@@ -1,0 +1,114 @@
+{
+  "_meta": {
+    "version_baseline": "v35.6.5",
+    "gerado_em": "2026-05-29",
+    "descricao": "Snapshot do output esperado de cada fixture. Mudanças neste arquivo = regressão (se inesperada) ou feature nova (se intencional, com bump de versão).",
+    "como_atualizar": "Quando uma mudança intencional alterar o output (ex: novo formato suportado), rodar 'node tests/run_tests.js --update-snapshots' e revisar o diff antes de commitar."
+  },
+  "148935": {
+    "length": 17958,
+    "requirements": [
+      {"id": "48",     "rules": ["RN39 - Atividade Rotas", "RN40 - Atividade Rotas"]},
+      {"id": "31482",  "rules": ["RN12 - Atividade no Rotas"]},
+      {"id": "151937", "rules": ["RN1 - 1", "RN2 - Atividade no Rotas"]},
+      {"id": "46",     "rules": ["RN30 - Atividade Rotas", "RN31 - Atividade Rotas"]},
+      {"id": "31496",  "rules": ["RN12 - Atividade no Rotas"]},
+      {"id": "151938", "rules": ["RN1 - 1", "RN2 - Atividade no Rotas"]},
+      {"id": "50",     "rules": ["RN99 - 9", "RN100 - 0"]},
+      {"id": "151073", "rules": ["RN6 - Atividade no Rotas"]},
+      {"id": "151939", "rules": ["RN1 - 1", "RN2 - Atividade no Rotas"]},
+      {"id": "31225",  "rules": ["RN54 - 4", "RN55 - Atividade Rotas"]},
+      {"id": "140477", "rules": ["RN8 - Atividade no Rotas"]},
+      {"id": "151940", "rules": ["RN1 - 1", "RN2 - Atividade no Rotas"]},
+      {"id": "151941", "rules": ["RN1 - 1", "RN2 - 2"]},
+      {"id": "151942", "rules": ["RN1 - 1"]}
+    ]
+  },
+  "171042": {
+    "length": 19909,
+    "requirements": [
+      {"id": "48",     "rules": []},
+      {"id": "46",     "rules": []},
+      {"id": "170724", "rules": ["RNX1 - Validar CFOP de acordo com a Forma de contato preenchida na Remessa"]},
+      {"id": "32341",  "rules": ["RNX1 - Validar CFOP conforme a Forma de contato preenchida na Devolução."]},
+      {"id": "50",     "rules": []},
+      {"id": "32833",  "rules": ["RNX1 - Validar CFOP conforme a Forma de contato preenchida na aba Faturamento da Ordem de manutenção."]},
+      {"id": "59382",  "rules": []},
+      {"id": "31227",  "rules": ["RNX1 - Validar CFOP conforme a Forma de contato preenchida na venda de indenização de locados"]},
+      {"id": "60748",  "rules": []},
+      {"id": "32878",  "rules": ["RNX1 - Validar CFOP conforme a Forma de contato preenchida na Venda de Balcão"]},
+      {"id": "32835",  "rules": ["RNX1 - Validar CFOP conforme preenchimento dos campos Forma de contato, Finalidade e Tipo de frete no processo Gerar NF Saída"]},
+      {"id": "32925",  "rules": ["RNX1 - Validar CFOP conforme preenchimento dos campos Forma de contato, Finalidade e Tipo de frete no processo Gerar NF de entrada na OM"]},
+      {"id": "32963",  "rules": ["RNX1 - Validar CFOP conforme preenchimento dos campos Forma de contato, Finalidade e Tipo de frete no processo Gerar NF de remessa para serviço de terceiros na OM"]},
+      {"id": "32965",  "rules": ["RNX1 - Validar CFOP conforme preenchimento dos campos Forma de contato, Finalidade e Tipo de frete no processo Gerar NF de devolução para serviços de terceiros na OM"]},
+      {"id": "79",     "rules": ["RNX1 - Preenchimento dos campos Finalidade, Forma de contato e Frete"]}
+    ]
+  },
+  "175029": {
+    "length": 20823,
+    "requirements": [
+      {"id": "31156",  "rules": []},
+      {"id": "31168",  "rules": ["RN31168.1 - Comportamento do parâmetro Validar NF-e emitida por terceiro", "RN31168.2 - Comportamento do parâmetro  “As validações da notas emitidas por terceiro devem”"]},
+      {"id": "32341",  "rules": ["RN20 - Processo de Junção para notas de terceiro", "RN 32341.1 - Espelho da NF com emissão Terceiros"]},
+      {"id": "32925",  "rules": ["RN17 - Processo de Junção para notas de terceiro", "RN 32925.1 - Espelho da NF com emissão Terceiros"]},
+      {"id": "32965",  "rules": ["RN 32965.1 - Processo de Junção para notas de terceiro", "RN 32965.1 - Espelho da NF com emissão Terceiros"]},
+      {"id": "172681", "rules": ["RN6 - Junção de Notas", "RN7 - Junção de Notas", "RN8 - Junção de Notas", "RN9 - Junção de Notas", "RN172681 - Espelho da NF com emissão Terceiros"]},
+      {"id": "57751",  "rules": ["RN18 - 1", "RN 57751.1 - Espelho da NF com emissão Terceiros"]},
+      {"id": "60339",  "rules": ["RN 60339.1 - Espelho da NF com emissão Terceiros", "RN5 - Tipo de emissão"]},
+      {"id": "36213",  "rules": ["RN 36213.1 - Espelho da NF com emissão Terceiros"]},
+      {"id": "172681", "rules": []},
+      {"id": "0001",   "rules": []},
+      {"id": "0002",   "rules": []},
+      {"id": "51194",  "rules": []},
+      {"id": "31141",  "rules": []}
+    ]
+  },
+  "175544": {
+    "length": 1783,
+    "requirements": [
+      {"id": "31323", "rules": ["RN1 - Compra de equipamento sublocado"]},
+      {"id": "31599", "rules": []},
+      {"id": "75583", "rules": []}
+    ]
+  },
+  "196911": {
+    "length": 15598,
+    "requirements": [
+      {"id": "31156", "rules": ["RNx - Número de Dias/Hora/Min"]},
+      {"id": "31221", "rules": ["RNx - Expedição - Quantidade de Dias/Hora", "RNx2 - Recepção - Quantidade de Dias/Hora"]},
+      {"id": "48",    "rules": []},
+      {"id": "31446", "rules": []},
+      {"id": "49",    "rules": ["RN10 - 0"]},
+      {"id": "31446", "rules": ["RN1 - 1", "RN2 - 2"]},
+      {"id": "46",    "rules": []},
+      {"id": "31454", "rules": []},
+      {"id": "47",    "rules": ["RN14 - e"]},
+      {"id": "31454", "rules": ["RN1 - 1", "RN2 - 2"]}
+    ]
+  },
+  "207663": {
+    "length": 993,
+    "requirements": [
+      {"id": "102418", "rules": ["RNX1 - Processo “Copiar Remessa”"]}
+    ]
+  },
+  "207979": {
+    "length": 1694,
+    "requirements": [
+      {"id": "79",    "rules": ["RNX1 - Notas Fiscais de Entrada"]},
+      {"id": "31151", "rules": ["RNX1 - Permitir emissão de NF/ND sem e-mail preenchido"]}
+    ]
+  },
+  "208519": {
+    "length": 1354,
+    "requirements": [
+      {"id": "34649", "rules": ["RNX1 - Filtro por \"Empresa \"Estatísticas de Encerramento - Locação/Venda/OM\""]}
+    ]
+  },
+  "208937": {
+    "length": 1740,
+    "requirements": [
+      {"id": "81788", "rules": ["RN5 - Arquivos da Remessa/Devolução com descrição"]}
+    ]
+  }
+}
