@@ -1,0 +1,43 @@
+Essa documento  Locação - Devolução(COMPENTREGA.HTML) é acionado na tela de Devolução no processo "Comprovante de Devolução" tipo HTML.
+E as TAGs [Arquivo (Foto)], [Arquivo (Foto 2 Col)], [Arquivo (Foto 3 Col)], buscam os dados da tela do processo "Arquivos", também localizado na tela de Devolução.
+
+h1. Detalhamento de Projeto
+ 
+h3. Requisito: ##81788
+ 
+*O QUE DEVE SER FEITO:*
+Cadastros\Texto > documento " Locação - Devolução" > COMPENTREGA.HTML
+
+No documento COMPENTREGA.html deverá criar as TAGs
+ *[Arquivo (Foto - Descrição)]**
+ *[Arquivo (Foto 2 Col - Descrição)]*
+ *[Arquivo (Foto 3 Col - Descrição)]*
+Estas novas tags deverão ter o mesmo comportamento das TAGs:
+
+[Arquivo (Foto)]
+[Arquivo (Foto 2 Col)]
+[Arquivo (Foto 3 Col)]
+
+* Porém, as +novas TAGs+ também deverão +exibir na parte superior da imagem+ , +a descrição+ inserida do arquivo.
+!clipboard-202605191812-fbfd3.png!
+!clipboard-202605191813-if6hm.png!
+
+*Sobre a descrição, algo próximo disso:*
+
+!clipboard-202605191822-urcwm.png!
+
+*Obs: necessário integração Outsystems para o processo 'Arquivos funcionar'*
+
+
++HINT+
+n/a
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+n/a
+
+*CONDIÇÕES/REGRAS:*
+"RN5 - Arquivos da Remessa/Devolução com descrição":http://net1/redmine/issues/81788#RN5-Arquivos-da-RemessaDevolução-com-descrição
+As tags abaixo imprimem todas as imagens vinculadas ao processo Arquivos da Remessa/Devolução que estiverem com o campo 'Tipo' igual a 'Foto'.
+* [Arquivo (Foto)]: uma foto por linha com a sua respectiva descrição na parte de cima da imagem.
+* [Arquivo (Foto 2 Col)]: duas colunas de fotos com a suas respectivas descrições na parte de cima da imagem.
+* [Arquivo (Foto 3 Col)]: três colunas de fotos com a suas respectivas descrições na parte de cima da imagem.
