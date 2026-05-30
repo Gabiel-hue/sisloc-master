@@ -1,0 +1,454 @@
+h3. Objetivo da Demanda:
+
+Separar o parâmetro Validar NF-e de devolução emitida por terceiro para as diferentes rotinas que dão entrada em NF emitida por terceiro (devolução de locação, OM, Venda, etc).
+
+h3. Problema:
+
+Atualmente o parâmetro "Validar NF-e de devolução emitida por terceiro" consta somente no parâmetro de Ficha de Locação sub aba Devolução, no entanto sua definição é aplicada para qualquer processo que faz uso de entrada de nota de terceiros, exceto Pedido de compra.
+
+---
+
+h1. Requisitos Impactados
+
+Requisito #31156 – Parâmetro Geral – Ficha de Locação
+- Remover parâmetro Validar NF-e de Terceiro.
+
+Requisito #31168 – Parâmetro Geral – Nota Fiscal
+- Implementar parâmetro de validação para NF-e emitida por Terceiro
+
+Requisito #32341 – Gerar Nota Fiscal na Devolução de Locação
+- Remover a importação do xml emitido por terceiros
+
+Requisito #32925 – Gerar NF de entrada na OM
+- Remover a importação do xml emitido por terceiros
+
+Requisito #32965 – Gerar NF de devolução para serviços de terceiros na OM
+- Remover a importação do xml emitido por terceiros
+
+Requisito #172681 – Gerar NF Ind. Retorno - ORDEM DE PRODUÇÃO
+- Remover a importação do xml emitido por terceiros
+
+Requisito #57751 - Gerar Nota Fiscal da DEVOLUÇÃO DE VENDA
+- Remover a importação do xml emitido por terceiros
+
+Requisito #60339 - Gerar Nota Fiscal de Pedido de Transferência
+- Remover a importação do xml emitido por terceiros
+
+Requisito #36213 -  Gerar Nota Fiscal de Sublocação
+- Remover a importação do xml emitido por terceiros
+
+Requisito # 79 – Manter dados NOTA FISCAL
+- Implementar processo para importação de XML emitido por Terceiros
+
+Requisito #0001 – Importar XML NOTA FISCAL
+- Importar xml emitido por terceiros
+
+Requisito #0002 – Estornar XML importado NOTA FISCAL
+- Estornar XML emitido por terceiros
+
+Requisito #51194 - Manter Dados de Anotações e Anexos da Nota Fiscal 
+- Gravar xml emitido por terceiro
+
+Requisito #31141 - Configurar Nível de Acesso - Configurar - Delphi/Web
+Implementar permissão de acesso para os processos Importar XML NOTA FISCAL e Estornar XML importado NOTA FISCAL
+
+
+---
+
+h1. Detalhamento de Projeto
+
+
+h3. Requisito #31156 – Parâmetro Geral – Ficha de Locação
+
+*Remover o parâmetro *Validar NF-e de devolução emitida por terceiro*.
+
+*Conversor*
+NA
+
+*Regras*
+
+NA
+
+----
+
+h3. Requisito #31168 – Parâmetro Geral – Nota Fiscal
+
+*Implementar*
+1) Implementar parâmetro *Validar NF-e emitida por terceiro*, o parâmetro contará com um checkbox com as seguintes opções:
+* Validar NCM – Valida se no XML a ser importado, existe produto com o mesmo NCM informado, na aba “Mercadorias” da nota fiscal.
+* Validar quantidade de itens - Valida se no XML a ser importado, existe produto com a mesma quantidade informado na aba “Mercadorias” da nota fiscal.
+* Validar valor total do item - Valida se no XML a ser importado, existe produto com o mesmo valor, informado na aba “Mercadorias” da nota fiscal.
+
+*+Hint:+*  As regras definidas neste parâmetro, serão aplicadas aos seguintes processos: 
+* Gerar NotaDevolução de Locação
+* Gerar NF de entrada na OM
+* Gerar NF de devolução para serviços de terceiros na OM
+* Gerar NF Ind. Retorno - ORDEM DE PRODUÇÃO
+* Gerar Nota Fiscal da DEVOLUÇÃO DE VENDA
+* Gerar Nota Fiscal de Pedido de Transferência
+* Gerar Nota Fiscal de Sublocação
+
+2) Implementar o parâmetro: *As validações da notas emitidas por terceiro devem:* com as opções:
+* Bloquear
+* Avisar
+* Nenhum
+
+*+Hint:+* 
+* Se definido “Bloquear”, ao importar o xml de terceiro, será exibido ao usuário mensagem de bloqueio e a NF-e não será importada se não atender as regras definidas no parâmetro *Validar NF-e emitida por terceiro*.
+* Se definido “Avisar”, ao importar o xml de terceiro, será exibido ao usuário mensagem de aviso, e a NF-e será importada, mesmo que não atenda as regras definidas no parâmetro *Validar NF-e emitida por terceiro*.
+* Se definido “Nenhum”, ao importar o xml de terceiro, a nota será escriturada
+
+3) Por padrão, o CNPJ do destinatário deverá sempre ser o CNPJ da empresa logada
+
+*Conversor*
+* Por padrão o parâmetro *Validar NF-e emitida por terceiro* virá desmarcado.
+* Por padrão o parâmetro  *As validações da notas emitidas por terceiro devem:*, virá com a opção “Nenhum” definido.
+
+*Regras*
+(Criar) RN31168.1 – Comportamento do parâmetro Validar NF-e emitida por terceiro
+
+Na importação do XML de Terceiro, Sisloc poderá validar as informações abaixo se marcadas:
+
+* Validar NCM – Valida se no XML a ser importado, existe produto com o mesmo NCM informado, na aba “Mercadorias” da nota fiscal.
+* Validar quantidade de itens - Valida se no XML a ser importado, existe produto com a mesma quantidade informado na aba “Mercadorias” da nota fiscal.
+* Validar valor total do item - Valida se no XML a ser importado, existe produto com o mesmo valor, informado na aba “Mercadorias” da nota fiscal.
+
+As regras definidas neste parâmetro, serão aplicadas aos seguintes processos: 
+* Gerar NotaDevolução de Locação
+* Gerar NF de entrada na OM
+* Gerar NF de devolução para serviços de terceiros na OM
+* Gerar NF Ind. Retorno - ORDEM DE PRODUÇÃO
+* Gerar Nota Fiscal da DEVOLUÇÃO DE VENDA
+* Gerar Nota Fiscal de Pedido de Transferência
+* Gerar Nota Fiscal de Sublocação
+
+(Criar) RN31168.2 - Comportamento do parâmetro  “As validações da notas emitidas por terceiro devem”
+* Se definido “Bloquear”, ao importar o xml de terceiro, será exibido ao usuário mensagem de bloqueio e a NF-e não será importada se não atender as regras definidas no parâmetro *Validar NF-e emitida por terceiro*.
+* Se definido “Avisar”, ao importar o xml de terceiro, será exibido ao usuário mensagem de aviso, e a NF-e será importada, mesmo que não atenda as regras definidas no parâmetro *Validar NF-e emitida por terceiro*
+* Se definido “Nenhum”, ao importar o xml de terceiro, nada sera validado e a importação será concluída.
+
+---
+
+
+h3. Requisito #32341 – Gerar Nota Fiscal na Devolução de Locação
+
+*Implementar*
+
+No processo *Gerar NF na Devolução de Locação*, com emissão “NF Terceiro”, realizar as seguintes alterações:
+* Remover a seção “NF Terceiro” e “Resumo XML” .
+* Manter as opções de Junção e a validação da regra “RN20 – Processo de Junção para notas de terceiro”:http://net1/redmine/issues/32341
+* Gerar espelho da nota fiscal quando executado o  “Ok”, a nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir”.
+* Inutilizar a regra “RN25 – Validação da chave do XML”:http://net1/redmine/issues/32341
+
+*Conversor*
+NA
+
+*Regras*
+
+(Alterar)“RN20 – Processo de Junção para notas de terceiro”:http://net1/redmine/issues/32341
+
+Ao clicar no tipo emissão “terceiro” será possível selecionar o tipo de junção:
+* Com parâmetro marcado
+** Emitir somente a nota dessa devolução
+*** Quando o fornecedor enviar várias notas de devolução, o sistema vai permitir fazer a importação das notas e emitir a nota somente daquela devolução.
+** Juntar Devoluções em uma nota só
+*** Quando o fornecedor enviar, uma única nota de várias devoluções de equipamentos, o sistema vai permitir fazer a junção de todas as devoluções em uma só nota, desde que a origem destas devoluções pertençam ao mesmo cliente.
+
+
+RN 32341.1 – Espelho da NF com emissão Terceiros
+Quando executado o  “Ok”,  Sisloc gerará uma nota fiscal espelho, esta nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir” para conferência e posterior importação do xml.
+
+---
+
+h3. Requisito #32925 – Gerar NF de entrada na OM
+
+*Implementar*
+
+No processo *Gerar NF de entrada na OM*, com emissão “NF Terceiro”, realizar as seguintes alterações:
+* Remover a seção “NF Terceiro” e “Resumo XML”.
+* Manter as opções de Junção e a validação da regra “RN17 – Processo de Junção para notas de terceiro”:http://net1/redmine/issues/32925
+* Gerar espelho da nota fiscal quando executado o  “Ok”, a nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir”.
+* Inutilizar a regra “RN17- Validação da chave do XML”:http://net1/redmine/issues/32925
+
+*Conversor*
+NA
+
+*Regras*
+
+(Alterar) “RN17 – Processo de Junção para notas de terceiro”:http://net1/redmine/issues/32925
+
+Ao clicar no tipo emissão “terceiro” será possível selecionar o tipo de junção:
+
+* Emitir somente a nota para esta OM
+** Indica que será gerada a nota fiscal referente a entrada do equipamento da OM em que está sendo realizada.
+* Juntar OM’s em uma nota só
+** Indica que será gerada a nota fiscal referente as entradas de equipamentos das OM’s selecionadas na aba “Junção de notas”
+
+RN 32925.1 - Espelho da NF com emissão Terceiros
+Quando executado o  “Ok”,  Sisloc gerará uma nota fiscal espelho, esta nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir” para conferência e posterior importação do xml.
+
+---
+
+h3. Requisito #32965 – Gerar NF de devolução para serviços de terceiros na OM
+
+*Implementar*
+
+No processo *Gerar NF de devolução para serviços de terceiros na OM*, com emissão “NF Terceiro”, realizar as seguintes alterações:
+
+* Remover a seção “NF Terceiro” e “Resumo XML”.
+* Manter as opções de Junção e a validação da regra “RN 32965.1 – Processo de Junção para notas de terceiro”:http://net1/redmine/issues/32965
+* Gerar espelho da nota fiscal quando executado o  “Ok”, a nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir”.
+* Inutilizar a regra “RN15 – Validação da chave XML ”:http://net1/redmine/issues/32965
+
+*Conversor*
+NA
+
+*Regras*
+(Criar)“RN 32965.1 – Processo de Junção para notas de terceiro”:http://net1/redmine/issues/32965
+
+Ao clicar no tipo emissão “terceiro” será possível selecionar o tipo de junção:
+
+* Emitir somente a nota dessa devolução
+** Indica que será gerada a nota fiscal referente ao retorno no Serviços de Terceiros da OM em que está sendo realizada.
+* Juntar OM’s em uma nota só
+** Indica que será gerada a nota fiscal referente aos retornos no Serviços de Terceiros das OM’s selecionadas na aba “Junção de notas”.
+
+RN 32965.1 - Espelho da NF com emissão Terceiros
+Quando executado o  “Ok”,  Sisloc gerará uma nota fiscal espelho, esta nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir” para conferência e posterior importação do xml.
+
+----
+
+h3. Requisito #172681 – Gerar NF Ind. Retorno - ORDEM DE PRODUÇÃO
+
+*Implementar*
+
+No processo *Gerar NF Ind. Retorno - ORDEM DE PRODUÇÃO*, realizar as seguintes alterações:
+
+* Remover a seção “NF Terceiro” e “Resumo XML”.
+* Manter as opções de Junção e as validações de regras:
+** “RN6 - Junção de Notas:”http://net1/redmine/issues/172681
+** “RN7 - Junção de Notas:”http://net1/redmine/issues/172681
+** “RN8 - Junção de Notas:”http://net1/redmine/issues/172681
+** “RN9 - Junção de Notas:”http://net1/redmine/issues/172681
+* Gerar espelho da nota fiscal quando executado o  “Ok”, a nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir”.
+
+*Conversor*
+NA
+
+*Regras*
+(Validar) “RN6 - Junção de Notas:”http://net1/redmine/issues/172681
+A aba Junção de Notas é exibida quando selecionada a opção 'Juntar Ops em uma só nota'.
+
+(Validar) “RN7 - Junção de Notas:”http://net1/redmine/issues/172681
+As OPs selecionadas na aba Junção de Notas são exibidas no campo Ops.
+
+(Validar) “RN8 - Junção de Notas:”http://net1/redmine/issues/172681
+Na aba Junção de Notas são exibidas as Ordens de Produção que possuem a mesma Pessoa na seção 'Industrializador' e que estão no status 'Enviado para Terceiro'.
+
+(Alterar)“RN9 - Junção de Notas:”http://net1/redmine/issues/172681
+A nota fiscal será gerada com  CNPJ do Emitente e/ou Destinatário, referente a empresa que está sendo realizada.
+
+(Criar) “RN172681 - Espelho da NF com emissão Terceiros
+Quando executado o  “Ok”,  Sisloc gerará uma nota fiscal espelho, esta nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir” para conferência e posterior importação do xml.
+
+---
+
+h3. Requisito #57751 - Gerar Nota Fiscal da DEVOLUÇÃO DE VENDA
+
+*Implementar*
+
+No processo *Gerar Nota Fiscal da DEVOLUÇÃO DE VENDA*, realizar as seguintes alterações:
+* Remover a seção “NF Terceiro” e “Resumo XML”.
+* Gerar espelho da nota fiscal quando executado o  “Ok”, a nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir”.
+* Validar a regra:
+** “RN29”:http://net1/redmine/issues/57751
+* Inutilizar  regras:
+* “RN18”:http://net1/redmine/issues/57751
+* “RN28”:http://net1/redmine/issues/57751
+* “RN25”:http://net1/redmine/issues/57751
+
+
+*Conversor*
+NA
+
+*Regras*
+RN 57751.1 - Espelho da NF com emissão Terceiros
+Quando executado o  “Ok”,  Sisloc gerará uma nota fiscal espelho, esta nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir” para conferência e posterior importação do xml.
+
+---
+
+h3. Requisito #60339 - Gerar Nota Fiscal de Pedido de Transferência
+
+*Implementar*
+
+No processo *Gerar Nota Fiscal de Pedido de Transferência*, realizar as seguintes alterações:
+* Remover a seção “NF Terceiro” e “Resumo XML”.
+* Gerar espelho da nota fiscal quando executado o  “Ok”, a nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir”.
+* Validar a regra: “RN5 -Tipo de emissão: Terceiro”: http://net1/redmine/issues/60339
+
+*Conversor*
+NA
+
+*Regras*
+
+(Criar) RN 60339.1 - Espelho da NF com emissão Terceiros
+Quando executado o  “Ok”,  Sisloc gerará uma nota fiscal espelho, esta nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir” para conferência e posterior importação do xml.
+
+(Validar)“RN5 -Tipo de emissão: Terceiro”: http://net1/redmine/issues/60339
+A emissão de terceiros, refere-se a emissão feito por um terceiro que não seja a empresa, por isso sempre será de entrada e desabilitará a opção tipo Saída. Poderá ser modelo 55 ou modelo 1:
+* Se modelo 55, habilitará o campo Data de entrada para indicar a data de entrada da NF e permitirá ao usuário buscar o XML ou informar a chave NF-e para importação.
+* Se modelo 1, habilitará o campo Data de entrada e os demais campos da nota: Série, Número da nota, Data de emissão.
+
+---
+
+h3. Requisito Funcional #36213 -  Gerar Nota Fiscal de Sublocação
+
+*Implementar*
+
+No processo * Gerar Nota Fiscal de Sublocação*, realizar as seguintes alterações:
+* Remover a seção “NF Terceiro” e “Resumo XML”.
+* Gerar espelho da nota fiscal quando executado o  “Ok”, a nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir”.
+
+*Conversor*
+NA
+
+*Regras*
+
+(Criar) RN 36213.1 - Espelho da NF com emissão Terceiros
+Quando executado o  “Ok”,  Sisloc gerará uma nota fiscal espelho, esta nota carregará as mesmas informações da emissão própria, exceto o campo “Emitido” que deverá ser apresentado como *Terceiro* ao invés de Próprio. A nota será gerada no status “À emitir” para conferência e posterior importação do xml.
+
+---
+
+h3. Requisito #172681 – Gerar NF Ind. Retorno - ORDEM DE PRODUÇÃO
+
+*Implementar*
+
+Gerar a nota fiscal com status  *A Emitir*, com tipo *Entrada * e emissão *Terceiro*, sempre que for selecionado, emissão Terceiro, nos seguintes processos:
+
+* Gerar Nota Fiscal na Devolução de Locação
+* Gerar NF de entrada na OM
+* Gerar NF de devolução para serviços de terceiros na OM
+* Gerar NF Ind. Retorno - ORDEM DE PRODUÇÃO
+* Gerar Nota Fiscal da DEVOLUÇÃO DE VENDA
+* Gerar Nota Fiscal de Pedido de Transferência
+* Gerar Nota Fiscal de Sublocação
+
+*+Importante:+* Os campos citados, deverão estar desabilitados para alteração.
+
+*Conversor*
+NA
+
+*Regras*
+NA
+
+---
+
+h3. Requisito #0001 – Importar XML NOTA FISCAL
+
+Implementar o processo *Importar XML* na Nota fiscal. O processo deverá ser exibido, quando a nota fiscal possuir as seguintes características:
+
+* Status: “A Emitir”
+* Tipo: Entrada
+* Emissão: Terceiros
+ 
+Ao executar o processo, Sisloc deverá abrir uma tela, com a possibilidade de importar o xml. A importação validará as regras:
+
+1. RN31168.1 - Comportamento do parâmetro Validar NF-e emitida por terceiro
+
+Na importação do XML de Terceiro, Sisloc poderá validar as informações abaixo se marcadas:
+
+* Validar NCM – Valida se no XML a ser importado, existe produto com o mesmo NCM informado, na aba “Mercadorias” da nota fiscal.
+* Validar quantidade de itens - Valida se no XML a ser importado, existe produto com a mesma quantidade informado na aba “Mercadorias” da nota fiscal.
+* Validar valor total do item - Valida se no XML a ser importado, existe produto com o mesmo valor, informado na aba “Mercadorias” da nota fiscal.
+
+As regras definidas neste parâmetro, serão aplicadas aos seguintes processos: 
+* Gerar NotaDevolução de Locação
+* Gerar NF de entrada na OM
+* Gerar NF de devolução para serviços de terceiros na OM
+* Gerar NF Ind. Retorno - ORDEM DE PRODUÇÃO
+* Gerar Nota Fiscal da DEVOLUÇÃO DE VENDA
+* Gerar Nota Fiscal de Pedido de Transferência
+* Gerar Nota Fiscal de Sublocação
+
+2. RN31168.2 - Comportamento do parâmetro  “As validações da notas emitidas por terceiro devem”
+* Se definido “Bloquear”, ao importar o xml de terceiro, será exibido ao usuário mensagem de bloqueio e a NF-e não será importada se não atender as regras definidas no parâmetro *Validar NF-e emitida por terceiro*.
+* Se definido “Avisar”, ao importar o xml de terceiro, será exibido ao usuário mensagem de aviso, e a NF-e será importada, mesmo que não atenda as regras definidas no parâmetro *Validar NF-e emitida por terceiro*
+
+*+Importante+*
+
+* Se tratando de importação de XML negada, deverá ser exibido ao usuário a seguinte mensagem:
+
+Operação abortada.
+De acordo com as definições do parâmetro Validar NF-e emitida por terceiro, o xml não foi importado pois XXXXXXXXXXXX (condição que bloqueou a importação). Corrija a pré nota, em seguida refaça a importação.
+
+* Se tratando de importação de XML com advertências, deverá ser exibido ao usuário a seguinte mensagem:
+
+Atenção:
+De acordo com as definições do parâmetro Validar NF-e emitida por terceiro, foi encontrado no xml a ser importado as seguintes inconsistências: XXXXXXX (inconsistências encontradas de acordo com a validação do parâmetro.
+Para concluir a importação, clique em “OK”.
+Para corrigir a pré nota, clique em “Cancelar”
+
+*Conversor*
+NA
+
+*Regras*
+
+(Criar)0001.1 – Validações na importação do XML.
+Na importação do XML serão validados os parâmetros gerais da Nota Fiscal, as condições definidas podem: Bloquear, Advertir ou ignorar sem avisos a importação.
+
+
+---
+
+h3. Requisito #0002 – Estornar XML importado NOTA FISCAL
+
+Implementar o processo *Estornar XML importado*, o processo deverá ser exibido quando a nota fiscal possuir as seguintes características:
+
+* Status: “Emitido”
+* Tipo: Entrada
+* Emissão: Terceiros
+* Anotação com o arquivo xml vinculado.
+
+*+Importante:+* O estorno será efetivado se o XML anexado for excluído.
+
+*Conversor*
+NA
+
+*Regras*
+NA
+
+---
+
+h3. Requisito #51194 -Manter Dados de Anotações e Anexos da Nota Fiscal
+
+* Implementar anotação com anexo sempre que o processo *Importar XML* na nota fiscal for concluído
+
+*Conversor*
+NA
+
+*Regras*
+NA
+
+---
+
+h3. Requisito #31141 - Configurar Nível de Acesso - Configurar - Delphi/Web
+
+*Implementar*
+
+Implementar permissão de acesso para os processos:
+* Importar XML NOTA FISCAL
+* Estornar XML importado NOTA FISCAL
+
+*Conversor*
+NA
+
+*Regras*
+NA
+
+---
+
+*+CENÁRIOS+*
+
+*Cenário – Importação XML de Terceiro no processo Devolução de Equipamentos*
+*Dado* que está sendo feito a importação do XML de Terceiro no processo Devolução de Equipamentos
+*Quando* estiver definido a validação do valor total do item e bloqueio em caso de inconsistência
+*Então* Sisloc irá exibir mensagem de bloqueio e abortar a importação do XML.

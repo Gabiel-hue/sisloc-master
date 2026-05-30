@@ -1,0 +1,321 @@
+---
+
+h1. Requisitos Impactados
+
+##31156
+- Implementar campo de Horas/Minutos para validação de Expedição (Remessa) e Recepção (Devolução)
+
+##31221
+- Adicionar campo de Hora/Min nos limites de remessa/devolução (Antes e Depois)
+
+##48  
+- Otimizar os campos Datas mínimas e máximas no Limite de Expedição para controle também por Hora/Min
+
+##49 
+- Implentar validação também para Hora/Min de acordo com o parâmetro geral e limites do usuário
+
+##31446 
+- Aprimorar campos 'Data Mínima' e 'Data Máxima' para receber o valor também de 'Hora(s)' e 'Minuto(s)'
+
+##46
+- Otimizar os campos Datas mínimas e máximas no Limite de Recepção para controle também por Hora/Min
+
+##47 
+- Implentar validação também para Hora/Min de acordo com o parâmetro geral e limites do usuário
+
+##31454
+- Aprimorar campos 'Data Mínima' e 'Data Máxima' para receber o valor também de 'Hora(s)' e 'Minuto(s)'
+
+---
+
+h2. Contexto:
+
+h3. +Funcionamento atual do Sisloc+
+
+Quando o parâmetro “Liberação de saída/entrega com data de cobrança diferente” está preenchido com a opção “Obrigatório” ao executar os processos de expedição e recepção dos equipamentos a data em que estes processos são executados é validada. 
+Se a data atual for maior ou menor do que a data do campo “Cobrar a partir de” (Remessa) e/ou "Cobrar até (Devolução) + o número de dias informado no parâmetro é exigido que seja feita a liberação da remessa.
+
+Exemplo
+
+- Parâmetro “Liberação de saída/entrega com data de cobrança diferente” preenchido com “Obrigatório”
+- Número de dias = 2
+- Campo “Cobrar a partir de” na remessa = 20/10/2025
+- Data atual = 23/10/2025
+Ao fazer a expedição na data atual o Sisloc exibe a mensagem abaixo:
+
+<pre>
+A data de cobrança está diferente da data atual do sistema.
+É necessário realizar o processo de liberação para prosseguir.
+No campo "Limite expedição" selecione a opção "Informar Limite Expedição" e informe as datas mínima e máxima para que a expedição seja efetuada.
+</pre>
+
+Assim, a expedição dos equipamentos somente pode ser realizada quando a remessa for liberada pelo usuário que tiver permissão de acesso para liberá-la.
+A mesma validação ocorre na devolução quando é feita a recepção dos equipamentos. O sistema valida a data atual com a data informada no campo “Cobrar até” +  o número de dias informado no parâmetro:
+
+<pre>
+A data de cobrança está diferente da data atual do sistema.
+É necessário realizar o processo de liberação para prosseguir.
+No campo "Limite recepção" selecione a opção "Informar Limite Recepção" e informe as datas mínima e máxima para que a expedição seja efetuada.
+</pre>
+
+h3. +Funcionamento após demanda desenvolvida+
+
+>O Sistema passará a validar também a 'quantidade' de horas e minutos do parâmetro geral diferentes da hora/min atual para liberação de Expedição/Devolução
+
+Exemplo
+
+- Parâmetro “Liberação de saída/entrega com data de cobrança diferente” preenchido com “Obrigatório”
+- Número de dias/hora/min = |0|01:30|
+- Campo “Cobrar a partir de” na remessa = 23/10/2025 - 09:00
+- Data/hora atual = 23/10/2025 - 11:50
+Ao fazer a expedição o Sisloc exibe a mensagem abaixo:
+
+<pre>
+A data/hora de cobrança está diferente da data/hora atual do sistema.
+É necessário realizar o processo de liberação para prosseguir.
+No campo "Limite expedição" selecione a opção "Informar Limite Expedição" e informe as datas mínima e máxima para que a expedição seja efetuada.
+</pre>
+
+Assim, a expedição dos equipamentos somente pode ser realizada quando a remessa for liberada pelo usuário que tiver permissão de acesso para liberá-la.
+A mesma validação ocorre na devolução quando é feita a recepção dos equipamentos. O sistema valida a data/hora atual com a data/hora informada no campo “Cobrar até” +  o número de dias/hora/min informado no parâmetro:
+
+<pre>
+A data/hora de cobrança está diferente da data/hora atual do sistema.
+É necessário realizar o processo de liberação para prosseguir.
+No campo "Limite recepção" selecione a opção "Informar Limite Recepção" e informe as datas mínima e máxima para que a expedição seja efetuada.
+</pre>
+
+---
+
+h1. Detalhamento de Projeto
+
+h3. REQUISITO: ##31156
+
+*O QUE DEVE SER FEITO:*
+Em Opções > Parâmetros > Geral > Aba - Ficha de Locação > Sub Aba Parâmetros 2, o campo 'Número de Dias', disponível quando o parâmetro _'Liberação de saída/entrega com data de cobrança diferente'_ está definido como *Obrigatório*:
+
+!clipboard-202510231130-sz9oh.png!
+
+>Alterar o nome do parâmetro de: 'Número de Dias' para 'Número de Dias/Hora/Min'
+
+>>Implementar novo campo para receber o valor 'Time', para controle de, em quantas 'Horas/Minutos' a validação será feita no momento da Expedição (Remessa) e/ou Recepção (Devolução).
++Obs:+ _Nas próximas etapas desta demanda essa validação será detalhada_  
+
+!clipboard-202510231137-qpmpy.png!
+
+*HINT*
+|Define a quantidade de Dias/Hora/Min diferente da data/hora atual em que será obrigatória a liberação para Expedição/Recepção por parte do Usuário|
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+Por Default, o novo campo deve ser criado com valor '23:59'
+Com esse time, o funcionamento do Sisloc atual será mantido, já que o número de dias é validado na modalidade "Quantidade de dias +1"
+
+*CONDIÇÕES/REGRAS:*
+RNx - Número de Dias/Hora/Min
+Quando o parâmetro “Liberação de saída/entrega com data de cobrança diferente” está preenchido com a opção “Obrigatório” ao executar os processos de expedição e recepção dos equipamentos a data/hora em que estes processos são executados é validada.
+Se a data/hora atual for maior ou menor do que a data/hora do campo “Cobrar a partir de” (Remessa) ou "Cobrar até" (Devolução) + o número de dias/hora/min informado no parâmetro é exigido que seja feita a liberação da remessa/devolução.
++Obs:+ Será acrescido 02 (Dois) minutos ao tempo de permissão do usuário para liberação da devolução (Tempo estimado necessário para liberação e conclusão da devolução)
+
+---
+
+h3. REQUISITO: ##31221
+
+*O QUE DEVE SER FEITO:*
+Em Opções > Configuaração > Usuário > Aba 2 - Limites/Acréscimo/Desconto > Seção _Locação_, os parâmetros:
+
+* Expedição: Qt. dias antes da dt. cobrança
+* Expedição: Qt. dias depois da dt. cobrança
+* Recepção: Qt. dias antes da dt. cobrança
+* Recepção: Qt. dias depois da dt. cobrança
+
+Devem ser alterados para:
+
+> Criar 2 novas sub seções:
+
+* *Expedição em rel. à data de cobrança*
+** Qt. dias/horas antes
+** Qt. dias/horas depois
+* *Recepção em rel. à data de cobrança*
+** Qt. dias/horas antes
+** Qt. dias horas depois
+
+!clipboard-202512260906-ewpwj.png!
+
+*HINT*
+|=.*PARÂMETRO*|=.*HINT*|
+|=.Qt. dias/horas antes|=._Informe a quantidade de dias/horas limite para que a expedição seja realizada antes da data ‘Cobrar a partir de’_ / +Obs:+ Será acrescido 02 (Dois) minutos ao tempo de permissão do usuário para liberação da remessa (Tempo estimado necessário para liberação e conclusão da remessa)|
+|=.Qt. dias/horas depois| _Informe a quantidade de dias/horas limite para que a expedição seja realizada depois da data ‘Cobrar a partir de’_ / +Obs:+ Será acrescido 02 (Dois) minutos ao tempo de permissão do usuário para liberação da remessa (Tempo estimado necessário para liberação e conclusão da remessa)|
+|=.Qt. dias/horas antes|=._Informe a quantidade de dias/horas limite para que a repceção seja realizada antes da data ‘Cobrar até’_ / +Obs:+ Será acrescido 02 (Dois) minutos ao tempo de permissão do usuário para liberação da devolução (Tempo estimado necessário para liberação e conclusão da devolução)|
+|=.Qt. dias/horas depois|=._Informe a quantidade de dias/horas limite para que a recepção seja realizada depois da data ‘Cobrar até’_ / +Obs:+ Será acrescido 02 (Dois) minutos ao tempo de permissão do usuário para liberação da devolução (Tempo estimado necessário para liberação e conclusão da devolução)|
+
+h2. Adicionar campo para receber o valor 'time' da quantidade de Horas e Minutos que o usuário terá permissão para Expedição/Recepçao - Antes/Depois:
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+Por Default, o novo campo deve ser criado com valor '00:00'
+
+*CONDIÇÕES/REGRAS:*
+RNx - Expedição - Quantidade de Dias/Hora
+Define a quantidade dias e quantidade de Horas/Minutos antes e/ou depois que o usuário poderá liberar a Expedição na relação entre a data/hora do campo "Cobrar a partir de" da Remesssa x Data/Hora atual
++Obs:+ Será acrescido 02 (Dois) minutos ao tempo de permissão do usuário para liberação da remessa (Tempo estimado necessário para liberação e conclusão da expedição)
+
+RNx² - Recepção - Quantidade de Dias/Hora
+Define a quantidade dias e quantidade de Horas/Minutos antes e/ou depois que o usuário poderá liberar a Recepção na relação entre a data/hora do campo "Cobrar até" da Devolução x Data/Hora atual.
++Obs:+ Será acrescido 02 (Dois) minutos ao tempo de permissão do usuário para liberação da devolução (Tempo estimado necessário para liberação e conclusão da recepção)
+
+---
+
+h3. REQUISITO: ##48
+
+*O QUE DEVE SER FEITO:*
+No campo 'Limite Expedição' (Tabela: fl_remessa / Coluna: dt_limite_min_expedicao) e (Tabela: fl_remessa / Coluna: dt_limite_max_expedicao)
+> Habilitar o recebimento também da Hora/Minuto junto com a data já existente:
+
+!clipboard-202510231721-oldpg.png!
+
++Obs:+ Regras para preenchimento desse campo estão detalhados no seção do requisito #31446 abaixo, responsável por alimentar esse campo.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+NA
+
+---
+
+h3. REQUISITO: ##49
+
+*O QUE DEVE SER FEITO:*
+A expedição dos equipamentos validará o parâmetro "Liberação de saída/entrega com data de cobrança diferente":
+Quando o parâmetro estiver preenchido com "Obrigatório" e a data/hora atual for maior ou menor que a data do campo "Cobrar a partir de" + o número de dias/hora/min informado no parâmetro será exigido o preenchimento do campo "Limite Expedição". A remessa somente poderá ser liberada quando a data/hora atual estiver dentro do período definido no campo "Limite Expedição".
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+"RN10":http://net1/redmine/issues/49#RN10
+A expedição dos equipamentos validará o parâmetro "Liberação de saída/entrega com data de cobrança diferente":
+Quando o parâmetro estiver preenchido com "Obrigatório" e a data/hora atual for maior ou menor que a data do campo "Cobrar a partir de" + o número de dias/hora/min informado no parâmetro será exigido o preenchimento do campo "Limite Expedição". A remessa somente poderá ser liberada quando a data atual estiver dentro do período definido no campo "Limite Expedição".
+
+---
+
+h3. REQUISITO: ##31446
+
+*O QUE DEVE SER FEITO:*
+Ao executar o processo "Informar Limite Expedição", sistema deve passar a receber, além da data, também Horas e Minutos nos campos 'Data mínima' e 'Data máxima'  
+
+Ao ser executado, será exibida janela para que o usuário informe:
+
+• Data/Hr mínima
+• Data/Hr máxima
+
+!clipboard-202510231801-jnxox.png!
+
+Ao gravar, será validada a permissão do usuário conforme "RN1":http://net1/redmine/issues/31446#RN1 e validada a "RN2":http://net1/redmine/issues/31446#RN2.
+
+Exemplos:
+
+|Expedição: Qt. dias/horas antes da dt. cobrança|0 / 01:30|
+|Cobrar a Partir de:|23/10/2025 / 10:00|
+|Data mínima:|23/10/2025 / 12:00|
+|Permitir?|NÃO|
+
+_Obs.: Data/Hora superior a quantidade de dias/Horas permitidos ao usuário_
+
+|Expedição: Qt. dias/horas depois da dt. cobrança|0 / 01:30|
+|Cobrar a Partir de:|23/10/2025 / 10:00|
+|Data mínima:|23/10/2025 / 11:00|
+|Permitir?|SIM|
+
+_Obs.: Data/hora inferior a quantidade de dias permitidos ao usuário_
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+Será sugerida a mesma data/hora do campo "Cobrar a partir de" da Remessa como "Data/Hr mínima" e "Data/Hr máxima".
+
+*CONDIÇÕES/REGRAS:*
+"RN1":http://net1/redmine/issues/31446#RN1
+Ao executar o processo "Informar Limite Expedição" será validada a permissão do usuário conforme abaixo:
+• Data/Hr mínima: deve estar entre a data/hora _"Cobrar a partir de"_ e a _'Expedição: Qt. dias/horas antes da dt. cobrança'_ do cadastro do usuário;
+• Data/hr máxima: deve estar entre a data/hora _"Cobrar a partir de"_ e a _'Expedição: Qt. dias/horas depois da dt. cobrança'_ do cadastro do usuário.
+
+"RN2":http://net1/redmine/issues/31446#RN2
+Se o cadastro do usuário não possuir os campos de quantidade de dias/horas preenchidos, o processo não poderá ser gravado.
+
+---
+
+h3. REQUISITO: ##46
+
+*O QUE DEVE SER FEITO:*
+No campo 'Limite Expedição' (Tabela: fl_devolucao / Coluna: dt_limite_min_recepcao) e (Tabela: fl_devolucao / Coluna: dt_limite_min_recepcao)
+> Habilitar o recebimento também da Hora/Minuto junto com a data já existente: 
+
+!clipboard-202511171028-oqkwu.png!
+
++Obs:+ Regras para preenchimento desse campo estão detalhados no seção do requisito #31454 abaixo, responsável por alimentar esse campo.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+NA
+
+---
+
+h3. REQUISITO: ##47
+
+*O QUE DEVE SER FEITO:*
+A Recepção dos equipamentos validará o parâmetro "Liberação de saída/entrega com data de cobrança diferente":
+Quando o parâmetro estiver preenchido com "Obrigatório" e a data/hora atual for maior ou menor que a data do campo "Cobrar até" + o número de dias/hora/min informado no parâmetro, será exigido o preenchimento do campo "Limite Recepção". A Devolução somente poderá ser liberada quando a data/hora atual estiver dentro do período definido no campo "Limite Recepção".
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+"RN14":http://net1/redmine/issues/47#RN14-Libera%C3%A7%C3%A3o-de-sa%C3%ADdaentrega-com-data-de-cobran%C3%A7a-diferente
+A Recepção dos equipamentos validará o parâmetro "Liberação de saída/entrega com data de cobrança diferente":
+Quando o parâmetro estiver preenchido com "Obrigatório" e a data/hora atual for maior ou menor que a data do campo "Cobrar até" + o número de dias/hora/min informado no parâmetro será exigido o preenchimento do campo "Limite Recepção". A Devolução somente poderá ser liberada quando a data atual estiver dentro do período definido no campo "Limite Devolução".
+
+---
+
+h3. REQUISITO: ##31454
+
+*O QUE DEVE SER FEITO:*
+Ao executar o processo "Informar Limite Recepção", sistema deve passar a receber, além da data, também Horas e Minutos nos campos 'Data mínima' e 'Data máxima'  
+
+Ao ser executado, será exibida janela para que o usuário informe:
+
+• Data/Hr mínima
+• Data/Hr máxima 
+
+!clipboard-202511171043-znn8w.png!
+
+Ao gravar, será validada a permissão do usuário conforme "RN1":http://net1/redmine/issues/31454#RN1 e validada a "RN2":http://net1/redmine/issues/31454#RN2.
+
+Exemplos:
+
+|Recepção: Qt. dias/horas antes da dt. cobrança|0 / 01:30|
+|Cobrar até:|23/10/2025 / 10:00|
+|Data mínima:|23/10/2025 / 12:00|
+|Permitir?|NÃO|
+
+_Obs.: Data/Hora superior a quantidade de dias/Horas permitidos ao usuário_
+
+|Recepção: Qt. dias/horas depois da dt. cobrança|0 / 01:30|
+|Cobrar até:|23/10/2025 / 10:00|
+|Data mínima:|23/10/2025 / 11:00|
+|Permitir?|SIM|
+
+_Obs.: Data/hora inferior a quantidade de dias permitidos ao usuário_
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+Será sugerida a mesma data/hora do campo "Cobrar até" da Devolução como "Data/Hr mínima" e "Data/Hr máxima".
+
+*CONDIÇÕES/REGRAS:*
+"RN1":http://net1/redmine/issues/31454#RN1
+Ao executar o processo "Informar Limite Recepção" será validada a permissão do usuário conforme abaixo:
+• Data/Hr mínima: deve estar entre a data/hora _"Cobrar até"_ e a _'Recepção: Qt. dias/horas antes da dt. cobrança'_ do cadastro do usuário;
+• Data/hr máxima: deve estar entre a data/hora _"Cobrar até"_ e a _'Recepção: Qt. dias/horas depois da dt. cobrança'_ do cadastro do usuário.
+
+"RN2":http://net1/redmine/issues/31454#RN2
+Se o cadastro do usuário não possuir os campos de quantidade de dias/horas preenchidos, o processo não poderá ser gravado.
+
+---

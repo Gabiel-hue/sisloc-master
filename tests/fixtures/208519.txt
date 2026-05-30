@@ -1,0 +1,26 @@
+h1. Detalhamento de Projeto
+ 
+h3. Requisito: ##34649
+ 
+*O QUE DEVE SER FEITO:*
+*Relatório gerencial\"Estatística de encerramento - Locação/Venda/OM"*
+
+No relatório gerencial “Estatística de Encerramento - Locação/Venda/OM” deverá ser implementado um novo filtro denominado *“Empresa”* em uma *ComboBox*  onde:
+
+* O filtro deverá permitir a seleção de uma ou mais empresas cadastradas no sistema.
+* Quando uma empresa específica for selecionada, o relatório deverá exibir apenas os registros relacionados à empresa escolhida.
+* O filtro deverá poder funcionar com todos os dados e filtros já apresentados e selecionados no relatório.
+* Por padrão, o filtro deverá vir preenchido com a opção “Todas”, mantendo o funcionamento atual do relatório e garantindo retrocompatibilidade para os usuários que já utilizam a rotina.
+* Caso o usuário não altere o filtro, o relatório continuará apresentando informações de todas as empresas disponíveis.
+* +Só devem aparecer no filtro as empresas que o usuário logado tem permissão de acesso+
+!clipboard-202605121314-k9kng.png!
+
++HINT+
+_Selecionar por qual Empresa deseja filtrar_
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+N/A
+
+*CONDIÇÕES/REGRAS:*
+*RNX1 Filtro por "Empresa "Estatísticas de Encerramento - Locação/Venda/OM"*
+o filtro por "Empresa" somente é valido para as empresas que o usuário logado tem permissão de acesso.

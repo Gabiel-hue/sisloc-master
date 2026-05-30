@@ -1,0 +1,386 @@
+h3. Objetivo da Demanda:
+
+
+
+h3. Problema:
+
+Um cliente de fora do estado "PA" realizou uma manutenção na empresa localizada em SP. Nesse contexto, foi gerada uma NF-e com a finalidade de aplicação final e a forma de contato é presencial, sem envolvimento de frete. Portanto, o CFOP apropriado a ser utilizado seria o 5.102, indicando que o cliente retirou as peças utilizadas na ordem de manutenção em SP.
+ 
+No entanto, ao realizar emissão da NF-e o CFOF que está saindo no modelo da NF-e e no XML é o 6.102, de operação interestradual mas o processo está incorreto visto que a ordem de manutenção foi realizada no estado e entregue em mãos. 
+ 
+Após análise, acredita-se que o processo de geração da nota com o CFOP adequado para o local de obra esteja funcionando corretamente. No entanto, na geração da NF-e para remessa e devolução, assim como para outros processos como venda local, venda de devolução e manutenção, o sistema está considerando o local de destino, ou seja, o endereço do CNPJ.
+ 
+Uma solução rápida para essa questão seria implementar uma funcionalidade semelhante àquela presente no pedido de venda. Nela, seria possível informar se o equipamento terá frete ou não, a finalidade da operação (que muitas vezes será aplicação final, considerando o contexto), e o meio de contato, que neste caso será presencial. Dessa forma, o CFOP apropriado a ser utilizado seria o estadual.
+
+
+---
+
+h1. Requisitos Impactados
+
+#48 – Remessa de locação
+#46 – Manter dados devolução
+#170724 – Gerar nota fiscal de remessa
+#32341 – Gerar nota fiscal na Devolução de locação
+#50 – Manter dados ordem de manutenção
+#32833 - Gerar NF de Fatura na OM
+#59382 – Manter dados da venda de equipamento locado.
+#31227 – Gerar nota fiscal de mercadoria/venda na indenização de locados
+#60748 - Configurar Parâmetros Pedido de Venda
+#32878 - Gerar NF de saída na VENDA DE BALCÃO
+#32835 - Gerar NF saída OM
+#32925 - Gerar NF de entrada na OM
+#32963 - Gerar NF de remessa para serviço de terceiros na OM
+#32965 - Gerar NF de devolução para serviços de terceiros na OM
+#79 - Manter Dados NOTA FISCAL
+
+---
+
+h1. Detalhamento de Projeto
+
+h3. Requisito: #48 – Remessa de locação
+
+*Implementar:*
+* Criar na Remessa de locação os campos: Finalidade e Forma de contato. Os campos deverão ficar posicionados acima do campo Frete.
+* O campo *Finalidade* contará com a opção Aplicação final.
+* O campo *Forma de contato* contará com as opções: "Não se aplica", "NFC-e em operações com entrega a domicílio", "Operação não presencial", outros", "Operação não presencial, pela internet", "Operação não presencial, teleatendimento", "Operação presencial", "Operação presencial, fora do estabelecimento".
+* Alterar o nome do campo Frete para Tipo frete.
+
+*Conversor:*
+Por padrão os novos campos deverão vir preenchidos:
+* Campo *Finalidade*: Aplicação final
+* Campo *Forma de contato*: Não se aplica
+
+*Regras:*
+NA
+
+---
+
+h3. #46 – Manter dados devolução
+
+*Implementar:*
+* Criar na Remessa de locação os campos: Finalidade e Forma de contato. Os campos deverão ficar posicionados acima do campo Frete.
+* O campo *Finalidade* contará com a opção Aplicação final.
+* O campo *Forma de contato* contará com as opções: "Não se aplica", "NFC-e em operações com entrega a domicílio", "Operação não presencial", outros", "Operação não presencial, pela internet", "Operação não presencial, teleatendimento", "Operação presencial", "Operação presencial, fora do estabelecimento".
+* Alterar o nome do campo Frete para Tipo frete.
+
+*Conversor:*
+Por padrão os novos campos deverão vir preenchidos:
+* Campo *Finalidade*: Aplicação final
+* Campo *Forma de contato*: Não se aplica
+
+*Regras:*
+NA
+
+---
+
+h3. #170724 – Gerar nota fiscal de remessa
+
+*Implementar*
+Validar a regra: "RNX1":http://net1/redmine/issues/170724/RNX1 - Validar CFOP de acordo com a Forma de contato preenchida na Remessa
+
+*Conversor*
+NA
+
+*Regras*
+"RNX1":http://net1/redmine/issues/170724/RNX1 - Validar CFOP de acordo com a Forma de contato preenchida na Remessa
+
+Para que o CFOP especificado no campo Interna da família CFOP seja aplicado, a Remessa deve atender às seguintes configurações:
+
+* Forma de contato: Operação presencial
+* Finalidade: Aplicação final
+* Tipo de frete: Sem frete
+
+Os demais campos permanecem com o preenchimento da forma que o usuário já faz atualmente. 
+
+Se qualquer um dos campos acima for configurado de forma diferente, será adotado o CFOP definido no campo Interestadual da família CFOP. Ressalta-se que a família CFOP está configurada no Tipo de operação especificado no *Parâmetro geral*, aba *Tipo de Operação*, no campo *Remessa locação*.
+
+---
+
+h3. #32341 – Gerar nota fiscal na Devolução de locação.
+
+*Implementar*
+Validar a regra: "RNX1":http://net1/redmine/issues/32341/RNX1 - Validar CFOP de acordo com a Forma de contato preenchida na Devolução
+
+*Conversor*
+NA
+
+*Regras*
+"RNX1":http://net1/redmine/issues/32341/RNX1 - Validar CFOP conforme a Forma de contato preenchida na Devolução.
+
+Para que o CFOP especificado no campo Interna da família CFOP seja aplicado, a Devolução deve atender às seguintes configurações:
+
+* Forma de contato: Operação presencial
+* Finalidade: Aplicação final
+* Tipo de frete: Sem frete
+
+Os demais campos permanecem com o preenchimento da forma que o usuário já faz atualmente.  
+
+Se qualquer um dos campos acima for configurado de forma diferente, será adotado o CFOP definido no campo Interestadual da família CFOP. Ressalta-se que a família CFOP está configurada no Tipo de operação especificado no *Parâmetro geral*, aba *Tipo de Operação*, no campo *Devolução locação*.
+
+---
+
+h3. #50 – Manter dados ordem de manutenção
+
+*Implementar*
+
+* Criar na aba *Faturamento*, seção *Peças para revenda* os campos: "Forma de contato" e Tipo frete. Os campos deverão ficar posicionados abaixo do campo Finalidade.
+* O campo *Finalidade* contará com a opção Aplicação final.
+* O campo *Forma de contato* contará com as opções: "Não se aplica", "NFC-e em operações com entrega a domicílio", "Operação não presencial", outros", "Operação não presencial, pela internet", "Operação não presencial, teleatendimento", "Operação presencial", "Operação presencial, fora do estabelecimento".
+* O campo Tipo frete contará com as opções: "Contratação - Por conta do destinatário (FOB)", "Contratação - Por conta do remetente (CIF)", "Contratação - Por conta de terceiros" , "Próprio - por conta do remetente", "Próprio - por conta do destinatário", "Sem frete".
+
+
+*Conversor*
+Por padrão os novos campos deverão vir preenchidos:
+* Campo *Finalidade*: Aplicação final
+* Campo *Forma de contato*: Não se aplica
+* Campo Tipo frete: Sem frete
+
+*Regras*
+NA
+
+---
+
+h3. #32833 - Gerar NF de Fatura na OM
+
+*Implementar*
+
+Validar regra: "RNX1":http://net1/redmine/issues/32341/RNX1 - Validar CFOP conforme a Forma de contato preenchida na aba Faturamento da Ordem de manutenção.
+
+
+*Conversor*
+NA
+
+*Regras*
+"RNX1":http://net1/redmine/issues/32341/RNX1 - Validar CFOP conforme a Forma de contato preenchida na aba Faturamento da Ordem de manutenção.
+
+Para que o CFOP especificado no campo Interna da família CFOP seja aplicado, a fatura(Nota fiscal de faturamento das peças) da Ordem de manutenção deve atender às seguintes configurações:
+
+* Forma de contato: Operação presencial
+* Finalidade: Aplicação final
+* Tipo de frete: Sem frete
+
+Os demais campos permanecem com o preenchimento da forma que o usuário já faz atualmente.  
+
+Se qualquer um dos campos acima for configurado de forma diferente, será adotado o CFOP definido no campo Interestadual da família CFOP. Ressalta-se que a família CFOP está configurada no Tipo de operação especificado no *Parâmetro geral*, aba *Tipo de Operação*, no campo *OM materiais*.
+
+---
+
+h3. #59382 – Manter dados da venda de equipamento locado.
+
+*Implementar*
+
+* Criar na Venda de equipamento locado os campos: Finalidade, Forma de contato e Tipo frete. Os campos deverão ficar posicionados abaixo do campo *Gerar NF*.
+* O campo *Finalidade* contará com a opção Aplicação final.
+* O campo *Forma de contato* contará com as opções: "Não se aplica", "NFC-e em operações com entrega a domicílio", "Operação não presencial", outros", "Operação não presencial, pela internet", "Operação não presencial, teleatendimento", "Operação presencial", "Operação presencial, fora do estabelecimento".
+* O campo Tipo frete contará com as opções: "Contratação - Por conta do destinatário (FOB)", "Contratação - Por conta do remetente (CIF)", "Contratação - Por conta de terceiros" , "Próprio - por conta do remetente", "Próprio - por conta do destinatário", "Sem frete".
+
+*Conversor*
+Por padrão os novos campos deverão vir preenchidos:
+* Campo *Finalidade*: Aplicação final
+* Campo *Forma de contato*: Não se aplica
+
+*Regras*
+NA
+
+---
+
+h3. #31227 – Gerar nota fiscal de mercadoria/venda na indenização de locados
+
+*Implementar*
+
+Validar regra: "RNX1":http://net1/redmine/issues/31227/RNX1 - Validar CFOP conforme a Forma de contato preenchida na venda de indenização de locados .
+
+*Conversor*
+NA
+
+*Regras*
+"RNX1":http://net1/redmine/issues/31227/RNX1 - Validar CFOP conforme a Forma de contato preenchida na venda de indenização de locados
+
+Para que o CFOP especificado no campo Interna da família CFOP seja aplicado, a nota fiscal gerada na Venda de indenização de locados deve atender às seguintes configurações:
+
+* Forma de contato: Operação presencial
+* Finalidade: Aplicação final
+* Tipo de frete: Sem frete
+
+Os demais campos permanecem com o preenchimento da forma que o usuário já faz atualmente.  
+
+Se qualquer um dos campos acima for configurado de forma diferente, será adotado o CFOP definido no campo Interestadual da família CFOP. Ressalta-se que a família CFOP está configurada no Tipo de operação especificado no *Parâmetro geral*, aba *Tipo de Operação*, no campo *Venda imobilizado*.
+
+---
+
+#60748 - Configurar Parâmetros Pedido de Venda
+
+*Implementar*
+
+* Criar nos Parâmetros Pedido de Venda os campos: Finalidade, Forma de contato e Tipo frete. Os campos deverão ser criados na seção *Valores Padrões - Venda de Balcão* e ficarem posicionados abaixo do campo *Tipo venda 2*.
+* O campo *Finalidade* contará com a opção Aplicação final.
+* O campo *Forma de contato* contará com as opções: "Não se aplica", "NFC-e em operações com entrega a domicílio", "Operação não presencial", outros", "Operação não presencial, pela internet", "Operação não presencial, teleatendimento", "Operação presencial", "Operação presencial, fora do estabelecimento".
+
+*Conversor*
+Por padrão os novos campos deverão vir preenchidos:
+* Campo *Finalidade*: Aplicação final
+* Campo *Forma de contato*: Não se aplica
+
+*Regras*
+NA
+
+---
+
+h3. #32878 - Gerar NF de saída na VENDA DE BALCÃO
+
+*Implementar*
+
+Validar regra: "RNX1":http://net1/redmine/issues/32878/RNX1 - Validar CFOP conforme a Forma de contato preenchida na Venda de Balcão .
+
+*Conversor*
+NA
+
+*Regras*
+
+"RNX1":http://net1/redmine/issues/32878/RNX1 - Validar CFOP conforme a Forma de contato preenchida na Venda de Balcão
+
+Para que o CFOP especificado no campo Interna da família CFOP seja aplicado, a nota fiscal gerada na Venda de Balcão deve atender às seguintes configurações:
+
+* Forma de contato: Operação presencial
+* Finalidade: Aplicação final
+* Tipo de frete: Sem frete
+
+Os demais campos permanecem com o preenchimento da forma que o usuário já faz atualmente.  
+
+Se qualquer um dos campos acima for configurado de forma diferente, será adotado o CFOP definido no campo Interestadual da família CFOP. Ressalta-se que a família CFOP está configurada no *Tipo de venda*.
+
+---
+
+h3. #32835 - Gerar NF saída OM
+
+*Implementar*
+Ao executar o processo *Gerar NF Saída*, deverá ser implementado abaixo do campo Tipo operação os campos: Finalidade, Forma de contato e Tipo frete.
+* O campo *Finalidade* contará com a opção Aplicação final.
+* O campo *Forma de contato* contará com as opções: "Não se aplica", "NFC-e em operações com entrega a domicílio", "Operação não presencial", outros", "Operação não presencial, pela internet", "Operação não presencial, teleatendimento", "Operação presencial", "Operação presencial, fora do estabelecimento".
+* O campo Tipo frete contará com as opções: "Contratação - Por conta do destinatário (FOB)", "Contratação - Por conta do remetente (CIF)", "Contratação - Por conta de terceiros" , "Próprio - por conta do remetente", "Próprio - por conta do destinatário", "Sem frete".
+
+*Conversor*
+Por padrão os novos campos deverão vir preenchidos:
+* Campo *Finalidade*: Aplicação final
+* Campo *Forma de contato*: Não se aplica
+* Campo *Frete*: Sem frete
+
+*Regras*
+"RNX1":http://net1/redmine/issues/32835/RNX1 - Validar CFOP conforme preenchimento dos campos Forma de contato, Finalidade e Tipo de frete no processo Gerar NF Saída
+
+Para que o CFOP especificado no campo Interna da família CFOP seja aplicado, a nota fiscal gerada pelo processo Gerar NF saída OM deve atender às seguintes configurações:
+
+* Forma de contato: Operação presencial
+* Finalidade: Aplicação final
+* Tipo de frete: Sem frete
+
+Os demais campos permanecem com o preenchimento da forma que o usuário já faz atualmente.  
+
+Se qualquer um dos campos acima for configurado de forma diferente, será adotado o CFOP definido no campo Interestadual da família CFOP. Ressalta-se que a família CFOP está configurada no Tipo de operação especificado no *Parâmetro geral*, aba *Tipo de Operação*, no campo *OM NF saída*.
+
+---
+
+h3. #32925 - Gerar NF de entrada na OM
+
+*Implementar*
+Ao executar o processo *Gerar NF de entrada na OM*, deverá ser implementado abaixo do campo Tipo operação os campos: Finalidade, Forma de contato e Tipo frete.
+* O campo *Finalidade* contará com a opção Aplicação final.
+* O campo *Forma de contato* contará com as opções: "Não se aplica", "NFC-e em operações com entrega a domicílio", "Operação não presencial", outros", "Operação não presencial, pela internet", "Operação não presencial, teleatendimento", "Operação presencial", "Operação presencial, fora do estabelecimento".
+* O campo Tipo frete contará com as opções: "Contratação - Por conta do destinatário (FOB)", "Contratação - Por conta do remetente (CIF)", "Contratação - Por conta de terceiros" , "Próprio - por conta do remetente", "Próprio - por conta do destinatário", "Sem frete".
+
+*Conversor*
+Por padrão os novos campos deverão vir preenchidos:
+* Campo *Finalidade*: Aplicação final
+* Campo *Forma de contato*: Não se aplica
+* Campo *Frete*: Sem frete
+
+*Regras*
+"RNX1":http://net1/redmine/issues/32925/RNX1 - Validar CFOP conforme preenchimento dos campos Forma de contato, Finalidade e Tipo de frete no processo Gerar NF de entrada na OM
+
+Para que o CFOP especificado no campo Interna da família CFOP seja aplicado, a nota fiscal gerada no processo *Gerar NF de entrada na OM* deve atender às seguintes configurações:
+
+* Forma de contato: Operação presencial
+* Finalidade: Aplicação final
+* Tipo de frete: Sem frete
+
+Os demais campos permanecem com o preenchimento da forma que o usuário já faz atualmente.  
+
+Se qualquer um dos campos acima for configurado de forma diferente, será adotado o CFOP definido no campo Interestadual da família CFOP. Ressalta-se que a família CFOP está configurada no Tipo de operação especificado no próprio processo *Gerar NF de entrada na OM*.
+
+---
+
+h3. #32963 - Gerar NF de remessa para serviço de terceiros na OM
+
+*Implementar*
+Ao executar o processo *Gerar NF de remessa para serviço de terceiros na OM*, deverá ser implementado abaixo do campo Tipo operação os campos: Finalidade, Forma de contato e Tipo frete.
+* O campo *Finalidade* contará com a opção Aplicação final.
+* O campo *Forma de contato* contará com as opções: "Não se aplica", "NFC-e em operações com entrega a domicílio", "Operação não presencial", outros", "Operação não presencial, pela internet", "Operação não presencial, teleatendimento", "Operação presencial", "Operação presencial, fora do estabelecimento".
+* O campo Tipo frete contará com as opções: "Contratação - Por conta do destinatário (FOB)", "Contratação - Por conta do remetente (CIF)", "Contratação - Por conta de terceiros" , "Próprio - por conta do remetente", "Próprio - por conta do destinatário", "Sem frete".
+
+*Conversor*
+Por padrão os novos campos deverão vir preenchidos:
+* Campo *Finalidade*: Aplicação final
+* Campo *Forma de contato*: Não se aplica
+* Campo *Frete*: Sem frete
+
+*Regras*
+"RNX1":http://net1/redmine/issues/32963/RNX1 - Validar CFOP conforme preenchimento dos campos Forma de contato, Finalidade e Tipo de frete no processo Gerar NF de remessa para serviço de terceiros na OM
+
+Para que o CFOP especificado no campo Interna da família CFOP seja aplicado, a nota fiscal gerada no processo *Gerar NF de remessa para serviço de terceiros na OM* deve atender às seguintes configurações:
+
+* Forma de contato: Operação presencial
+* Finalidade: Aplicação final
+* Tipo de frete: Sem frete
+
+Os demais campos permanecem com o preenchimento da forma que o usuário já faz atualmente.  
+
+Se qualquer um dos campos acima for configurado de forma diferente, será adotado o CFOP definido no campo Interestadual da família CFOP. Ressalta-se que a família CFOP está configurada no Tipo de operação especificado no *Parâmetro geral*, aba *Tipo de Operação*, no campo *OM Remessa de serv. terceiro*.
+
+---
+
+#32965 - Gerar NF de devolução para serviços de terceiros na OM
+
+*Implementar*
+Ao executar o processo *Gerar NF de devolução para serviços de terceiros na OM* e selecionar o tipo de emissão *Própria*, deverá ser implementado abaixo do campo Tipo operação os campos: Finalidade, Forma de contato e Tipo frete.
+* O campo *Finalidade* contará com a opção Aplicação final.
+* O campo *Forma de contato* contará com as opções: "Não se aplica", "NFC-e em operações com entrega a domicílio", "Operação não presencial", outros", "Operação não presencial, pela internet", "Operação não presencial, teleatendimento", "Operação presencial", "Operação presencial, fora do estabelecimento".
+* O campo Tipo frete contará com as opções: "Contratação - Por conta do destinatário (FOB)", "Contratação - Por conta do remetente (CIF)", "Contratação - Por conta de terceiros" , "Próprio - por conta do remetente", "Próprio - por conta do destinatário", "Sem frete".
+
+*Conversor*
+Por padrão os novos campos deverão vir preenchidos:
+* Campo *Finalidade*: Aplicação final
+* Campo *Forma de contato*: Não se aplica
+* Campo *Frete*: Sem frete
+
+*Regras*
+"RNX1":http://net1/redmine/issues/32965/RNX1 - Validar CFOP conforme preenchimento dos campos Forma de contato, Finalidade e Tipo de frete no processo Gerar NF de devolução para serviços de terceiros na OM
+
+Para que o CFOP especificado no campo Interna da família CFOP seja aplicado, a nota fiscal gerada no processo *Gerar NF de devolução para serviços de terceiros na OM* deve atender às seguintes configurações:
+
+* Forma de contato: Operação presencial
+* Finalidade: Aplicação final
+* Tipo de frete: Sem frete
+
+Os demais campos permanecem com o preenchimento da forma que o usuário já faz atualmente.  
+
+Se qualquer um dos campos acima for configurado de forma diferente, será adotado o CFOP definido no campo Interestadual da família CFOP. Ressalta-se que a família CFOP está configurada no Tipo de operação especificado no *Parâmetro geral*, aba *Tipo de Operação*, no campo *OM entrada NF de serv. de terceiro*.
+
+---
+
+h3. #79 - Manter Dados NOTA FISCAL
+
+*Implementar*
+Validar regra: "RNX1":http://net1/redmine/issues/32878/RNX1 - Preenchimento dos campos Finalidade, Forma de contato e Frete .
+
+*Conversor*
+NA
+
+*Regras*
+"RNX1":http://net1/redmine/issues/32878/RNX1 - Preenchimento dos campos Finalidade, Forma de contato e Frete
+Buscar as informações de Finalidade, Forma de contato e Frete, para os campos Finalidade (Aba Dados), Forma de contato (Aba Dados) e Frete (Aba Complemento) da Nota fiscal, quando concluído o processo Gerar NF das seguintes origens:
+
+* Remessa de equipamentos
+* Devolução de locação
+* Ordem de manutenção
+* Venda indenização de locado
+* Venda balcão

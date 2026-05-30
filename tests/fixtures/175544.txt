@@ -1,0 +1,69 @@
+h3. Descrição
+
+*Objetivo da demanda*
+
+Criar processo que possibilite a compra de equipamento sublocado no status em comodato.
+
+*_Cenário (equipamento sublocado em comodato):_*
+Empresa faz a locação de equipamentos de terceiro e faz a sublocação desses equipamentos para atender suas necessidades de locação. Em um certo momento ela envia esse equipamento em comodato para uma filial que por sua vez subloca o equipamento para atender um contrato com algum cliente. 
+Durante este processo a empresa resolve comprar o equipamento que está em comodato e sublocado.
+
+
+*Problema*
+
+Atualmente não é possível comprar um equipamento sublocado em status diferente de Disponível.
+
+---
+
+h1. Requisitos Impactados
+
+##31323
+Permitir selecionar patrimônios sublocados independente do status.
+
+##31599
+Gerar sublocação de compra, independente do status do equipamento.
+
+##75583
+Cadastrar Controle de ativo com "Ativação pendente" quando se referir a compra de sublocado.
+
+---
+
+h1. Detalhamento de Projeto
+
+h3. ##31323
+
+*Implementar*
+
+Ao executar o processo "Entrada NF/Estoque" de um Pedido de compra em que o campo "Tipo" esteja definido como Sublocado, deverão ser listados todos os patrimônios relacionados ao equipamento inserido na compra. Será permitido a seleção e compra dos patrimônios sublocados em qualquer status.
+
+*Conversor*
+N/A
+
+*Regras*
+(Criar) "RN1":http://net1/redmine/issues/31323/RN1 - Compra de equipamento sublocado
+Quando executado o processo "Entrada NF/Estoque" de um Pedido de compra em que o campo "Tipo" esteja definido como Sublocado, devem ser listados para seleção todos os patrimônios sublocados vinculados ao produto inserido no Pedido de compra. 
+
+
+h3. ##31599
+
+
+*Implementar*
+ 
+
+*Conversor*
+
+
+*Regras*
+ 
+
+h3. ##75583
+
+*Implementar*
+ 
+
+*Conversor*
+
+
+*Regras*
+ 
+---

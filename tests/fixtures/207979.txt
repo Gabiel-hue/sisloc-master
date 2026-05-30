@@ -1,0 +1,55 @@
+h1. Detalhamento de Projeto
+ 
+h3. Requisito: ##79
+ 
+*O QUE DEVE SER FEITO:*
+*Nota Fiscal\Nota Fiscal (Emissão)*
+
+Em Nota Fiscal>Dados> 7 Cobrança deverá :
+
+Para Notas Fiscais de Entrada (E/S = “E”), o checkbox do campo “Enviar ND/NF por” deverá vir desmarcado por padrão.
+O objetivo é evitar a exibição desnecessária do pop-up solicitando o preenchimento do campo de e-mail, considerando que esse recurso não é comumente utilizado em NF’s de entrada.
+
+Ao incluir ou alterar uma Nota Fiscal com E/S = “E”, o campo “Enviar ND/NF por” deverá vir desmarcado automaticamente.
+O usuário poderá marcar manualmente o campo caso deseje realizar o envio.
+O sistema não deverá exibir a mensagem/pop-up de obrigatoriedade de preenchimento do e-mail para NF = Entrada.
+Para Notas Fiscais de Saída (E/S = “S”), o comportamento atual deverá ser mantido.
+
+
+!clipboard-202605081750-stipx.png!
+
++HINT+
+Descrição de hint para novos campos, processos ou filtros.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+N/A
+
+*CONDIÇÕES/REGRAS:*
+*RNX1 Notas Fiscais de Entrada* 
+O campo "Enviar ND/NF por" deverá vir desmarcado por padrão para Nota Fiscal do tipo = "Entrada".
+
+
+---
+
+h1. Detalhamento de Projeto
+ 
+h3. Requisito: ##31151
+ 
+*O QUE DEVE SER FEITO:*
+Opções/Parâmetro Geral>"Notificações">Nota fiscal
+
+O Parâmetro *"Permitir emissão de NF/ND sem e-mail preenchido"* *não deverá* mais ser aplicado para Notas Fiscais do Tipo = Entrada.
+
+!clipboard-202605111013-xsmfb.png!
+
+
+Hint 
+"Permitir emissão de NF/ND sem e-mail preenchido para Notas fiscais de Saída"
+
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+N/A
+
+*CONDIÇÕES/REGRAS:*
+*RNX1 - Permitir emissão de NF/ND sem e-mail preenchido*
+O parâmetro somente é aplicado a NF/ND do tipo = Saída

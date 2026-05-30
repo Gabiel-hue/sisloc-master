@@ -1,0 +1,26 @@
+h1. Detalhamento de Projeto
+ 
+h3. Requisito: ##102418
+ 
+*O QUE DEVE SER FEITO:*
+*Locação → Remessa de Equipamentos →Dados → "Copiar Remessa"*
+
+
+Ao executar o processo “Copiar Remessa”, o sistema deverá validar se existe Serviço Extra vinculado na Remessa e se existir, perguntar ao usuário se ele quer copiar o(s) serviço(s) para a nova remessa onde deverá:
+
+* Exibir um *pop-up*  com a seguinte mensagem:
+ “Deseja realizar a cópia dos serviços extras vinculados a esta remessa?”
+* Apresentar as opções:
+*SIM* → Realiza também a cópia dos Serviços Extras vinculados a remessa do processo _Locação\Remessa de Equipamentos\Dados>Serviços Extras_
+*NÃO* → Realiza a cópia da remessa sem os serviços extras
+
+
+!clipboard-202604221739-wtbux.png!
+
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+N/A
+
+*CONDIÇÕES/REGRAS:*
+*RNX1 - Processo “Copiar Remessa”
+* O sistema deverá validar se existe Serviço Extra vinculado na Remessa e se existir, perguntar ao usuário se ele quer copiar o(s) serviço(s) para a nova remessa

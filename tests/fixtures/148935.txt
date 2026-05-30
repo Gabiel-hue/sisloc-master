@@ -1,0 +1,413 @@
+h3. Objetivo da Demanda:
+
+Criar recurso no Sisloc para saber que após a execução dos processos foi criada a atividade no Rotas, e se esta atividade está ou não em alguma rota.
+Ter como "forçar" a integração com o Outsystems caso a atividade não tenha sido criada.
+
+h3. Problemas:
+
+Não é exibida mensagem ao usuário informando que a atividade no Rotas não foi criada com a execução do processo.
+
+h3. Contexto Atual:
+
+O usuário executa os processos no Sisloc que criam a atividade e depois precisa conferir se atividade foi criada no Rotas (ponto no mapa). 
+
+h3. Contexto esperado:
+
+Usuário deve conseguir visualizar pelo Sisloc se a atividade foi criada, se ela foi incluída em alguma rota e conseguir reenviar a programação caso a atividade não tenha sido criada por algum motivo.
+
+---
+
+(!) Desenvolver depois da demanda "150456 - Criar processo para 'Programar Execução' da OM" (!)
+
+---
+
+h1. Requisitos Impactados e Requisitos Novos
+
+#48 - Manter Dados REMESSA DE LOCAÇÃO 
+#31482 - Programar Entrega na Remessa
+#151937 - Reenviar Programação de Entrega - REMESSA 
+#46 - Manter Dados DEVOLUÇÃO
+#31496 - Programar Retirada na Devolução
+#151938 - Reenviar Programação de Retirada - DEVOLUÇÃO
+#50 - Manter Dados ORDEM DE MANUTENÇÃO
+#151073 - Programar Execução da OM
+#151939 - Reenviar Programação de Execução - ORDEM DE MANUTENÇÃO
+#31225 - Manter Dados PEDIDO DE VENDA
+#140477 - Programar Entrega - Pedido de Venda
+#151940 - Reenviar Programação de Entrega - PEDIDO DE VENDA
+#151941 - Monitorar Atividades - Rotas
+#151942 - Visualizar Rota - Monitorar Atividades
+
+---
+
+h1. Detalhamento de Projeto
+
+h3. Requisito: #48 - Manter Dados REMESSA DE LOCAÇÃO 
+
+*Implementar:* Na Remessa de Equipamentos:
+
+*1)* Criar o processo _*Reenviar Programação*_, abaixo de _Programar Entrega_. 
+OBS.: O processo deve ser exibido apenas na consulta da Remessa. 
+
+*2)* Criar o campo _Atividade Rotas_ com as opções "Sim" e "Não", abaixo de "Celular Entrega".
++Hint+
+Indica se a atividade foi criada no Rotas ao _Programar Entrega_ ou _Reenviar Programação_.
+
+*Conversor:* NA
+
+*Regras:* 
+"RN39 - Atividade Rotas":http://net1/redmine/issues/48#RN39
+O campo _Atividade Rotas_ é exibido quando o módulo +Integração Outsystems+ estiver habilitado.
+
+"RN40 - Atividade Rotas":http://net1/redmine/issues/48#RN40
+O processo _*Reenviar Programação*_ é exibido quando:
+
+* O processo _Programar Entrega_ tiver sido executado;
+* O módulo +Integração Outsystems+ estiver habilitado;
+* A atividade no Rotas não foi criada (Campo _Atividade Rotas_ preenchido com "Não").
+
+---
+
+h3. Requisito: #31482 - Programar Entrega na Remessa
+
+*Implementar:* Ao executar o processo _*Programar Entrega*_ na Remessa de Equipamentos:
+
+* Exibir mensagem de retorno ao usuário informando se a atividade foi criada no Rotas com sucesso ou com mensagem de erro (quando o módulo _Integração Outsystems_ estiver habilitado);
+* Criar um registro na tela _Monitorar Atividades - Rotas_ com o retorno da integração;
+* Preencher o campo _Atividade Rotas_.
+
+*Conversor:* NA
+
+*Regras:* "RN12 - Atividade no Rotas":http://net1/redmine/issues/31482#RN12
+Quando o módulo _Integração Outsystems_ estiver habilitado, ao programar a entrega:
+- Será criado um registro na tela _Monitorar Atividades - Rotas_ para controle da criação da atividade no Rotas;
+- O campo _Atividade Rotas_ na Remessa será preenchido:
+Sim: se a atividade no Rotas foi criada;
+Não: se a atividade no Rotas não foi criada.
+
+---
+
+h3. Requisito: #151937 - Reenviar Programação de Entrega - REMESSA
+
+*Implementar:* Ao executar o processo _*Reenviar Programação*_:
+
+* Exibir a mesma tela da programação de entrega com os mesmos campos para que sejam alterados, caso necessário;
+* Chamar a integração do Outsystems para criação da atividade no Rotas ao confirmar as informações da entrega;
+* Exibir mensagem de retorno ao usuário informando se a atividade foi criada no Rotas com sucesso ou com mensagem de erro, explicando o erro;
+* Atualizar as informações de entrega na Remessa (motorista, veículo, endereço, etc) caso tenham sido alteradas;
+* Atualizar o campo _Atividade Rotas_;
+* Atualizar o registro na tela _Monitorar Atividades - Rotas_ com o retorno da integração.
+
+*Conversor:* NA
+
+*Regras:* 
+"RN1":http://net1/redmine/issues/151937#RN1
+O processo _*Reenviar Programação*_ é exibido quando:
+
+* O processo _Programar Entrega_ tiver sido executado;
+* O módulo +Integração Outsystems+ estiver habilitado;
+* A atividade no Rotas não foi criada (campo _Atividade Rotas_ preenchido com "Não").
+
+"RN2 - Atividade no Rotas":http://net1/redmine/issues/151937#RN2
+Ao reenviar a programação de entrega:
+- Será atualizado o registro na tela _Monitorar Atividades - Rotas_ para controle da atividade no Rotas;
+- O campo _Atividade Rotas_ da Remessa será atualizado:
+Sim: se a atividade no Rotas foi criada;
+Não: se a atividade no Rotas não foi criada.
+
+---
+
+h3. Requisito: #46 - Manter Dados DEVOLUÇÃO
+
+*Implementar:* Na Devolução de Equipamentos:
+
+*1)* Criar o processo _*Reenviar Programação*_, abaixo de _Programar Retirada_.
+OBS.: O processo deve ser exibido apenas na consulta da Devolução. 
+
+*2)* Criar o campo _Atividade Rotas_ com as opções "Sim" e "Não", abaixo de "Devolução retirada programada".
++Hint+
+Indica se a atividade foi criada no Rotas ao _Programar Retirada_ ou _Reenviar Programação_.
+
+*Conversor:* NA
+
+*Regras:* 
+"RN30 - Atividade Rotas":http://net1/redmine/issues/46#RN30
+O campo _Atividade Rotas_ é exibido quando o módulo +Integração Outsystems+ estiver habilitado.
+
+"RN31 - Atividade Rotas":http://net1/redmine/issues/46#RN31
+O processo _*Reenviar Programação*_ é exibido quando:
+
+* O processo _Programar Retirada_ tiver sido executado;
+* O módulo +Integração Outsystems+ estiver habilitado;
+* A atividade no Rotas não foi criada (Campo _Atividade Rotas_ preenchido com "Não").
+
+---
+
+h3. Requisito: #31496 - Programar Retirada na Devolução
+
+*Implementar:* Ao executar o processo _*Programar Retirada*_ na Devolução de Equipamentos:
+
+* Exibir mensagem de retorno ao usuário informando se a atividade foi criada no Rotas com sucesso ou com mensagem de erro (quando o módulo _Integração Outsystems_ estiver habilitado);
+* Criar um registro na tela _Monitorar Atividades - Rotas_ com o retorno da integração;
+* Preencher o campo _Atividade Rotas_.
+
+*Conversor:* NA
+
+*Regras:* "RN12 - Atividade no Rotas":http://net1/redmine/issues/31496#RN12
+Quando o módulo _Integração Outsystems_ estiver habilitado, ao programar a retirada:
+- Será criado um registro na tela _Monitorar Atividades - Rotas_ para controle da criação da atividade no Rotas;
+- O campo _Atividade Rotas_ na Devolução será preenchido:
+Sim: se a atividade no Rotas foi criada;
+Não: se a atividade no Rotas não foi criada.
+
+---
+
+h3. Requisito: #151938 - Reenviar Programação de Retirada - DEVOLUÇÃO
+
+*Implementar:* Ao executar o processo _*Reenviar Programação*_:
+
+* Exibir a mesma tela da programação de retirada com os mesmos campos para que sejam alterados, caso necessário;
+* Chamar a integração do Outsystems para criação da atividade no Rotas ao confirmar as informações da entrega;
+* Exibir mensagem de retorno ao usuário informando se a atividade foi criada no Rotas com sucesso ou com mensagem de erro, explicando o erro;
+* Atualizar as informações de retirada na Devolução (motorista, veículo, endereço, etc) caso tenham sido alteradas;
+* Atualizar o campo _Atividade Rotas_;
+* Atualizar o registro na tela _Monitorar Atividades - Rotas_ com o retorno da integração.
+
+*Conversor:*
+
+*Regras:* 
+"RN1":http://net1/redmine/issues/151938#RN1
+O processo _*Reenviar Programação*_ é exibido quando:
+
+* O processo _Programar Retirada_ tiver sido executado;
+* O módulo +Integração Outsystems+ estiver habilitado;
+* A atividade no Rotas não foi criada (campo _Atividade Rotas_ preenchido com "Não").
+
+"RN2 - Atividade no Rotas":http://net1/redmine/issues/151938#RN2
+Ao reenviar a programação de retirada:
+- Será atualizado o registro na tela _Monitorar Atividades - Rotas_ para controle da atividade no Rotas;
+- O campo _Atividade Rotas_ da Devolução será atualizado:
+Sim: se a atividade no Rotas foi criada;
+Não: se a atividade no Rotas não foi criada.
+
+---
+
+h3. Requisito: #50 - Manter Dados ORDEM DE MANUTENÇÃO
+
+*Implementar:* Na Ordem de Manutenção:
+
+*1)* Criar o processo _*Reenviar Programação*_, abaixo de _Programar Execução_.
+OBS.: O processo deve ser exibido apenas na consulta da OM. 
+
+*2)* Criar o campo _Atividade Rotas_ com as opções "Sim" e "Não", abaixo de "Execução Programada" na aba 2 Complemento.
++Hint+
+Indica se a atividade foi criada no Rotas ao _Programar Execução_ ou _Reenviar Programação_.
+
+*Conversor:* NA
+
+*Regras:* 
+"RN99":http://net1/redmine/issues/50#RN99
+O campo _Atividade Rotas_ é exibido quando o módulo +Integração Outsystems+ estiver habilitado.
+
+"RN100":http://net1/redmine/issues/50#RN100
+O processo _*Reenviar Programação*_ é exibido quando:
+
+* O processo _Programar Execução_ tiver sido executado;
+* O módulo +Integração Outsystems+ estiver habilitado;
+* A atividade no Rotas não foi criada (Campo _Atividade Rotas_ preenchido com "Não").
+
+---
+
+h3. Requisito: #151073 - Programar Execução da OM
+
+*Implementar:* Ao executar o processo _*Programar Execução*_ na Ordem de Manutenção:
+
+* Exibir mensagem de retorno ao usuário informando se a atividade foi criada no Rotas com sucesso ou com mensagem de erro (quando o módulo _Integração Outsystems_ estiver habilitado);
+* Criar um registro na tela _Monitorar Atividades - Rotas_ com o retorno da integração;
+* Preencher o campo _Atividade Rotas_.
+
+*Conversor:* NA
+
+*Regras:* "RN6 - Atividade no Rotas":http://net1/redmine/issues/151073#RN6
+Quando o módulo _Integração Outsystems_ estiver habilitado, ao programar a execução: 
+- Será criado um registro na tela _Monitorar Atividades - Rotas_ para controle da criação da atividade no Rotas;
+- O campo _Atividade Rotas_ na Ordem de Manutenção será preenchido:
+Sim: se a atividade no Rotas foi criada;
+Não: se a atividade no Rotas não foi criada.
+
+---
+
+h3. Requisito: #151939 - Reenviar Programação de Execução - ORDEM DE MANUTENÇÃO
+
+*Implementar:* Ao executar o processo _*Reenviar Programação*_:
+
+* Exibir a mesma tela da programação de entrega com os mesmos campos para que sejam alterados, caso necessário;
+* Chamar a integração do Outsystems para criação da atividade no Rotas ao confirmar as informações da entrega;
+* Exibir mensagem de retorno ao usuário informando se a atividade foi criada no Rotas com sucesso ou com mensagem de erro, explicando o erro;
+* Atualizar as informações de execução na OM (resp. execução, veículo, endereço, etc) caso tenham sido alteradas;
+* Atualizar o campo _Atividade Rotas_;
+* Atualizar o registro na tela _Monitorar Atividades - Rotas_ com o retorno da integração.
+
+*Conversor:* NA
+
+*Regras:* 
+"RN1":http://net1/redmine/issues/151939#RN1
+O processo _*Reenviar Programação*_ é exibido quando:
+
+* O processo _Programar Execução_ tiver sido executado;
+* O módulo +Integração Outsystems+ estiver habilitado;
+* A atividade no Rotas não foi criada (campo _Atividade Rotas_ preenchido com "Não").
+
+"RN2 - Atividade no Rotas":http://net1/redmine/issues/151939#RN2
+Ao reenviar a programação de execução da OM:
+- Será atualizado o registro na tela _Monitorar Atividades - Rotas_ para controle da atividade no Rotas;
+- O campo _Atividade Rotas_ da Ordem de Manutenção será atualizado:
+Sim: se a atividade no Rotas foi criada;
+Não: se a atividade no Rotas não foi criada.
+
+---
+
+h3. Requisito: #31225 - Manter Dados PEDIDO DE VENDA
+
+*Implementar:* No Pedido de Venda:
+
+*1)* Criar o processo _*Reenviar Programação*_, abaixo de _Programar Entrega_.
+OBS.: O processo deve ser exibido apenas na consulta do Pedido de Venda. 
+
+*2)* Criar o campo _Atividade Rotas_ com as opções "Sim" e "Não", abaixo de "Celular Entrega", na aba 1 Dados, seção Entrega.
++Hint+
+Indica se a atividade foi criada no Rotas ao _Programar Entrega_ ou _Reenviar Programação_.
+
+*Conversor:* NA
+
+*Regras:* 
+"RN54":http://net1/redmine/issues/31225#RN54
+O campo _Atividade Rotas_ é exibido quando o módulo +Integração Outsystems+ estiver habilitado.
+
+"RN55 - Atividade Rotas":http://net1/redmine/issues/31225#RN55
+O processo _*Reenviar Programação*_ é exibido quando:
+
+* O processo _Programar Entrega_ tiver sido executado;
+* O módulo +Integração Outsystems+ estiver habilitado;
+* A atividade no Rotas não foi criada (Campo _Atividade Rotas_ preenchido com "Não").
+
+---
+
+h3. Requisito: #140477 - Programar Entrega - Pedido de Venda
+
+*Implementar:* Ao executar o processo _*Programar Entrega*_ no Pedido de Venda:
+
+* Exibir mensagem de retorno ao usuário informando se a atividade foi criada no Rotas com sucesso ou com mensagem de erro (quando o módulo _Integração Outsystems_ estiver habilitado);
+* Criar um registro na tela _Monitorar Atividades - Rotas_ com o retorno da integração;
+* Preencher o campo _Atividade Rotas_.
+
+*Conversor:* NA
+
+*Regras:* "RN8 - Atividade no Rotas":http://net1/redmine/issues/140477#RN8
+Quando o módulo _Integração Outsystems_ estiver habilitado, ao programar a entrega:
+- Será criado um registro na tela _Monitorar Atividades - Rotas_ para controle da criação da atividade no Rotas;
+- O campo _Atividade Rotas_ na Remessa será preenchido:
+Sim: se a atividade no Rotas foi criada;
+Não: se a atividade no Rotas não foi criada.
+
+---
+
+h3. Requisito: #151940 - Reenviar Programação de Entrega - PEDIDO DE VENDA
+
+*Implementar:* Ao executar o processo _*Reenviar Programação*_:
+
+* Exibir a mesma tela da programação de entrega com os mesmos campos para que sejam alterados, caso necessário;
+* Chamar a integração do Outsystems para criação da atividade no Rotas ao confirmar as informações da entrega;
+* Exibir mensagem de retorno ao usuário informando se a atividade foi criada no Rotas com sucesso ou com mensagem de erro, explicando o erro;
+* Atualizar as informações de entrega no Pedido de Venda (motorista, veículo, endereço, etc) caso tenham sido alteradas;
+* Atualizar o campo _Atividade Rotas_;
+* Atualizar o registro na tela _Monitorar Atividades - Rotas_ com o retorno da integração.
+
+*Conversor:* NA
+
+*Regras:* 
+"RN1":http://net1/redmine/issues/151940#RN1
+O processo _*Reenviar Programação*_ é exibido quando:
+
+* O processo _Programar Entrega_ tiver sido executado;
+* O módulo +Integração Outsystems+ estiver habilitado;
+* A atividade no Rotas não foi criada (campo _Atividade Rotas_ preenchido com "Não").
+
+"RN2 - Atividade no Rotas":http://net1/redmine/issues/151940#RN2
+Ao reenviar a programação de entrega:
+- Será atualizado o registro na tela _Monitorar Atividades - Rotas_ para controle da atividade no Rotas;
+- O campo _Atividade Rotas_ do Pedido de Venda será atualizado:
+Sim: se a atividade no Rotas foi criada;
+Não: se a atividade no Rotas não foi criada.
+
+---
+
+h3. Requisito: #151941 - Monitorar Atividades - Rotas
+
+*Implementar:* 
+
+*1)* Criar o CRUD _*Monitorar Atividades - Rotas*_ em Relatórios Gerenciais > Processos com as informações/colunas abaixo:
+
+|*Coluna*|*Opções*|*Filtro*|
+|Status Atividade|- Criada (verde)
+- Não criada (vermelho)|Sim|
+|Retorno Integração|- Motivo da falha na criação da atividade (quando a atividade não foi criada no Rotas)
+- Ok (quando a atividade foi criada no Rotas)|
+|Origem|- REM (Remessa)
+- DEV (Devolução)
+- OM (Ordem de Manutenção)
+- PV (Pedido de Venda)|Sim|
+|Número|Número do registro de origem (Remessa, Devolução, OM ou Pedido de Venda|Sim|
+|Cliente|Cliente do registro de origem|Sim|
+|Endereço|Endereço inserido na programação|Sim|
+
+*2)* Ao dar duplo clique no registro abrir a origem (Remessa, Devolução, OM ou Pedido de Venda).
+
+*3)* Criar o processo _Visualizar Rota_ do lado direito da tela. Este processo será utilizado para que o usuário visualize as informações da Rota no Outsystems sob demanda. 
+OBS.: Criar permissão de acesso para este processo.
+
+*Conversor:* Serão exibidos os registros em que os processos de programação foram executados após a criação da tela. Os registros antigos não serão exibidos, a menos que o processo de programação seja estornado e executado novamente.
+
+*Regras:* 
+"RN1":http://net1/redmine/issues/151941#RN1
+Para o usuário essa tela será apenas de consulta. Os registros são incluídos a partir da execução dos processos nas origens:
+
+> Remessa: Programar Entrega
+> Devolução: Programar Retirada
+> Ordem de Manutenção: Programar Execução
+> Pedido de Venda: Programar Entrega
+
+"RN2":http://net1/redmine/issues/151941#RN2
+Para saber se a atividade já foi incluída em uma rota e qual status desse rota deve-se utilizar o processo _*Visualizar Rota*_. Ao executá-lo é feita uma consulta sob demanda ao Outsystems e assim são exibidas as informações daquela atividade em específico.
+
+---
+
+h3. Requisito: #151942 - Visualizar Rota - Monitorar Atividades
+
+*Implementar:* Ao executar o processo _Visualizar Rota_ consultar o Outsystems para saber se a atividade selecionada na tela está incluída em uma rota e qual status da rota e exibir janela com as informações abaixo:
+
+|*Coluna*|*Opções*|
+|Status Atividade|- Pendente 
+- Em deslocamento
+- Em execução
+- Concluído
+- Cancelado
+- Adiado|
+|Status Rota|- Prevista
+- Liberada
+- Em execução 
+- Concluída
+- Sem Rota (quando a atividade não foi inserida em uma rota)|
+|Rota|- Nome da Rota (Se a atividade estiver inserida em uma rota)
+- Vazio (Se a atividade não estiver inserida em uma rota)|
+|Executor|- Executor da rota (Se a atividade estiver inserida em uma rota)
+- Vazio (Se a atividade não estiver inserida em uma rota)|
+|Data Prevista Início|- Data prevista de início (Se a atividade estiver inserida em uma rota)
+- Vazio (Se a atividade não estiver inserida em uma rota)|
+|Data Prevista Fim|Data prevista de fim (Se a atividade estiver inserida em uma rota)
+- Vazio (Se a atividade não estiver inserida em uma rota)|
+
+*Conversor:* NA
+
+*Regras:* "RN1":http://net1/redmine/issues/151942#RN1
+A consulta ao Outsystems para exibir as informações da rota em que a atividade está incluída é feita sob demanda e exibe as informações da atividade que está selecionada na tela.
