@@ -13,7 +13,7 @@
 //   - buildPlaceholderMap(ds): [{id, title}]
 //   - analyze(ds): [{id, rules: string[]}]  (pipeline completo)
 //
-// Versão espelhada: v35.6.5
+// Versão espelhada: v35.6.6
 
 'use strict';
 
@@ -28,18 +28,21 @@ function extractRules(sec) {
   if (!rulesMatch) return [];
 
   const rules = [];
-  const parts = rulesMatch[1].split(/\n(?=\s*(?:\([^)]*\)\s*)?(?:h\d+\.\s*)?\*?(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN\s?[A-Z0-9]+(?:\.\d+)?)\*?\b)/i);
+  // v35.6.6: aceita "RN" puro quando vem seguido de espaço(s) + hífen/endash (lookahead)
+  const parts = rulesMatch[1].split(/\n(?=\s*(?:\([^)]*\)\s*)?(?:h\d+\.\s*)?\*?(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN(?:\s?[A-Z0-9]+(?:\.\d+)?|(?=\s+[-–])))\*?\b)/i);
 
   parts.forEach(function (part) {
     let t = part.trim().replace(/^h\d+\.\s*/, '');
     if (!t) return;
     if (t.startsWith('|')) return;
     t = t.replace(/^\([^)]*\)\s*/, '');
-    t = t.replace(/^\*(RN\s?[A-Z0-9]+(?:\.\d+)?)\*/i, '$1')
-         .replace(/^\*(RN\s?[A-Z0-9]+(?:\.\d+)?[^\n*]*)\*\s*$/im, '$1')
-         .replace(/^\*(RN\s?[A-Z0-9]+(?:\.\d+)?[^\n*]*)$/im, '$1');
+    // v35.6.6: strip de markdown também aceita RN puro (sem código)
+    t = t.replace(/^\*(RN(?:\s?[A-Z0-9]+(?:\.\d+)?)?)\*/i, '$1')
+         .replace(/^\*(RN(?:\s?[A-Z0-9]+(?:\.\d+)?)?[^\n*]*)\*\s*$/im, '$1')
+         .replace(/^\*(RN(?:\s?[A-Z0-9]+(?:\.\d+)?)?[^\n*]*)$/im, '$1');
 
-    if (t.match(/^(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN\s?[A-Z0-9]+(?:\.\d+)?\b)/i)) {
+    // v35.6.6: verificação de início de regra também aceita RN puro + hífen
+    if (t.match(/^(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN(?:\s?[A-Z0-9]+(?:\.\d+)?|(?=\s+[-–]))\b)/i)) {
       const lines = t.split('\n');
       let rawTitle = lines[0].trim();
 
@@ -56,7 +59,8 @@ function extractRules(sec) {
       }
 
       rawTitle = rawTitle.replace(/\*/g, '')
-                         .replace(/^(RN\s?[A-Z0-9]+(?:\.\d+)?)\s*[-–:]?\s*/i, '$1 - ')
+                         // v35.6.6: normalização do título aceita RN puro
+                         .replace(/^(RN(?:\s?[A-Z0-9]+(?:\.\d+)?)?)\s*[-–:]?\s*/i, '$1 - ')
                          .replace(/:$/, '')
                          .trim();
 
