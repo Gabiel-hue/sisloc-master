@@ -1,0 +1,220 @@
+
+
+h1. Requisitos Impactados
+
+31059 - Emitir Nota Fiscal
+Alteração no processo de retenção pis cofins na integração NFS-e  
+
+31059 - Emitir Nota Fiscal
+Alteração no hint do parametro Modelo de Retenção PCC
+
+---
+
+h1. Detalhamento de Projeto
+
+h2. REQUISITO: #31059 - Emitir Nota Fiscal
+
+*O QUE DEVE SER FEITO:*
+
+Alterar a rotina de emissão da NFS-e, para atender as normas da NT007, de acordo com a necessidade de cada integração com a NFS-e, conforme regra RN- Regra de PIS/COFINS no Sisloc integração NFS-e.
+
+
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+N/A
+
+*CONDIÇÕES/REGRAS:*
+RN -   Regra de PIS/COFINS no Sisloc integração NFS-e
+
+*Se Parâmetro(série da nota): Modelo de Retenção PCC = NT007*
+ 
+h2. *Integração via Benefix*
+
+*Grupo GN460 – Apuração de PIS/COFINS*
+* CST → Origem: Abrir Dados da NFS-e
+* vBCPisCofins → Base de cálculo (Abrir Dados da NFS-e)
+* pAliqPis → Alíquota PIS (Abrir Dados da NFS-e)
+* pAliqCofins → Alíquota COFINS (Abrir  Dados da NFS-e)
+* vPis → Valor de PIS (Dados da NFS-e)
+* vCofins → Valor de COFINS (Dados da NFS-e)
+* tpRetPisCofins → Código do tipo de retenção (CST)
+
+*Grupo GN461 – Retenções*
+* vRetCP → Valor de inss retido (conforme aba Impostos e Valores)
+* vRetIRRF → Valor de IRRF retido
+* vRetCSLL → Somatório: PIS + COFINS + CSLL (retenções)
+
+h3. *Regras de preenchimento*
+*Apuração própria*
+Sempre preenchida exclusivamente com base nos Dados da NFS-e, independentemente de haver retenção:
+* CST
+* Base de cálculo
+* Alíquotas
+* Valores de PIS e COFINS
+
+*Retenção*
+Preenchida com base nas informações de retenção (aba Impostos e Valores):
+* Valores dos impostos retidos
+* Tipo de retenção (tpRetPisCofins)
+
+h2. *Integração TecnoSpeed*
+
+Tag: Apuração Própria
+Gerada com base nos Dados da NFS-e:
+* cstPisCofins
+* baseCalculoPisCofins
+* pis (alíquota e valor)
+* cofins (alíquota e valor)
+
+Tag: Retenção
+Gerada com base na aba Impostos e Valores:
+* outrasRetencoes
+* pis (cst, baseCalculo, retido, aliquota, valor)
+* cofins (cst, baseCalculo, retido, aliquota, valor)
+* csll (alíquota e valor)
+* inss (alíquota e valor)
+* irrf (alíquota e valor)
+* cpp (alíquota e valor)
+* tipoRetencaoPisCofinsCSLL
+
+h2. *Integração ACBR*
+
+* vPis → Valor de PIS (Dados da NFS-e)
+* vCofins → Valor de COFINS (Dados da NFS-e)
+* tpRetPisCofins → Código do tipo de retenção (CST)
+* vRetCP → Valor de inss retido (aba Impostos e Valores)
+* vRetIRRF → Valor de IRRF retido (aba Impostos e Valores)
+* vRetCSLL → Somatório: PIS + COFINS + CSLL (retenções) (aba Impostos e Valores)
+
+*Se Parâmetro(série da nota): Modelo de Retenção PCC = Legado*  
+
+h2. *Estrutura Benefix*
+
+Mesmos grupos:
+* GN460 (Apuração)
+* GN461 (Retenção)
+
+*Regra de Preenchimento*  
+O preenchimento dos grupos GN460 e GN461 segue a lógica:
+* Se houver retenção:
+Utilizar dados da aba Impostos e Valores
+* Se NÃO houver retenção:
+Utilizar dados do processo Dados da NFS-e
+ 
+h2. *Integração TecnoSpeed (Legado)*
+
+Será gerada apenas a tag de Retenção, com a mesma regra:
+* Com retenção: dados da aba Impostos e Valores
+* Sem retenção: dados da NFS-e
+
+h2. *Integração ACBR*
+
+Não se aplica pois é somente emissor nacional
+
+---
+
+h2. REQUISITO: #31059 - Emitir Nota Fiscal
+
+*O QUE DEVE SER FEITO:*
+
+Alterar o  texto do parametro Modelo de Retenção PCC, da aba parametro, incluindo a regra RN -  Regra de PIS/COFINS no Sisloc integração NFS-e
+
+*Sugestão de hint:* 
+
+Esee campo controla a forma de envio das retenções de PCC (pis, Cofins e CSLL). Alguns Municípios naoa adotaram a Nota Técnica 007 e estão recebendo o modelo Legado.
+OBS.: O Modelo Nacional é aderente a NT007.
+
+* Regra de PIS/COFINS no Sisloc integração NFS-e*
+
+*Se Parâmetro(série da nota): Modelo de Retenção PCC = NT007*
+ 
+h2. *Integração via Benefix*
+
+*Grupo GN460 – Apuração de PIS/COFINS*
+* CST → Origem: Abrir Dados da NFS-e
+* vBCPisCofins → Base de cálculo (Abrir Dados da NFS-e)
+* pAliqPis → Alíquota PIS (Abrir Dados da NFS-e)
+* pAliqCofins → Alíquota COFINS (Abrir  Dados da NFS-e)
+* vPis → Valor de PIS (Dados da NFS-e)
+* vCofins → Valor de COFINS (Dados da NFS-e)
+* tpRetPisCofins → Código do tipo de retenção (CST)
+
+*Grupo GN461 – Retenções*
+* vRetCP → Valor de inss retido (conforme aba Impostos e Valores)
+* vRetIRRF → Valor de IRRF retido
+* vRetCSLL → Somatório: PIS + COFINS + CSLL (retenções)
+
+h3. *Regras de preenchimento*
+*Apuração própria*
+Sempre preenchida exclusivamente com base nos Dados da NFS-e, independentemente de haver retenção:
+* CST
+* Base de cálculo
+* Alíquotas
+* Valores de PIS e COFINS
+
+*Retenção*
+Preenchida com base nas informações de retenção (aba Impostos e Valores):
+* Valores dos impostos retidos
+* Tipo de retenção (tpRetPisCofins)
+
+h2. *Integração TecnoSpeed*
+
+Tag: Apuração Própria
+Gerada com base nos Dados da NFS-e:
+* cstPisCofins
+* baseCalculoPisCofins
+* pis (alíquota e valor)
+* cofins (alíquota e valor)
+
+Tag: Retenção
+Gerada com base na aba Impostos e Valores:
+* outrasRetencoes
+* pis (cst, baseCalculo, retido, aliquota, valor)
+* cofins (cst, baseCalculo, retido, aliquota, valor)
+* csll (alíquota e valor)
+* inss (alíquota e valor)
+* irrf (alíquota e valor)
+* cpp (alíquota e valor)
+* tipoRetencaoPisCofinsCSLL
+
+h2. *Integração ACBR*
+
+* vPis → Valor de PIS (Dados da NFS-e)
+* vCofins → Valor de COFINS (Dados da NFS-e)
+* tpRetPisCofins → Código do tipo de retenção (CST)
+* vRetCP → Valor de inss retido (aba Impostos e Valores)
+* vRetIRRF → Valor de IRRF retido (aba Impostos e Valores)
+* vRetCSLL → Somatório: PIS + COFINS + CSLL (retenções) (aba Impostos e Valores)
+
+*Se Parâmetro(série da nota): Modelo de Retenção PCC = Legado*  
+
+h2. *Estrutura Benefix*
+
+Mesmos grupos:
+* GN460 (Apuração)
+* GN461 (Retenção)
+
+*Regra de Preenchimento*  
+O preenchimento dos grupos GN460 e GN461 segue a lógica:
+* Se houver retenção:
+Utilizar dados da aba Impostos e Valores
+* Se NÃO houver retenção:
+Utilizar dados do processo Dados da NFS-e
+ 
+h2. *Integração TecnoSpeed (Legado)*
+
+Será gerada apenas a tag de Retenção, com a mesma regra:
+* Com retenção: dados da aba Impostos e Valores
+* Sem retenção: dados da NFS-e
+
+
+h2. *Integração ACBR*
+
+Não se aplica pois é somente emissor nacional
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+N/A
+
+*CONDIÇÕES/REGRAS:*
+N/A
+---
