@@ -13,7 +13,7 @@
 //   - buildPlaceholderMap(ds): [{id, title}]
 //   - analyze(ds): [{id, rules: string[]}]  (pipeline completo)
 //
-// Versão espelhada: v35.6.6
+// Versão espelhada: v35.6.7
 
 'use strict';
 
@@ -65,7 +65,8 @@ function extractRules(sec) {
                          .trim();
 
       let content = lines.slice(1).join('\n').trim();
-      content = content.replace(/(\n\s*---[\s\S]*|\n\s*h\d+\.[\s\S]*)$/g, '').trim();
+      // v35.6.7: corta só por --- (não mais por \n\s*h\d+\.) — preserva h2/h3 internos da regra
+      content = content.replace(/\n\s*---[\s\S]*$/g, '').trim();
 
       if (!rawTitle.match(/CEN[AÁ]RIOS/i)) {
         rules.push({ title: rawTitle, content: content });
