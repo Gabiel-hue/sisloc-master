@@ -13,7 +13,7 @@
 //   - buildPlaceholderMap(ds): [{id, title}]
 //   - analyze(ds): [{id, rules: string[]}]  (pipeline completo)
 //
-// Versão espelhada: v35.6.7
+// Versão espelhada: v35.6.8 (parser inalterado desde v35.6.7 — v35.6.8 mexeu só no renumerador da caixinha, fora deste espelho)
 
 'use strict';
 
