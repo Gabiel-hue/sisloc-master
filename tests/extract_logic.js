@@ -82,18 +82,18 @@ function splitSections(ds) {
   const detM = ds.match(/h1\.\s*Detalhamento\s+de\s+Projeto/i);
   const area = detM ? ds.slice(detM.index) : ds;
   // v35.6.5: nova alternativa "\n\s*#\d+\s*[-–]" cobre cabeçalhos #N - Título sem h3.
-  return area.split(/(?=(?:REQUISITO\s*:?\s*#{0,2}\s*\d+|h3\.\s*Requisito(?:\s+Funcional)?\s*:?\s*#{0,2}\s*\d+|h3\.\s*#{1,2}\s*\d+|\n\s*#\d+\s*[-–]))/i);
+  return area.split(/(?=(?:REQUISITO\s*:?\s*#{0,2}\s*\d+|h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?#{0,2}\s*\d+|h3\.\s*#{1,2}\s*\d+|\n\s*#\d+\s*[-–]))/i);
 }
 
 function getReqIdFromSection(sec) {
-  const m = sec.match(/(?:REQUISITO|Requisito)(?:\s+Funcional)?\s*:?\s*#{0,2}\s*(\d+)/i)
+  const m = sec.match(/Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?#{0,2}\s*(\d+)/i)
          || sec.match(/^h3\.\s*#{1,2}\s*(\d+)/im)
          || sec.match(/^\s*#(\d+)\s*[-–]/);  // v35.6.5: fallback estrito (sem flag m)
   return m ? m[1] : null;
 }
 
 function getReqSectionBounds(ds, reqId) {
-  const reDetalhe = new RegExp('h3\\.\\s*Requisito\\s*:?\\s*#{0,2}\\s*' + reqId + '\\b', 'i');
+  const reDetalhe = new RegExp('h3\\.\\s*Requisito[\\s:]*(?:Requisito\\s+)?(?:Funcional\\s+)?#{0,2}\\s*' + reqId + '\\b', 'i');
   let startM = ds.match(reDetalhe);
   if (!startM) {
     const reH3Hash = new RegExp('h3\\.\\s*#{1,2}\\s*' + reqId + '\\b', 'i');
@@ -115,7 +115,7 @@ function getReqSectionBounds(ds, reqId) {
   const start = startM.index;
   const afterStart = ds.slice(start + startM[0].length);
   // v35.6.5: nextM também aceita "\n\s*#\d+\s*[-–]" como delimitador de fim
-  const nextM = afterStart.match(/(?:\n\s*h3\.\s*Requisito\s*:?\s*#{0,2}\s*\d+|\n\s*REQUISITO\s*:?\s*#{0,2}\s*\d+|\n\s*h3\.\s*#{1,2}\s*\d+|\n\s*#\d+\s*[-–])/i);
+  const nextM = afterStart.match(/(?:\n\s*h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?#{0,2}\s*\d+|\n\s*REQUISITO\s*:?\s*#{0,2}\s*\d+|\n\s*h3\.\s*#{1,2}\s*\d+|\n\s*#\d+\s*[-–])/i);
   const end = nextM ? start + startM[0].length + nextM.index : ds.length;
   return { start: start, end: end };
 }
