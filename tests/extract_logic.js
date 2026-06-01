@@ -13,7 +13,7 @@
 //   - buildPlaceholderMap(ds): [{id, title}]
 //   - analyze(ds): [{id, rules: string[]}]  (pipeline completo)
 //
-// Versão espelhada: v35.6.8 (parser inalterado desde v35.6.7 — v35.6.8 mexeu só no renumerador da caixinha, fora deste espelho)
+// Versão espelhada: v35.10.1 (parser ganhou suporte a ## RNX prefixo em v35.10.1; resto inalterado desde v35.6.7)
 
 'use strict';
 
@@ -29,12 +29,13 @@ function extractRules(sec) {
 
   const rules = [];
   // v35.6.6: aceita "RN" puro quando vem seguido de espaço(s) + hífen/endash (lookahead)
-  const parts = rulesMatch[1].split(/\n(?=\s*(?:\([^)]*\)\s*)?(?:h\d+\.\s*)?\*?(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN(?:\s?[A-Z0-9]+(?:\.\d+)?|(?=\s+[-–])))\*?\b)/i);
+  const parts = rulesMatch[1].split(/\n(?=\s*(?:#{1,2}\s+)?(?:\([^)]*\)\s*)?(?:h\d+\.\s*)?\*?(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN(?:\s?[A-Z0-9]+(?:\.\d+)?|(?=\s+[-–])))\*?\b)/i);
 
   parts.forEach(function (part) {
     let t = part.trim().replace(/^h\d+\.\s*/, '');
     if (!t) return;
     if (t.startsWith('|')) return;
+    t = t.replace(/^#{1,2}\s+/, '');
     t = t.replace(/^\([^)]*\)\s*/, '');
     // v35.6.6: strip de markdown também aceita RN puro (sem código)
     t = t.replace(/^\*(RN(?:\s?[A-Z0-9]+(?:\.\d+)?)?)\*/i, '$1')
