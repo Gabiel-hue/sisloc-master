@@ -1,0 +1,171 @@
+---
+
+h1. Requisitos Novos
+
+NA
+
+---
+
+h1. Requisitos Impactados
+
+#31168 - Parâmetro Geral - Nota Fiscal
+Implementar tag's na "Máscara para geração das informações sobre".
+
+#31468 - Gerar Fatura de Locação
+Validar tag's inseridas na geração da fatura.
+
+#32340 - Gerar NOTA FISCAL de REMESSA DE LOCAÇÃO
+Validar tag's inseridas na geração da NF de Remessa de Equipamentos.
+
+#32341 - Gerar NOTA FISCAL na DEVOLUÇÃO DE LOCAÇÃO
+Validar tag's inseridas na geração da NF de Devolução de Equipamentos.
+
+
+#32827 - Gerar NF PEDIDO DE VENDA
+Validar tag's inseridas na geração da NF do Pedido de Venda.
+
+#79 - Manter Dados NOTA FISCAL
+Gravar as informações
+
+---
+
+h1. Detalhamento de Projeto
+
+h3. REQUISITO: #31168 - Parâmetro Geral - Nota Fiscal 
+
+*O QUE DEVE SER FEITO:*
+
+1) Implementar no Parâmetro Geral de Nota Fiscal, em *Mascará para geração das informações sobre:* as tags's conforme abaixo:
+
+* Aba Ficha Loc -> Fatura: [ATENDENTE/VENDEDOR_FICHA]
+* Aba Ficha Loc -> Remessa: [TIPO_FRETE]
+* Aba Ficha Loc -> Devolução: [TIPO_FRETE], [ATENDENTE/VENDEDOR_FICHA]
+* Aba Venda -> NF: [TIPO_FRETE], [ATENDENTE/VENDEDOR_VENDA], [PEDIDO_VENDA]
+
+2) Implementar no botão *Mascara* os hint's para as novas tag's:
+
+* [TIPO_FRETE] – Busca o tipo de frete gravado na Remessa de Equipamentos, Devolução de Equipamentos ou Pedido de Venda.
+* [ATENDENTE/VENDEDOR_FICHA] – Busca o atendente/vendedor vinculado a Ficha de Locação.
+* [ATENDENTE/VENDEDOR_VENDA] - Busca o atendente/vendedor vinculado ao Pedido de Venda.
+* [PEDIDO_VENDA] - Busca o número do Pedido de Venda
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+
+(Alterar) "2462 - Parâmetro Máscara para geração das informações sobre":https://internos.app.sisloc.com/sisloc.reqsearch/regradenegocio/form?id=f8800730-1989-11f1-80da-6f40338893ef
+
+Em Parâmetros > aba Nota Fiscal > "Máscara para geração das informações sobre", será gerado as informações de cada processo, conforme máscaras abaixo:
+
+
+*Ficha Loc -> Fatura*
+
+* Tag [ATENDENTE/VENDEDOR_FICHA] – Busca o atendente/vendedor vinculado a Ficha de Locação.
+
+
+*Fich Loc->Remessa*
+
+* Tag [ENDERECO_ENTREGA_REFERENCIA]: Corresponde ao campo nf.referen_entrega
+* Tag Telefone [CONTATO_TELEFONE]: Corresponde ao campo nf.tl_entrega
+* Tag [SUBSTITUICAO]: Corresponde aos dados do equipamento substituído (quando houver)
+* Tag [TIPO_FRETE] – Busca o tipo de frete gravado na Remessa de Equipamentos, Devolução de Equipamentos ou Pedido de Venda.
+
+
+*Fich Loc->Devolução*
+
+* Tag [ENDERECO_ENTREGA_REFERENCIA]: Corresponde ao campo nf.referen_entrega
+* Tag Telefone [CONTATO_TELEFONE]: Corresponde ao campo nf.tl_entrega
+* Tag [SUBSTITUICAO]: Corresponde aos dados do equipamento substituído (quando houver)
+* Tag [TIPO_FRETE]: Busca o tipo de frete gravado na Devolução de Equipamentos
+
+
+*Venda*
+
+* Tag [TIPO_FRETE] – Busca o tipo de frete gravado no Pedido de Venda.
+* Tag [ATENDENTE/VENDEDOR_VENDA] - Busca o atendente/vendedor vinculado ao Pedido de Venda.
+* Tag [PEDIDO_VENDA] - Busca o número do Pedido de Venda
+
+---
+
+
+h3. REQUISITO: #31468 - Gerar Fatura de Locação
+
+
+*O QUE DEVE SER FEITO:*
+Validar na geração da fatura, as tags incluídas no Parâmetro geral-> Nota Fiscal-> "Máscara para geração das informações sobre"-> aba Ficha Loc -> Fatura.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+NA 
+
+---
+
+h3. REQUISITO: #32340 - Gerar NOTA FISCAL de REMESSA DE LOCAÇÃO
+
+*O QUE DEVE SER FEITO:*
+Validar na geração da NF, as tags incluídas no Parâmetro geral-> Nota Fiscal-> "Máscara para geração das informações sobre"-> aba Fich Loc->Remessa.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+NA
+
+---
+
+h3. REQUISITO: #32341 - Gerar NOTA FISCAL na DEVOLUÇÃO DE LOCAÇÃO
+
+*O QUE DEVE SER FEITO:*
+Validar na geração da NF, as tags incluídas no Parâmetro geral-> Nota Fiscal-> "Máscara para geração das informações sobre"-> aba Fich Loc->Devolução.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+
+---
+
+h3. REQUISITO: #32827 - Gerar NF PEDIDO DE VENDA
+
+*O QUE DEVE SER FEITO:*
+Validar na geração da NF, as tags incluídas no Parâmetro geral-> Nota Fiscal-> "Máscara para geração das informações sobre"-> aba Venda.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+
+*CONDIÇÕES/REGRAS:*
+NA
+
+---
+
+h3. REQUISITO: #79 - Manter Dados NOTA FISCAL
+
+*O QUE DEVE SER FEITO:*
+Gravar na aba Complemento, campo *Observação*, as informações geradas pelas tags configuradas no Parâmetro geral-> Nota Fiscal-> "Máscara para geração das informações sobre", quando a NF for gerada a partir dos processos:
+
+* Ficha Loc -> Fatura
+* Ficha Loc -> Remessa
+* Ficha Loc -> Devolução
+* Venda -> NF
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+NA
+
+---
+
+*CENÁRIOS*
+
+*Dado* que o Parâmetro Geral de Nota Fiscal está com a "Máscara para geração das informações sobre" configurado
+*E* definido para a aba Ficha Loc -> Fatura a tag *[ATENDENTE/VENDEDOR_FICHA]*
+*Quando* o usuário executar a geração da fatura de locação
+*Então* o sistema deve criar a nota com as informações de atendente ou vendedor, vinculado a ficha de locação
+*E* gravar as informações no campo observação da aba 4 da nota fiscal.
+
+*Observação:* Mesmo cenário deve ocorrer para demais origens citdas nesta demanda.
