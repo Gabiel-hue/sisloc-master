@@ -20,7 +20,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { extractRules, splitSections, getReqIdFromSection } = require('./extract_logic.js');
+const { extractRules, splitSections, getReqIdFromSection, analyze } = require('./extract_logic.js');
 
 // ============================================================
 // HELPERS (espelham o bookmarklet v35.10.1)
@@ -216,11 +216,12 @@ test('Bug B — "# RN1 – Título" (nível 1 do Textile, # único) também dete
 
 test('Bug B — fixture real 199075 detecta a regra do #40803', () => {
   const desc = fs.readFileSync(path.join(__dirname, 'fixtures/199075.txt'), 'utf8');
-  const sec = splitSections(desc)[0]; // só tem 1 req
-  assertEq(getReqIdFromSection(sec), '40803');
-  const rules = extractRules(sec);
-  assertEq(rules.length, 1, 'deveria detectar exatamente 1 regra');
-  assertEq(rules[0].title, 'RNX - Exportar para Excel');
+  // analyze() filtra seções sem ID (pré-detalhamento) e retorna só requisitos válidos
+  const result = analyze(desc);
+  assertEq(result.length, 1, 'deveria detectar exatamente 1 requisito');
+  assertEq(result[0].id, '40803');
+  assertEq(result[0].rules.length, 1, 'deveria ter exatamente 1 regra');
+  assertEq(result[0].rules[0], 'RNX - Exportar para Excel');
 });
 
 test('Bug B — content da regra detectada preserva o que vem depois', () => {
@@ -295,8 +296,81 @@ test('Não-regressão — fixture 206262 (req #32549) gera Textile correto', () 
 });
 
 // ============================================================
-// RUN
+// GRUPO 7 — Bug C (getReqSectionBounds com cabeçalho "Requisito: Requisito Funcional #N")
 // ============================================================
+// Demanda 199075 — quando bounds retorna null, o handler de Atualizar Links
+// cai no else final ("Nenhum link encontrado"). Era bug latente, agora real.
+
+const { getReqSectionBounds } = require('./extract_logic.js');
+
+test('Bug C — bounds acha req #40803 em cabeçalho "Requisito: Requisito Funcional"', () => {
+  const desc = fs.readFileSync(path.join(__dirname, 'fixtures/199075.txt'), 'utf8');
+  const bounds = getReqSectionBounds(desc, '40803');
+  assert(bounds !== null, 'bounds deveria existir (não retornar null)');
+  assert(bounds.start > 0, 'start deveria ser > 0');
+  assert(bounds.end > bounds.start, 'end > start');
+});
+
+test('Bug C — bounds acha em formato 9 (Requisito Funcional #N) sem duplicação', () => {
+  const desc = 'h1. Detalhamento de Projeto\n\nh3. Requisito Funcional #36213 - Algo\n\n*CONDIÇÕES/REGRAS:*\nRN1 - X';
+  const bounds = getReqSectionBounds(desc, '36213');
+  assert(bounds !== null, 'bounds deveria existir');
+  const slice = desc.slice(bounds.start, bounds.end);
+  assert(slice.includes('#36213'), 'fatia deveria conter o cabeçalho do requisito');
+});
+
+test('Bug C — bounds segue achando formatos antigos (não-regressão)', () => {
+  const casos = [
+    { desc: 'h1. Detalhamento\n\nh3. Requisito #54 - X\n\nconteudo', id: '54' },
+    { desc: 'h1. Detalhamento\n\nh3. Requisito: #54 - X\n\nconteudo', id: '54' },
+    { desc: 'h1. Detalhamento\n\nh3. Requisito: ##54 - X\n\nconteudo', id: '54' },
+    { desc: 'h1. Detalhamento\n\nh3. ##54 - X\n\nconteudo', id: '54' },
+  ];
+  casos.forEach((c, i) => {
+    const b = getReqSectionBounds(c.desc, c.id);
+    assert(b !== null, 'caso ' + i + ' falhou: bounds null');
+  });
+});
+
+test('Bug C — bounds delimita end corretamente quando próximo req também usa formato duplicado', () => {
+  const desc = [
+    'h1. Detalhamento de Projeto',
+    '',
+    'h3. Requisito: Requisito Funcional #40803 - A',
+    '',
+    '*CONDIÇÕES/REGRAS:*',
+    'RN1 - regra A',
+    '',
+    'h3. Requisito: Requisito Funcional #40804 - B',
+    '',
+    '*CONDIÇÕES/REGRAS:*',
+    'RN1 - regra B'
+  ].join('\n');
+  const b1 = getReqSectionBounds(desc, '40803');
+  assert(b1 !== null, 'bounds do primeiro req deveria existir');
+  const slice = desc.slice(b1.start, b1.end);
+  assert(slice.includes('#40803'), 'fatia deveria começar no #40803');
+  assert(!slice.includes('#40804'), 'fatia NÃO deveria invadir o req seguinte');
+  assert(slice.includes('RN1 - regra A'), 'fatia deveria conter a regra A');
+  assert(!slice.includes('RN1 - regra B'), 'fatia NÃO deveria conter a regra B');
+});
+
+test('Bug C — análise ponta-a-ponta da 199075: do bounds ao Atualizar Links', () => {
+  const desc = fs.readFileSync(path.join(__dirname, 'fixtures/199075.txt'), 'utf8');
+  const bounds = getReqSectionBounds(desc, '40803');
+  assert(bounds !== null, 'bounds!=null pré-requisito');
+  const secao = desc.slice(bounds.start, bounds.end);
+
+  // Replicando o handler: pegar regrasBlock
+  const regrasM = secao.match(/(?:\*\s*)?(?:CONDI[CÇ][OÕ]ES\/REGRAS|REGRAS)(?:\s*\*)?\s*:?\s*\*?(?:\s*\n|\s+(?=RN|["\u201C\u201D]|\(|\*))[\s\S]*$/i);
+  assert(regrasM, 'regrasM deveria casar a seção CONDIÇÕES/REGRAS');
+  const block = secao.slice(regrasM.index);
+
+  const r = applyAtualizarLinks(block, 'RNX', 'RN2', 'http://x/issues/40803#rn2');
+  assert(r.matched, 'Atualizar Links deveria casar a regra "## RNX – Exportar"');
+  assert(r.depois.includes('## "RN2 – Exportar para Excel":'),
+    'esperava o ## preservado e link Textile correto — recebi: ' + r.depois);
+});
 
 console.log('\n━━━━ v35.10.1 — Aspas + ## RNX ━━━━\n');
 if (fail === 0) {
