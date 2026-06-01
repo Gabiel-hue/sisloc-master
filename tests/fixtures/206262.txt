@@ -1,0 +1,190 @@
+h1. Requisitos Impactados
+
+##31186
+- Novo parâmetro interno para habilitar o *"Demonstrativo Estruturado"*
+##98848
+- Gerar o novo modelo *"Demonstrativo Estruturado"* ao visualizar a fatura de locação
+##32549
+- Gerar o novo modelo *"Demonstrativo Estruturado"* ao emitir o demonstrativo de faturamento
+##31468
+- Gerar o novo modelo *"Demonstrativo Estruturado"* ao gerar a fatura de locação
+##40514
+- Gerar o novo modelo *"Demonstrativo Estruturado"* ao emitir o histórico nas movimentações da Ficha de Locação
+##53009
+- - Gerar o novo modelo *"Demonstrativo Estruturado"* ao Consistir atual na tela de Faturas a gerar
+  
+---
+
+h1. Detalhamento de Projeto
+
+*Como*  Diretor da Locadora,
+*Quero* Que o Sisloc contemple o modelo de Demonstrativo de Faturamento já utilizado pela Empresa há algum tempo,
+*Para* Permanecer com o mesmo modelo de demonstrativo, já conhecido pelos usuários e clientes que recebem o demontrativo para validação.
+
+---
+
+h2. REQUISITO: ##31186
+
+*O QUE DEVE SER FEITO:*
+Em *Parâmetros Internos* _(Unit: uWappParametroInternoDoForm)_, criar novo parâmetro:
+* *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*
+
+Com o novo parâmetro interno marcado, o comportamento do Relatório de Demonstrativo de Faturamento, gerado em:
+
+- Emitir Demonstrativo de Faturamento
+- Visualizar Fatura
+- Gerar Fatura de Locação
+- Emitir relatório na movimentação
+- Consistir Atual Faturas a Gerar
+
+Irá considerar somente o novo modelo, dispensando validações e parâmetros construídos para o demonstrativo de faturamento, como por exemplo "Desconto por dias parados"
+
+> O novo demonstrativo irá validar somente os parâmetros *"Título Demonstrativo de faturamento"* e *"Imprimir itens zerados"*.
+
++HINT+
+<pre>
+Demonstrativo personalizado (#206262)
+Ao habilitar este, será impresso um relatório estrutura, onde considera-se apenas locação simples, ou seja, valor x quantidade.
+Por se tratar de um demonstrativo simplificado, este não considera todas as validações e parâmetros construídos para o demonstrativo de faturamento, como por exemplo "Desconto por dias parados".
+Obs.: Dos parâmetros gerais, são considerados: "Título Demonstrativo de faturamento" e "Imprimir itens zerados".
+</pre>
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+O novo _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_* será implementado _desmarcado_
+
+*CONDIÇÕES/REGRAS:*
+RNx - Parâmetro - Demonstrativo Estruturado
+Ao habilitar este, será impresso um relatório estrutura, onde considera-se apenas locação simples, ou seja, valor x quantidade.
+Por se tratar de um demonstrativo simplificado, este não considera todas as validações e parâmetros construídos para o demonstrativo de faturamento, como por exemplo "Desconto por dias parados".
+Obs.: Dos parâmetros gerais, são considerados: "Título Demonstrativo de faturamento" e "Imprimir itens zerados".
+
+---
+
+h2. NOVO MODELO DE DEMONSTRATIVO DE FATURAMENTO - *DEMONSTRATIVO ESTRUTURADO*
+
+O novo modelo deve ser criado para contemplar o parâmetro interno *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, contém as mesmas informações do _Demonstrativo Padrão_ do Sisloc (ListFatLoc), porém, terá disposições diferentes dessas informações:
+
+!clipboard-202604091156-nvsud.png!
+---
+
+h2. Demonstrativo de Faturamento
+
+|_. Contrato |   fich_loc / _NUMERO |_. CNPJ/CPF | pessoa / nr_cnpj_pessoa |
+|_. Cliente |  pessoa / nm_pessoa |_. IE |  pessoa / nr_ies_pessoa |
+|_. End. Entrega | fich_loc / nm_entrega (Endereço) |_. Data base fat. ant. | 'primeira fatura' ou  fich_loc / dt_fau_ficha|
+|_. Período |  fich_loc / cd_calcfat - dt_fai_ficha - dt_faf_ficha |_. Data base fat. | fich_loc / dt_fat_ficha |
+|_. Faturar para | fich_loc / cd_pessoa_fat |_. Fat. mínimo | fich_loc / vl_minimo_locacao |
+|_. End. Fatura | fich_loc / cd_pessoa_fat (endereço) |_. Vencimento | fich_loc / dt_fav_ficha |
+
+h3. OBRA: fich_loc / nm_entrega (Nome do Local de Obra)
+
+|_. Equipamento |_. Quantidade |_. Período |_. Tempo |_. Valor Unitário |_. Valor Total |
+
+*Remessa: fl_remessa / NUMERO | Data: fl_remessa / dt_cobranca*
+
+| ARCO ABERTO MULTI | 100 | 17/10 a 15/11 | 30 D | 2,55 | 229,50 |
+| POSTE 2000        | 250 | 17/10 a 15/11 | 30 D | 7,25 | 1.812,50 |
+| POSTE 3000        | 300 | 17/10 a 15/11 | 30 D | 10,67 | 4.268,00 |
+
+*Total da remessa (fl_remessa / NUMERO):* *R$ 6.310,00*
+---
+*Remessa: fl_remessa / NUMERO | Data: 17/10/2025*
+
+| ARCO ABERTO MULTI | 100 | 17/10 a 15/11 | 30 D | 2,55 | 229,50 |
+| POSTE 2000        | 250 | 17/10 a 15/11 | 30 D | 7,25 | 1.812,50 |
+| POSTE 3000        | 300 | 17/10 a 15/11 | 30 D | 10,67 | 4.268,00 |
+
+*Total da remessa (fl_remessa / NUMERO):* *R$ 6.310,00*
+---
+*Total Locação:* *R$ 12.620,00*
+
+h3. VALORES REFERENTE SERVIÇOS EXTRAS
+
+|_. QTDE |_. Código |_. Data Base |_. Descrição |_. Valor total |
+
+*Total ref. serviços extras:* R$ 0,00
+
+h2. TOTAL GERAL: R$ 12.620,00
+
+---
+
+h2. REQUISITO: ##32549 
+
+*O QUE DEVE SER FEITO:*
+Quando marcado o novo _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao emitir o relatório de demonstrativo de faturamento, deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+RNx - Gerar Fatura - *"Demonstrativo Estruturado"*
+Quando marcado o _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao emitir o relatório de demonstrativo de faturamento, deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+
+---
+
+h2. REQUISITO: #98848
+
+*O QUE DEVE SER FEITO:*
+Quando marcado o novo _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao executar o processo da Ficha de Locação *'Visualizar Fatura'* _(Visualizar Fatura/BM (TLocVisuazalizarFaturaBMDoProcess)_, deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+RNx - Visualizar Fatura - *"Demonstrativo Estruturado"*
+Quando marcado o _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao executar o processo da Ficha de Locação *'Visualizar Fatura'*, deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+
+---
+
+h2. REQUISITO: ##31468
+
+*O QUE DEVE SER FEITO:*
+Quando marcado o novo _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao executar o processo da Ficha de Locação *'Gerar Fatura'* _(TFichLocFaturaDoProcess)_, deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+RNx - Gerar Fatura - *"Demonstrativo Estruturado"*
+Quando marcado o _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao executar o processo da Ficha de Locação *'Gerar Fatura'*, deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+
+---
+
+h2. REQUISITO: ##40514
+
+*O QUE DEVE SER FEITO:*
+Quando marcado o novo _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao emitir o relatório de _"Histórico"_, nas +movimentações+ da Ficha de Locação, deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+RNx - Emitir relatório - *"Demonstrativo Estruturado"*
+Quando marcado o _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao emitir o relatório de _"Histórico"_, nas movimentações da Ficha de Locação, deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+
+---
+
+h2. REQUISITO: ##53009
+
+*O QUE DEVE SER FEITO:*
+Quando marcado o novo _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao executar o processo *'Consistir atual'* na tela de Faturas à gerar (Form: TFrmGeraFaturas / Unit: GeraFaturas), deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+RNx - Consistir Atual - *"Demonstrativo Estruturado"*
+Quando marcado o _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao executar o processo *'Consistir atual'* na tela de Faturas à gerar, deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+---
+
+*+CENÁRIOS:+*
+
+*Cenário 1 – Demonstrativo da Faturamento com Parâmetro interno *+Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado+ marcado*
+*Dado que* Gerado o relatório de Demonstrativo de faturamento, por um dos processos:
+- Emitir Demonstrativo de Faturamento
+- Visualizar Fatura
+- Gerar Fatura de Locação
+- Emitir relatório na movimentação
+- Consistir Atual Faturas a Gerar
+*Quando* <O parâmetro interno *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_* está marcado
+*Então* O Sisloc irá gerar o novo modelo criado
