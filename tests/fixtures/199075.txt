@@ -1,0 +1,16 @@
+h1. Detalhamento de Projeto
+
+h3. Requisito: Requisito Funcional #40803 – Emitir relatório Ordem de Manutenção
+
+*O QUE DEVE SER FEITO:*
+
+* No Relatório de Ordem de Manutenção com Horas Trabalhadas por Técnico disponível em _Manutenção\Relatório de ordem de mautenção_, incluir a opção "Exportar para Excel" no cabeçalho de ações do relatório.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+n/a
+
+*CONDIÇÕES/REGRAS:*
+
+## RNX – Exportar para Excel
+* A exportação contempla todas as informações exibidas no relatório gerado.
+* A funcionalidade é disponível para usuários que possuem permissão para impressão/visualização do relatório.
