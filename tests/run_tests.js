@@ -87,6 +87,18 @@ const SYNTHETIC = [
     descricao: 'link textile [#1234] não deve casar',
     texto: 'h3. #100 - A\n\nVer [#1234] - relacionado\n\n*Regras*\nNA',
     esperado_ids: ['100']
+  },
+  {
+    nome: 'sintetico/requisito_minusculo_meio_frase_nao_casa',
+    descricao: 'v35.11.2: "no requisito #N abaixo" em linguagem natural NÃO deve criar seção fantasma',
+    texto: 'h1. Detalhamento de Projeto\n\nh3. REQUISITO: ##48\n\n*O QUE DEVE SER FEITO:*\nVer regras no seção do requisito #31446 abaixo, responsável.\n\n*REGRAS:*\nNA\n\n---\n\nh3. REQUISITO: ##31446\n\n*REGRAS:*\nNA',
+    esperado_ids: ['48', '31446']
+  },
+  {
+    nome: 'sintetico/h2_REQUISITO_preservado',
+    descricao: 'v35.11.2: cabeçalho h2. REQUISITO ##N (caso #206262) ainda detectado',
+    texto: 'h1. Detalhamento de Projeto\n\nh2. REQUISITO: ##400\n\n*REGRAS:*\nNA\n\n---\n\nh2. REQUISITO: ##500\n\n*REGRAS:*\nNA',
+    esperado_ids: ['400', '500']
   }
 ];
 
