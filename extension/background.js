@@ -57,12 +57,16 @@ function extractVersion(body) {
 
 /**
  * Mostra um badge temporário no ícone (3s).
+ *
+ * Os .catch(() => {}) silenciam o erro "No tab with id: X" que acontece quando
+ * a aba é fechada (ou descartada pelo Chrome) DURANTE os 3 segundos do badge.
+ * É esperado e inofensivo — o badge já estaria invisível de qualquer jeito.
  */
 function flashBadge(tabId, text, color) {
-  chrome.action.setBadgeText({ text, tabId });
-  chrome.action.setBadgeBackgroundColor({ color, tabId });
+  chrome.action.setBadgeText({ text, tabId }).catch(() => {});
+  chrome.action.setBadgeBackgroundColor({ color, tabId }).catch(() => {});
   setTimeout(() => {
-    chrome.action.setBadgeText({ text: "", tabId });
+    chrome.action.setBadgeText({ text: "", tabId }).catch(() => {});
   }, 3000);
 }
 
