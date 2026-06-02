@@ -6,14 +6,15 @@
 // Os regexes devem ser IDÊNTICOS aos da versão minificada.
 //
 // Funções exportadas:
-//   - extractRules(sec): [{title, content}]
+//   - extractRules(sec): [{title, content, _reqsearch?}]
 //   - splitSections(ds): string[]  (já aplicando o corte por h1. Detalhamento de Projeto)
 //   - getReqIdFromSection(sec): string | null
 //   - getReqSectionBounds(ds, reqId): {start, end} | null
 //   - buildPlaceholderMap(ds): [{id, title}]
 //   - analyze(ds): [{id, rules: string[]}]  (pipeline completo)
 //
-// Versão espelhada: v35.10.1 (parser ganhou suporte a ## RNX prefixo em v35.10.1; resto inalterado desde v35.6.7)
+// Versão espelhada: v35.11.1 (parser ganhou suporte ao formato reqsearch em v35.11
+//                              e o fix de propagação do _reqsearch no ruleMappings em v35.11.1)
 
 'use strict';
 
@@ -29,13 +30,43 @@ function extractRules(sec) {
 
   const rules = [];
   // v35.6.6: aceita "RN" puro quando vem seguido de espaço(s) + hífen/endash (lookahead)
-  const parts = rulesMatch[1].split(/\n(?=\s*(?:#{1,2}\s+)?(?:\([^)]*\)\s*)?(?:h\d+\.\s*)?\*?(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN(?:\s?[A-Z0-9]+(?:\.\d+)?|(?=\s+[-–])))\*?\b)/i);
+  // v35.11: 3ª alternativa fora do escopo do \b cobre o padrão reqsearch
+  //         ["\u201C\u201D](?:\d+|RN[A-Z0-9]*)\s*[-–]
+  //         (dígitos puros, RN-placeholder, ou RN vazio seguido de hífen)
+  //         A trava de URL reqsearch fica no forEach (regex completo abaixo).
+  const parts = rulesMatch[1].split(/\n(?=\s*(?:#{1,2}\s+)?(?:\([^)]*\)\s*)?(?:h\d+\.\s*)?(?:\*?(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN(?:\s?[A-Z0-9]+(?:\.\d+)?|(?=\s+[-–])))\*?\b|["\u201C\u201D](?:\d+|RN[A-Z0-9]*)\s*[-–]))/i);
 
   parts.forEach(function (part) {
     let t = part.trim().replace(/^h\d+\.\s*/, '');
     if (!t) return;
     if (t.startsWith('|')) return;
     t = t.replace(/^#{1,2}\s+/, '');
+
+    // v35.11: Branch reqsearch — ANTES do strip de parênteses (o "(Verbo)" é parte
+    // do que vamos guardar em _reqsearch.verbo pro Atualizar Links recompor).
+    // Aceita 3 grupos de identificador antigo (antes do " - "):
+    //   - dígitos puros: "2462"
+    //   - RN-placeholder: "RNX", "RNx", "RNX1", "RNA", "RN5", etc.
+    //   - RN vazio: só "RN"
+    // Trava de segurança: a URL precisa conter "reqsearch" literal pra entrar no branch.
+    const reReqsearch = /^(\([^)]*\)\s*)?["\u201C\u201D]((?:\d+|RN[A-Z0-9]*))\s*[-–]\s*([^\n\r]+?)["\u201C\u201D]:(https?:\/\/[^\s]*reqsearch[^\s]+)/i;
+    const mReq = t.match(reReqsearch);
+    if (mReq) {
+      const verbo = (mReq[1] || '').trim();    // ex: "(Alterar)" ou ""
+      const oldId = mReq[2];                    // ex: "2462" ou "RNX" ou "RN"
+      const titulo = mReq[3].trim();            // ex: "Parâmetro Máscara..."
+      const urlReq = mReq[4];                   // URL reqsearch original
+      const lines = t.split('\n');
+      let content = lines.slice(1).join('\n').trim();
+      content = content.replace(/\n\s*---[\s\S]*$/g, '').trim();
+      rules.push({
+        title: 'RN - ' + titulo,
+        content: content,
+        _reqsearch: { verbo: verbo, oldId: oldId, oldUrl: urlReq }
+      });
+      return;
+    }
+
     t = t.replace(/^\([^)]*\)\s*/, '');
     // v35.6.6: strip de markdown também aceita RN puro (sem código)
     t = t.replace(/^\*(RN(?:\s?[A-Z0-9]+(?:\.\d+)?)?)\*/i, '$1')
