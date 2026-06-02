@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Sisloc Master",
-  "version": "35.6",
+  "version": "35.11.1",
   "description": "Lê demandas do Redmine, extrai regras de negócio e grava nos requisitos. Auto-atualiza via GitHub a cada execução. Com rollback de Gravar e Atualizar Links.",
   "icons": {
     "16": "icons/icon16.png",
