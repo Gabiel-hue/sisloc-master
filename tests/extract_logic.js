@@ -13,8 +13,20 @@
 //   - buildPlaceholderMap(ds): [{id, title}]
 //   - analyze(ds): [{id, rules: string[]}]  (pipeline completo)
 //
-// Versão espelhada: v35.11.1 (parser ganhou suporte ao formato reqsearch em v35.11
-//                              e o fix de propagação do _reqsearch no ruleMappings em v35.11.1)
+// Versão espelhada: v35.11.3
+// Mudanças desde a v35.11.1:
+//   v35.11.2 — Fix do split do dSections: 1ª alternativa "REQUISITO ##N" ancorada em
+//              início de linha com "(?<=^|\n)\s*(?:h\d+\.\s*)?" pra não casar menções
+//              tipo "no requisito #N abaixo" em linguagem natural (caso #196911).
+//              "h\d+\." opcional preserva suporte a "h2. REQUISITO ..." (caso #206262).
+//   v35.11.3 — 2 fixes no extractRules pra eliminar lixo no título de regras link-only:
+//              (1) linkPostMatch: "[^\s]+\s*" trocado por "\S+\s+" — exige whitespace
+//                  obrigatório após o URL pra ativar o branch "título depois do link".
+//                  Antes, '"RN10":URL' (sem nada após) cedia o último char do URL pro
+//                  grupo (.+?)$ e virava "RN10 - 0".
+//              (2) Normalização final: replace incondicional '$1 - ' trocado por callback
+//                  condicional que só adiciona ' - ' se há texto remanescente após o RN.
+//                  Antes, 'RN10' puro virava 'RN10 -' (hífen trailing artificial).
 
 'use strict';
 
@@ -79,7 +91,10 @@ function extractRules(sec) {
       let rawTitle = lines[0].trim();
 
       // v35.5.9 — título DEPOIS do link: "RN1":URL - Título
-      const linkPostMatch = lines[0].match(/^["\u201C\u201D](RN\s?[A-Z0-9]+(?:\.\d+)?)["\u201C\u201D]:https?:\/\/[^\s]+\s*[-–—:]?\s*(.+?)$/i);
+      // v35.11.2 — \s+ obrigatório após URL (era \s*). Antes, com [^\s]+\s*[-–—:]?\s*(.+?)$
+      //            o regex disparava errado em "RN10":URL (sem título) porque o engine
+      //            cedia o último char do URL pro grupo (.+?) — virava "RN10 - 0".
+      const linkPostMatch = lines[0].match(/^["\u201C\u201D](RN\s?[A-Z0-9]+(?:\.\d+)?)["\u201C\u201D]:https?:\/\/\S+\s+[-–—:]?\s*(.+?)$/i);
       if (linkPostMatch) {
         rawTitle = linkPostMatch[1].trim() + ' - ' + linkPostMatch[2].trim();
       }
@@ -92,7 +107,11 @@ function extractRules(sec) {
 
       rawTitle = rawTitle.replace(/\*/g, '')
                          // v35.6.6: normalização do título aceita RN puro
-                         .replace(/^(RN(?:\s?[A-Z0-9]+(?:\.\d+)?)?)\s*[-–:]?\s*/i, '$1 - ')
+                         // v35.11.2: " - " só é adicionado quando HÁ texto após o RN.
+                         //           Antes, '$1 - ' incondicional virava "RN10" → "RN10 -"
+                         //           (com hífen trailing feio mesmo sem título adicional).
+                         .replace(/^(RN(?:\s?[A-Z0-9]+(?:\.\d+)?)?)\s*[-–:]?\s*(.*)$/i,
+                                  function (_, rn, rest) { return rest ? rn + ' - ' + rest : rn; })
                          .replace(/:$/, '')
                          .trim();
 
@@ -113,7 +132,10 @@ function splitSections(ds) {
   const detM = ds.match(/h1\.\s*Detalhamento\s+de\s+Projeto/i);
   const area = detM ? ds.slice(detM.index) : ds;
   // v35.6.5: nova alternativa "\n\s*#\d+\s*[-–]" cobre cabeçalhos #N - Título sem h3.
-  return area.split(/(?=(?:REQUISITO\s*:?\s*#{0,2}\s*\d+|h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?#{0,2}\s*\d+|h3\.\s*#{1,2}\s*\d+|\n\s*#\d+\s*[-–]))/i);
+  // v35.11.2: 1ª alternativa ancorada em início de linha c/ "(?<=^|\n)\s*(?:h\d+\.\s*)?"
+  //           pra não casar menções tipo "no requisito #N abaixo" em linguagem natural.
+  //           "h\d+\.\s*" opcional preserva suporte a "h2. REQUISITO ..." (fixture 206262).
+  return area.split(/(?=(?:(?<=^|\n)\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*#{0,2}\s*\d+|h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?#{0,2}\s*\d+|h3\.\s*#{1,2}\s*\d+|\n\s*#\d+\s*[-–]))/i);
 }
 
 function getReqIdFromSection(sec) {
