@@ -18,7 +18,7 @@
       {
         "id": "151937",
         "rules": [
-          "RN1 - 1",
+          "RN1",
           "RN2 - Atividade no Rotas"
         ]
       },
@@ -38,15 +38,15 @@
       {
         "id": "151938",
         "rules": [
-          "RN1 - 1",
+          "RN1",
           "RN2 - Atividade no Rotas"
         ]
       },
       {
         "id": "50",
         "rules": [
-          "RN99 - 9",
-          "RN100 - 0"
+          "RN99",
+          "RN100"
         ]
       },
       {
@@ -58,14 +58,14 @@
       {
         "id": "151939",
         "rules": [
-          "RN1 - 1",
+          "RN1",
           "RN2 - Atividade no Rotas"
         ]
       },
       {
         "id": "31225",
         "rules": [
-          "RN54 - 4",
+          "RN54",
           "RN55 - Atividade Rotas"
         ]
       },
@@ -78,21 +78,21 @@
       {
         "id": "151940",
         "rules": [
-          "RN1 - 1",
+          "RN1",
           "RN2 - Atividade no Rotas"
         ]
       },
       {
         "id": "151941",
         "rules": [
-          "RN1 - 1",
-          "RN2 - 2"
+          "RN1",
+          "RN2"
         ]
       },
       {
         "id": "151942",
         "rules": [
-          "RN1 - 1"
+          "RN1"
         ]
       }
     ]
@@ -288,8 +288,39 @@
       }
     ]
   },
+  "190033": {
+    "length": 5328,
+    "requirements": [
+      {
+        "id": "31168",
+        "rules": [
+          "RN - Parâmetro Máscara para geração das informações sobre"
+        ]
+      },
+      {
+        "id": "31468",
+        "rules": []
+      },
+      {
+        "id": "32340",
+        "rules": []
+      },
+      {
+        "id": "32341",
+        "rules": []
+      },
+      {
+        "id": "32827",
+        "rules": []
+      },
+      {
+        "id": "79",
+        "rules": []
+      }
+    ]
+  },
   "196911": {
-    "length": 15598,
+    "length": 15919,
     "requirements": [
       {
         "id": "31156",
@@ -309,20 +340,16 @@
         "rules": []
       },
       {
-        "id": "31446",
-        "rules": []
-      },
-      {
         "id": "49",
         "rules": [
-          "RN10 - 0"
+          "RN10"
         ]
       },
       {
         "id": "31446",
         "rules": [
-          "RN1 - 1",
-          "RN2 - 2"
+          "RN1",
+          "RN2"
         ]
       },
       {
@@ -330,20 +357,68 @@
         "rules": []
       },
       {
-        "id": "31454",
-        "rules": []
-      },
-      {
         "id": "47",
         "rules": [
-          "RN14 - e"
+          "RN14"
         ]
       },
       {
         "id": "31454",
         "rules": [
-          "RN1 - 1",
-          "RN2 - 2"
+          "RN1",
+          "RN2"
+        ]
+      }
+    ]
+  },
+  "199075": {
+    "length": 630,
+    "requirements": [
+      {
+        "id": "40803",
+        "rules": [
+          "RNX - Exportar para Excel"
+        ]
+      }
+    ]
+  },
+  "206262": {
+    "length": 9292,
+    "requirements": [
+      {
+        "id": "31186",
+        "rules": [
+          "RNx - Parâmetro - Demonstrativo Estruturado"
+        ]
+      },
+      {
+        "id": "32549",
+        "rules": [
+          "RNx - Gerar Fatura - \"Demonstrativo Estruturado\""
+        ]
+      },
+      {
+        "id": "98848",
+        "rules": [
+          "RNx - Visualizar Fatura - \"Demonstrativo Estruturado\""
+        ]
+      },
+      {
+        "id": "31468",
+        "rules": [
+          "RNx - Gerar Fatura - \"Demonstrativo Estruturado\""
+        ]
+      },
+      {
+        "id": "40514",
+        "rules": [
+          "RNx - Emitir relatório - \"Demonstrativo Estruturado\""
+        ]
+      },
+      {
+        "id": "53009",
+        "rules": [
+          "RNx - Consistir Atual - \"Demonstrativo Estruturado\""
         ]
       }
     ]
