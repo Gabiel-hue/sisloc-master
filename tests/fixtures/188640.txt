@@ -1,0 +1,294 @@
+---
+
+h1. Requisitos Impactados
+
+REQUISITO: 897 - Abrir dados NFSe
+Exibir informações relativas a IBS/CBS
+
+REQUISITO: 864 - Emitir NOTA FISCAL
+Validar na emissão as informações relativas a IBS/CBS
+
+REQUISITO: 841 - Manter Dados NOTA FISCAL
+Implementar campos IBS/CBS na aba Impostos e Valores da NFCOM
+
+REQUISITO: 31468 - Gerar Fatura
+Buscar informações realativas a IBS/CBS na NFCOM
+
+* REQUISITO: 208996 - Obter IBS e CBS
+Definir cálculos do IBS e CBS
+
+* REQUISITO: 31468 - Gerar Fatura de Locação
+Calcular os impostos IBS e CBS, na geração da NFCom
+
+* REQUISITO: 60592 - Abrir dados NFSe
+Implementar campos das seções IBS e CBS
+
+* REQUISITO: 79 - Manter Dados NOTA FISCAL
+Totalizar os valores do IBS e CBS na NFCom
+
+* REQUISITO: 31059 - Emitir NOTA FISCAL
+Enviar a Sefaz a NFCom contemplando valores de IBS e CBS
+
+---
+
+h1. Detalhamento de Projeto
+
+h3. REQUISITO: 208996 - Obter IBS e CBS
+
+*O QUE DEVE SER FEITO:*
+
+1) Implementar os cálculos do IBS UF, IBS Mun e CBS, para os documentos fiscais eletrônicos no Sisloc (NF-e, NFCom, CT-e e NFS-e), os cálculos serão definidos a partir do *Cclasstrib*, vinculado ao produto/serviço ou CFOP.
+
+2) Validar as regras:
+
+* "RNX1 - Cálculo para Tributação Integral do IBS e CBS":http://net1/redmine/issues/208996/#RNX1
+* "RNX2 - Cálculo para Redução de Alíquota do IBS e CBS":http://net1/redmine/issues/208996/#RNX2
+* "RNX3 - Cálculo para Diferimento  IBS e CBS":http://net1/redmine/issues/208996/#RNX3
+
+*CONVERSOR*
+NA
+
+*CONDIÇÕES/REGRAS*
+
+(Criar) "RNX1 - Cálculo para Tributação Integral do IBS e CBS":http://net1/redmine/issues/208996/#RNX1
+O sistema deverá calcular o IBS e a CBS com base no valor da operação, considerando o modelo de tributação por fora e não cumulativo:
+* A tributação integral será atribuída a partir do *Cclasstrib* (Código de Classificação do Tributo) definido na operação.
+* A base de cálculo será composta pelo valor da operação acrescido de encargos e deduzido de descontos incondicionais.
+* O IBS e a CBS deverão ser calculados individualmente, aplicando suas respectivas alíquotas sobre a base de cálculo.
+* A alíquota efetiva de IBS e CBS na *Tributação Integral*, é obtida através dos percentuais definidos no cadastro de empresa.
+
+Cálculo: 
+Base de Cálculo = Vl.operação + Acréscimos (frete, seguro, encargos cobrados do cliente) - Descontos Incondicionais
+Valor IBS = Base de Cálculo × Alíquota IBS UF
+Valor IBS = Base de Cálculo × Alíquota IBS Mun
+Valor CBS = Base de Cálculo × Alíquota CBS
+
+(Criar) "RNX2 - Cálculo para Redução de Alíquota do IBS e CBS":http://net1/redmine/issues/208996/#RNX2
+O sistema deverá calcular o IBS e a CBS com base no valor da operação, considerando o modelo de tributação por fora e não cumulativo:
+* A base de cálculo deverá seguir a regra geral da tributação integral.
+* A redução deverá ser aplicada sobre a alíquota padrão do tributo, de acordo com o *Cclasstrib* (Código de Classificação do Tributo) definido na operação.
+* O cálculo da alíquota reduzida deverá considerar o percentual de redução informado.
+* O IBS e a CBS deverão ser calculados individualmente com base na alíquota reduzida.
+* A alíquota efetiva de IBS e CBS quando há *Redução de Alíquota*, é obtida através dos percentuais definidos no cadastro de empresa, aplicando a ele o fator referente ao percentual de redução de alíquota.
+
+*Cálculo da alíquota efetiva de IBS UF com redução de alíquota*
+% Aliq. Efetiva IBS = Alíq. IBS UF × (1 - %RedAliq /100)
+
+*Cálculo da alíquota efetiva de IBS Mun com redução de alíquota*
+% Aliq. Efetiva IBS = Alíq. IBS Mun × (1 - %RedAliq /100)
+
+*Cálculo da alíquota efetiva de CBS com redução de alíquota*
+% Aliq. Efetiva CBS = Aliq. CBS × (1 - %RedAliq /100)
+
+*Cálculo dos valores de IBS e CBS, após nova alíquota obtida:
+Base de Cálculo = Vl.operação + Acréscimos (frete, seguro, encargos cobrados do cliente) - Descontos Incondicionais
+Valor IBS UF = Base de Cálculo × Alíquota efetiva IBS UF
+Valor IBS Mun = Base de Cálculo × Alíquota efetiva IBS Mun
+Valor CBS = Base de Cálculo × Alíquota efetiva CBS
+
+(Criar) "RNX3 - Cálculo para Diferimento  IBS e CBS":http://net1/redmine/issues/208996/#RNX3
+O diferimento consiste no adiamento do recolhimento do tributo para uma etapa posterior da cadeia.
+O sistema deverá calcular o IBS e a CBS com base no valor da operação, considerando o modelo de tributação por fora e não cumulativo:
+* A base de cálculo deverá seguir a regra geral da tributação integral.
+* O valor do imposto deverá ser apurado normalmente antes da aplicação do diferimento.
+* O diferimento deverá ser aplicado sobre o valor do imposto devido, conforme percentual definido, de acordo com o *Cclasstrib* (Código de Classificação do Tributo) definido na operação.
+* O valor diferido não deverá compor o montante a recolher na operação corrente.
+
+*Cálculo do valor diferido IBS UF:*
+Valor diferido = Base de Cálculo x (%IBS UF/100) x (%Dif/100)
+*Observação:* Em caso de preenchimento do grupo de redução a alíquota utilizada deverá ser a Alíquota Efetiva.
+
+*Cálculo do valor diferido IBS Mun:*
+Valor diferido = Base de Cálculo x (%IBS Mun/100) x (%Dif/100)
+*Observação:* Em caso de preenchimento do grupo de redução a alíquota utilizada deverá ser a Alíquota Efetiva.
+
+*Cálculo do valor diferido CBS:*
+Valor diferido = Base de Cálculo x (%CBS/100) x (%Dif/100)
+*Observação:* Em caso de preenchimento do grupo de redução a alíquota utilizada deverá ser a Alíquota Efetiva.
+
+(Criar) "RNX4 - Cálculo para Tributação Regular IBS e CBS":http://net1/redmine/issues/208996/#RNX3
+O sistema deverá calcular o IBS e a CBS considerando a tributação regular como base, mesmo quando houver aplicação de benefícios fiscais.
+
+A tributação regular deverá representar o valor do imposto sem qualquer benefício.
+Este cálculo deverá ser realizado sempre que houver grupo de benefício fiscal informado na operação.
+
+*Cálculo para Tributação Regular:
+
+Base de Cálculo = Vl.operação + Acréscimos (frete, seguro, encargos cobrados do cliente) - Descontos Incondicionais
+Valor IBS = Base de Cálculo × Alíquota IBS UF
+Valor IBS = Base de Cálculo × Alíquota IBS Mun
+Valor CBS = Base de Cálculo × Alíquota CBS
+
+---
+
+h3. REQUISITO: 31468 - Gerar Fatura de Locação
+
+*O QUE DEVE SER FEITO*
+
+1)Buscar informações realativas a IBS/CBS na NFCOM, ao executar o processo "Gerar Fatura", na Ficha de Locação. Deverá o Sisloc adotar para as abas de IBS e cBS na nota, os códigos e cálculos, conforme hierarquia:
+
+* Adotar o preenchimento e cálculo das informações inseridas na seção Tributação IBS/CBS, do cadastro de Serviço, se houver, caso contrário;
+* Adotar o preenchimento e cálculo das informações inseridas na seção Tributação IBS/CBS do CFOP.
+
+2) Quando for gerada uma NFCom, Sisloc deverá validar os cálculos do IBS (UF e Mun) e CBS, a partir do *Cclassitrib*. Desta forma os cálculos seguirão uma das regras:
+
+* "RNX1 - Cálculo para Tributação Integral do IBS e CBS":http://net1/redmine/issues/208996/#RNX1
+* "RNX2 - Cálculo para Redução de Alíquota do IBS e CBS":http://net1/redmine/issues/208996/#RNX2
+* "RNX3 - Cálculo para Diferimento  IBS e CBS":http://net1/redmine/issues/208996/#RNX3
+
+*CONVERSOR*
+NA
+
+*CONDIÇÕES/REGRAS*
+NA
+
+---
+
+h3. REQUISITO: 60592 - Abrir dados NFSe
+
+*O QUE DEVE SER FEITO:*
+
+1) Vincular no processo "Abrir dados da NFse", os seguintes campos nas informações relativas à NFCom:
+
+*ABA IBS*
++*Classificação e Base de Cálculo*+
+|NOME DO CAMPO|VALOR|CAMPO CORRESPONDENTE XML NFCom|
+|Situação Tributária do IBS|Será preenchido a partir da configuração realizada no cadastro de CFOP/Serviço|CST|
+|Classificação Tributária IBS|Busca o valor registrado no CFOP/Serviço|cClassTrib|
+|Base de cálculo IBS |Valor do total serviço|vBC|
+
+*IBS UF*
+|% do IBS Estadual |Valor buscado das confiurações da empresa|pIBSUF|  
+|% da redução de alíquota do IBS|Busca o % definido na tabela CClass|pRedAliq|
+|% da alíquota efetiva IBS|Busca o % definido na tabela CClass|pAliqEfet|
+|Valor IBS |Valor calculado BC IBS *  %IBS Estadual|vIBS|
+|Valor do IBS devolvido|Valor a ser preenchido pelo usuário|vDevTrib|
+
+*Tributação Regular*
+|NOME DO CAMPO|VALOR|CAMPO CORRESPONDENTE XML NFCom|
+|Situação Tributária IBS|Valor informado pelo usuário|CSTReg|
+|Classificação Tributária IBS regular|Valor informado pelo usuário|cClassTribReg|
+|% do IBS regular|Valor informado pelo usuário|pAliqEfetRegIBSUF|
+|Valor do IBS regular|Valor calculado pelo Sisloc|vTribRegIBSUF|
+
+*Diferimento*
+|NOME DO CAMPO|VALOR|CAMPO CORRESPONDENTE XML NFCom|
+|% Diferimento do IBS|Valor a ser informado pelo usuário|pDif|
+|Valor diferimento IBS|Valor calculado pelo Sisloc|vDif|
+
+*ABA CBS*
+*Classificação e Base de Cálculo*
+|NOME DO CAMPO|VALOR|CAMPO CORRESPONDENTE XML NFCom|
+|Situação Tributária do CBS|Será preenchido a partir da configuração realizada no cadastro de CFOP/Serviço|CST|
+|Classificação Tributária CBS|Busca o valor registrado no CFOP/Serviço|cClassTrib|
+|Base de cálculo CBS |Valor do total serviço|vBC|
+|% do CBS |Valor buscado das confiurações da empresa|pIBSUF|  
+|% da redução de alíquota do CBS|Busca o % definido na tabela CClass|pRedAliq|
+|% da alíquota efetiva CBS|Busca o % definido na tabela CClass|pAliqEfet|
+|Valor CBS |Valor calculado BC IBS *  %IBS Estadual|vIBS|
+|Valor do CBS devolvido|Valor a ser preenchido pelo usuário|vDevTrib|
+
+*Tributação Regular*
+|NOME DO CAMPO|VALOR|CAMPO CORRESPONDENTE XML NFCom|
+|Situação Tributária CBS|Valor informado pelo usuário|CSTReg|
+|Classificação Tributária CBS regular|Valor informado pelo usuário|cClassTribReg|
+|% do CBS regular|Valor informado pelo usuário|pAliqEfetRegIBSUF|
+|Valor do CBS regular|Valor calculado pelo Sisloc|vTribRegIBSUF|
+
+*Diferimento*
+|NOME DO CAMPO|VALOR|CAMPO CORRESPONDENTE XML NFCom|
+|% Diferimento do CBS|Valor a ser informado pelo usuário|pDif|
+|Valor diferimento CBS|Valor calculado pelo Sisloc|vDif|
+ 
+2) Implementar:
+
+*ABA IBS*
+*Classificação e Base de Cálculo*
+|NOME DO CAMPO|VALOR|CAMPO CORRESPONDENTE XML NFCom|
+*IBS MUNICIPAL*
+|% do IBS Municipal|Valor buscado das confiurações da empresa|pIBSMun|  
+|% da redução de alíquota do IBS|Busca o % definido na tabela CClass|pRedAliq|
+|% da alíquota efetiva IBS|Busca o % definido na tabela CClass|pAliqEfet|
+|Valor IBS |Valor calculado BC IBS *  %IBS Estadual|vIBS|
+|Valor do IBS devolvido|Valor a ser preenchido pelo usuário|vDevTrib|
++*Observação: Implementar abaixo da seção IBS UF*+
+
+*Estorno de IBS*
+|NOME DO CAMPO|VALOR|CAMPO CORRESPONDENTE XML NFCom|
+|Valor IBS Estornado|Informado pelo usuário|vIBSEstCred|
+
+*ABA CBS*
+*CBS em compras governamental*
+|NOME DO CAMPO|VALOR|CAMPO CORRESPONDENTE XML NFCom|
+|% aliq. CBS| Busca valor IBS CBS Empresa/Central de cálculo|pAliqCBS|
+|Valor CBS|Valor calculado BC IBS/CBS x % aliq. CBS|vTribCBS|
+
+*Estorno de CBS*
+|NOME DO CAMPO|VALOR|CAMPO CORRESPONDENTE XML NFCom|
+|Valor CBS Estornado|Informado pelo usuário|vCBSEstCred|
+
+*IMPORTANTE*
+
+1) O "Cclass" e "CST" serão atribuídos ao IBS e CBS a partir do CFOP selecionado, no entanto, qualquer alteração realizada nestas informações na aba IBS, não serão refletidas na aba CBS, sendo necessário a alteração de forma manual. No envio da NFCom a Sefaz deverá ser exibida a seguinte mensagem, se as informações de "Cclass" e "CST" forem diferentes nas abas IBS e CBS:
+
+Os campos "Código da Situação Tributária do IBS/CBS (CST)" e "Código de Classificação Tributária" devem possuir os mesmos códigos para aba IBS e CBS. Ajustar estas informações e refazer o envio da NFCom.
+
+
+2) As base de cálculo devem ser a mesma para CBS e IBS. A alteração de valores na base de cálculo da aba IBS, não será refletida na aba CBS, sendo necessário a alteração de forma manual. No envio da NFCom, a Sefaz deverá ser exibida a seguinte mensagem, se a base de cálculo for diferente nas abas IBS e CBS:
+
+A base para cálculo do IBS e CBS devem ser iguais. Ajustar estas informações e refazer o envio da NFCom.
+
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+NA
+
+---
+h3. REQUISITO: 79 - Manter Dados NOTA FISCAL
+
+*O QUE DEVE SER FEITO*
+
+1) Implementar na aba Impostos e Valores da Nota fiscal de comunicação eletrônica, modelo 62, a totalização dos valores lançados a partir do requisito #60592.
+2) Os valores serão totalizados nos campos IBS UF, IBS Mun e CBS.
+3) Acrescer ao valor de faturamento, o valor de IBS + CBS, o valor deverá ser registrado na tag vTotDFe da NFCom.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+
+(Criar) "RNX1 - NFCom - Base de cálculo do IBS e CBS":http://net1/redmine/issues/79/#RNX1
+A base de cálculo para IBS e para CBS é única, calculada conforme fórmula:
+( + ) vProd
+( + ) vServ
+( + ) vFrete
+( + ) vSeg
+( + ) vOutro
+( + ) vII
+( - ) vDesc
+( - ) vPIS
+( - ) vCOFINS
+( - ) vICMS
+( - ) vICMSUFDest
+( - ) vFCP
+( - ) vFCPUFDest
+( - ) vICMSMono
+( - ) vISSQN
+( + ) vIS
+
+---
+
+h3. REQUISITO: 31059 - Emitir NOTA FISCAL
+
+*Implementar*
+
+* Validar a emissão da NFCom com os campos IBS e CBS.
+* Validar na emissão da NFCom a contabilização dos novos impostos IBS e CBS
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+NA
