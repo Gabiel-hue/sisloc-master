@@ -230,7 +230,6 @@
       {
         "id": "57751",
         "rules": [
-          "RN18 - 1",
           "RN 57751.1 - Espelho da NF com emissão Terceiros"
         ]
       },
@@ -284,6 +283,38 @@
       },
       {
         "id": "75583",
+        "rules": []
+      }
+    ]
+  },
+  "188640": {
+    "length": 13259,
+    "requirements": [
+      {
+        "id": "208996",
+        "rules": [
+          "RNX1 - Cálculo para Tributação Integral do IBS e CBS",
+          "RNX2 - Cálculo para Redução de Alíquota do IBS e CBS",
+          "RNX3 - Cálculo para Diferimento  IBS e CBS",
+          "RNX4 - Cálculo para Tributação Regular IBS e CBS"
+        ]
+      },
+      {
+        "id": "31468",
+        "rules": []
+      },
+      {
+        "id": "60592",
+        "rules": []
+      },
+      {
+        "id": "79",
+        "rules": [
+          "RNX1 - NFCom - Base de cálculo do IBS e CBS"
+        ]
+      },
+      {
+        "id": "31059",
         "rules": []
       }
     ]
@@ -492,6 +523,9 @@
     "version_baseline": "v35.6.5",
     "gerado_em": "2026-05-29",
     "descricao": "Snapshot do output esperado de cada fixture. Mudanças neste arquivo = regressão (se inesperada) ou feature nova (se intencional, com bump de versão).",
-    "como_atualizar": "Quando uma mudança intencional alterar o output (ex: novo formato suportado), rodar 'node tests/run_tests.js --update-snapshots' e revisar o diff antes de commitar."
+    "como_atualizar": "Quando uma mudança intencional alterar o output (ex: novo formato suportado), rodar 'node tests/run_tests.js --update-snapshots' e revisar o diff antes de commitar.",
+    "versao_bookmarklet": "v35.11.4",
+    "data_atualizacao": "2026-06-03",
+    "observacao": "Atualizado para v35.11.4: nova entry 188640 + refresh de 175029 (snapshot bugado da v35.11.2/3 com RN18 - 1 corrigido). 14 fixtures catalogadas."
   }
 }
