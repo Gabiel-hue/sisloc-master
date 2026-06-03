@@ -413,6 +413,23 @@
       }
     ]
   },
+  "204289": {
+    "length": 3529,
+    "requirements": [
+      {
+        "id": "31505",
+        "rules": [
+          "RNXX - Permitir substituição pelo mesmo equipamento na Devolução"
+        ]
+      },
+      {
+        "id": "95698",
+        "rules": [
+          "RNXX - Permitir substituição pelo mesmo equipamento na Substituição Rápida"
+        ]
+      }
+    ]
+  },
   "206262": {
     "length": 9292,
     "requirements": [
