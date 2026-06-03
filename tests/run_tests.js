@@ -99,6 +99,20 @@ const SYNTHETIC = [
     descricao: 'v35.11.2: cabeçalho h2. REQUISITO ##N (caso #206262) ainda detectado',
     texto: 'h1. Detalhamento de Projeto\n\nh2. REQUISITO: ##400\n\n*REGRAS:*\nNA\n\n---\n\nh2. REQUISITO: ##500\n\n*REGRAS:*\nNA',
     esperado_ids: ['400', '500']
+  },
+  {
+    nome: 'sintetico/regras_em_prosa_nao_casa',
+    descricao: 'v35.11.4: "regras:"/"regra:" em prosa NÃO casa o marker (caso #188640: "Validar as regras:")',
+    // Sem o lookbehind, o rulesMatch pegava "regras:" da prosa e o split criava "RN10 -" da sublist
+    texto: 'h1. Detalhamento de Projeto\n\nh3. REQUISITO: 700 - Algo\n\n2) Validar as regras:\n\n* "RN99 - Fantasma":http://example.com/#RN99\n\n*CONDIÇÕES/REGRAS*\n\nRN1 - Real\nProsa da regra real.',
+    esperado_ids: ['700']
+  },
+  {
+    nome: 'sintetico/regras_em_prosa_com_sublist_188640',
+    descricao: 'v35.11.4: caso real #188640 simplificado — prosa "regras:" + sublist sumário + CONDIÇÕES/REGRAS real',
+    // Antes da v35.11.4: 2 "RN" extraídas (a sublist fantasma + a real). Depois: só 1.
+    texto: 'h1. Detalhamento de Projeto\n\nh3. REQUISITO: 800 - Obter Dados\n\n*O QUE DEVE SER FEITO:*\n\n1) Implementar.\n\n2) Validar as regras:\n\n* "RNX1 - Sumário":http://example.com/#RNX1\n\n*CONVERSOR*\nNA\n\n*CONDIÇÕES/REGRAS*\n\n(Criar) "RNX1 - Real":http://example.com/#RNX1\nProsa da regra real.',
+    esperado_ids: ['800']
   }
 ];
 
