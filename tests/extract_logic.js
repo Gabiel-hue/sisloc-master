@@ -13,7 +13,7 @@
 //   - buildPlaceholderMap(ds): [{id, title}]
 //   - analyze(ds): [{id, rules: string[]}]  (pipeline completo)
 //
-// Versão espelhada: v35.11.3
+// Versão espelhada: v35.11.4
 // Mudanças desde a v35.11.1:
 //   v35.11.2 — Fix do split do dSections: 1ª alternativa "REQUISITO ##N" ancorada em
 //              início de linha com "(?<=^|\n)\s*(?:h\d+\.\s*)?" pra não casar menções
@@ -27,6 +27,16 @@
 //              (2) Normalização final: replace incondicional '$1 - ' trocado por callback
 //                  condicional que só adiciona ' - ' se há texto remanescente após o RN.
 //                  Antes, 'RN10' puro virava 'RN10 -' (hífen trailing artificial).
+//   v35.11.4 — Fix no rulesMatch do extractRules: ancora-lookbehind "(?<=^|\n)\s*" antes
+//              do marker pra impedir que 'regras:'/'regra:' em prosa case como início
+//              do bloco de regras. Caso real #188640: "2) Validar as regras:" antes do
+//              "*CONDIÇÕES/REGRAS*" real fazia o body capturado incluir a sublist sumário
+//              (* "RNX1":URL, * "RNX2":URL, * "RNX3":URL) + CONVERSOR + CONDIÇÕES/REGRAS
+//              + as 4 regras reais (Criar) → o split entregava 5 regras (RNX1 duplicado)
+//              e o req #208996 ficava com 1 caixinha fantasma a mais. Bug latente análogo
+//              do v35.11.2 (REQUISITO em prosa). Bônus: fixture #175029 #57751 também
+//              corrigida — agora extrai só RN 57751.1, sem a fantasma RN18 da sublist
+//              "* Inutilizar regras:" da prosa.
 
 'use strict';
 
@@ -37,7 +47,7 @@ function extractRules(sec) {
     .replace(/\u2076/g, '6').replace(/\u2077/g, '7').replace(/\u2078/g, '8')
     .replace(/\u2079/g, '9');
 
-  const rulesMatch = sec.match(/(?:\*\s*)?(?:CONDI[CÇ][OÕ]ES\/REGRAS|REGRAS)\s*\*?\s*:?\s*\*?\s+([\s\S]*?)(?=\n\s*\*?(?:REQUISITO|Requisito|h\d+\.\s*Requisito)|\n\s*h3\.\s*#{1,2}\s*\d+|\n\s*---|$)/i);
+  const rulesMatch = sec.match(/(?<=^|\n)\s*(?:\*\s*)?(?:CONDI[CÇ][OÕ]ES\/REGRAS|REGRAS)\s*\*?\s*:?\s*\*?\s+([\s\S]*?)(?=\n\s*\*?(?:REQUISITO|Requisito|h\d+\.\s*Requisito)|\n\s*h3\.\s*#{1,2}\s*\d+|\n\s*---|$)/i);
   if (!rulesMatch) return [];
 
   const rules = [];
