@@ -1,0 +1,48 @@
+h1. Detalhamento de Projeto
+ 
+*#31505 – Definir Substituição na Devolução*
+- Adequar o processo de ‘Substituição’ da tela de Devolução para para validar e aplicar as regras de substituição conforme a configuração estabelecida no parâmetro “Permitir substituir apenas pelo mesmo equipamento”.
+*#95698 – Manter Dados Substituição Rápida de Equipamentos Locados*
+- Ajustar a funcionalidade de 'Substituição Rápida' para validar e aplicar as regras de substituição conforme a configuração estabelecida no parâmetro “Permitir substituir apenas pelo mesmo equipamento”.
+ 
+---
+
+h2. Requisito #31505 – Definir Substituição na Devolução
+
+*O QUE DEVE SER FEITO:*
+Os processos de *Substituição na tela de Devolução* deve ser ajustado para *permitir a substituição pelo mesmo equipamento*, desde que todas as condições abaixo sejam atendidas:
+* O parâmetro geral “Permitir substituir apenas pelo mesmo equipamento” _(Parâmetros Gerais → Ficha de Locação → Subaba Substituição)_ esteja *desabilitado*;
+* Na aba *6 – Substituição* do _Cadastro do Produto_ , exista *ao menos um registro de substituição* com a flag “Substituição” habilitada;
+* Para esse registro, *não exista equipamento de substituição informado*.
+
+Atendidas essas condições, o sistema deve permitir que, durante o processo de substituição — tanto pela Devolução quanto pela Substituição Rápida — o usuário selecione o mesmo equipamento que está sendo substituído.
+
+!clipboard-202602201137-2q0kp.png!
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+N/a
+
+*CONDIÇÕES/REGRAS:*
+*RNXX: Permitir substituição pelo mesmo equipamento na Devolução*
+Durante o processo de Substituição na tela de Devolução, o sistema valida o parâmetro geral “Permitir substituir apenas pelo mesmo equipamento”:
+Quando o parâmetro estiver desabilitado, e existir configuração de substituição na aba 6 – Substituição do Cadastro do Produto com a flag “Substituição” habilitada sem equipamento de substituição informado, o sistema permite que o próprio equipamento devolvido seja selecionado como equipamento de substituição.
+ 
+---
+
+h2. Requisito *#95698 – Manter Dados Substituição Rápida de Equipamentos Locados*
+
+*O QUE DEVE SER FEITO:*
+O processo de *Substituição Rápida de Equipamentos* deve ser ajustado para *permitir a substituição pelo mesmo equipamento*, desde que todas as condições abaixo sejam atendidas:
+* O parâmetro geral “Permitir substituir apenas pelo mesmo equipamento” _(Parâmetros Gerais → Ficha de Locação → Subaba Substituição)_ esteja *desabilitado*;
+* Na aba *6 – Substituição* do _Cadastro do Produto_ , exista *ao menos um registro de substituição* com a flag “Substituição” habilitada;
+* Para esse registro, *não exista equipamento de substituição informado*.
+
+Atendidas essas condições, o sistema deve permitir que, durante o processo de substituição, o usuário selecione o mesmo equipamento que está sendo substituído.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+N/a
+
+*CONDIÇÕES/REGRAS:*
+*RNXX: Permitir substituição pelo mesmo equipamento na Substituição Rápida*
+Durante a execução da funcionalidade de Substituição Rápida de Equipamentos Locados, o sistema valida o parâmetro geral “Permitir substituir apenas pelo mesmo equipamento”.
+Quando o parâmetro estiver desabilitado, e existir configuração de substituição válida no Cadastro do Produto (aba 6 – Substituição) com a flag “Substituição” habilitada sem equipamento de substituição previamente definido, o sistema disponibiliza o próprio equipamento original como opção válida para substituição.
