@@ -13,7 +13,7 @@
 //   - buildPlaceholderMap(ds): [{id, title}]
 //   - analyze(ds): [{id, rules: string[]}]  (pipeline completo)
 //
-// Versão espelhada: v35.11.4
+// Versão espelhada: v35.11.5
 // Mudanças desde a v35.11.1:
 //   v35.11.2 — Fix do split do dSections: 1ª alternativa "REQUISITO ##N" ancorada em
 //              início de linha com "(?<=^|\n)\s*(?:h\d+\.\s*)?" pra não casar menções
@@ -37,6 +37,17 @@
 //              do v35.11.2 (REQUISITO em prosa). Bônus: fixture #175029 #57751 também
 //              corrigida — agora extrai só RN 57751.1, sem a fantasma RN18 da sublist
 //              "* Inutilizar regras:" da prosa.
+//   v35.11.5 — Fix do padrão "h2. Requisito *#N – Título*" (asterisco entre "Requisito"
+//              e "#" — negrito Textile do título começa antes do "#"). Caso real #204289:
+//              req #95698 não aparecia na caixinha porque "h2. Requisito *#95698 – ..."
+//              não casava nenhum dos regex de detecção de seção. 7 ajustes em 4 funções:
+//              (1) splitSections — \*?\s* nas 2 alts (REQUISITO e h3. Requisito).
+//              (2) getReqIdFromSection — \*?\s* antes do #{0,2}.
+//              (3) getReqSectionBounds — \*?\s* em reDetalhe, reAny e nas 2 alts do
+//                  nextM. Bônus no nextM 2ª alt: (?:h\d+\.\s*)? opcional pra alinhar com
+//                  o splitSections (sem isso, gravação no req anterior vazaria pro req
+//                  h2./h1. seguinte porque o nextM só detectava h3.).
+//              Mesma técnica das v35.11.2/v35.11.4 (lookbehind + tolerância opcional).
 
 'use strict';
 
@@ -145,18 +156,18 @@ function splitSections(ds) {
   // v35.11.2: 1ª alternativa ancorada em início de linha c/ "(?<=^|\n)\s*(?:h\d+\.\s*)?"
   //           pra não casar menções tipo "no requisito #N abaixo" em linguagem natural.
   //           "h\d+\.\s*" opcional preserva suporte a "h2. REQUISITO ..." (fixture 206262).
-  return area.split(/(?=(?:(?<=^|\n)\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*#{0,2}\s*\d+|h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?#{0,2}\s*\d+|h3\.\s*#{1,2}\s*\d+|\n\s*#\d+\s*[-–]))/i);
+  return area.split(/(?=(?:(?<=^|\n)\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*\*?\s*#{0,2}\s*\d+|h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*\d+|h3\.\s*#{1,2}\s*\d+|\n\s*#\d+\s*[-–]))/i);
 }
 
 function getReqIdFromSection(sec) {
-  const m = sec.match(/Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?#{0,2}\s*(\d+)/i)
+  const m = sec.match(/Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(\d+)/i)
          || sec.match(/^h3\.\s*#{1,2}\s*(\d+)/im)
          || sec.match(/^\s*#(\d+)\s*[-–]/);  // v35.6.5: fallback estrito (sem flag m)
   return m ? m[1] : null;
 }
 
 function getReqSectionBounds(ds, reqId) {
-  const reDetalhe = new RegExp('h3\\.\\s*Requisito[\\s:]*(?:Requisito\\s+)?(?:Funcional\\s+)?#{0,2}\\s*' + reqId + '\\b', 'i');
+  const reDetalhe = new RegExp('h3\\.\\s*Requisito[\\s:]*(?:Requisito\\s+)?(?:Funcional\\s+)?\\*?\\s*#{0,2}\\s*' + reqId + '\\b', 'i');
   let startM = ds.match(reDetalhe);
   if (!startM) {
     const reH3Hash = new RegExp('h3\\.\\s*#{1,2}\\s*' + reqId + '\\b', 'i');
@@ -171,14 +182,14 @@ function getReqSectionBounds(ds, reqId) {
     if (mH) startM = { index: offset + mH.index, 0: mH[0] };
   }
   if (!startM) {
-    const reAny = new RegExp('(?:REQUISITO|Requisito)\\s*:?\\s*#{0,2}\\s*' + reqId + '\\b', 'i');
+    const reAny = new RegExp('(?:REQUISITO|Requisito)\\s*:?\\s*\\*?\\s*#{0,2}\\s*' + reqId + '\\b', 'i');
     startM = ds.match(reAny);
   }
   if (!startM) return null;
   const start = startM.index;
   const afterStart = ds.slice(start + startM[0].length);
   // v35.6.5: nextM também aceita "\n\s*#\d+\s*[-–]" como delimitador de fim
-  const nextM = afterStart.match(/(?:\n\s*h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?#{0,2}\s*\d+|\n\s*REQUISITO\s*:?\s*#{0,2}\s*\d+|\n\s*h3\.\s*#{1,2}\s*\d+|\n\s*#\d+\s*[-–])/i);
+  const nextM = afterStart.match(/(?:\n\s*h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*\d+|\n\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*\*?\s*#{0,2}\s*\d+|\n\s*h3\.\s*#{1,2}\s*\d+|\n\s*#\d+\s*[-–])/i);
   const end = nextM ? start + startM[0].length + nextM.index : ds.length;
   return { start: start, end: end };
 }
