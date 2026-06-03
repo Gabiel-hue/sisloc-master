@@ -113,6 +113,16 @@ const SYNTHETIC = [
     // Antes da v35.11.4: 2 "RN" extraídas (a sublist fantasma + a real). Depois: só 1.
     texto: 'h1. Detalhamento de Projeto\n\nh3. REQUISITO: 800 - Obter Dados\n\n*O QUE DEVE SER FEITO:*\n\n1) Implementar.\n\n2) Validar as regras:\n\n* "RNX1 - Sumário":http://example.com/#RNX1\n\n*CONVERSOR*\nNA\n\n*CONDIÇÕES/REGRAS*\n\n(Criar) "RNX1 - Real":http://example.com/#RNX1\nProsa da regra real.',
     esperado_ids: ['800']
+  },
+  {
+    nome: 'sintetico/h2_requisito_asterisco_204289',
+    descricao: 'v35.11.5: "h2. Requisito *#N – Título*" (asterisco do negrito Textile entre Requisito e #) — caso #204289 req #95698',
+    // Antes da v35.11.5, o "*" entre "Requisito" e "#" quebrava todos os regex de detecção
+    // de seção (split, getReqId, getReqSectionBounds). Resultado: req #95698 não aparecia
+    // na caixinha. Bônus testado pelo run_tests: o nextM agora detecta h2. (não só h3.),
+    // então o bloco do #31505 termina ANTES do #95698 (sem vazamento de gravação).
+    texto: 'h1. Detalhamento de Projeto\n\nh2. Requisito #31505 – Definir\n\n*CONDIÇÕES/REGRAS:*\n*RN1: Regra A*\nProsa A.\n\n---\n\nh2. Requisito *#95698 – Manter Dados*\n\n*CONDIÇÕES/REGRAS:*\n*RN1: Regra B*\nProsa B.',
+    esperado_ids: ['31505', '95698']
   }
 ];
 
