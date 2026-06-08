@@ -123,6 +123,46 @@ const SYNTHETIC = [
     // então o bloco do #31505 termina ANTES do #95698 (sem vazamento de gravação).
     texto: 'h1. Detalhamento de Projeto\n\nh2. Requisito #31505 – Definir\n\n*CONDIÇÕES/REGRAS:*\n*RN1: Regra A*\nProsa A.\n\n---\n\nh2. Requisito *#95698 – Manter Dados*\n\n*CONDIÇÕES/REGRAS:*\n*RN1: Regra B*\nProsa B.',
     esperado_ids: ['31505', '95698']
+  },
+  {
+    nome: 'sintetico/h3_requisito_placeholder_xxx_187472',
+    descricao: 'v35.11.6: placeholder textual #XXX como ID provisório — caso #187472 req #XXX',
+    // Antes da v35.11.6, header "h3. REQUISITO: #XXX - Devolução RFID" não aparecia
+    // porque \d+ não casa "XXX". Sistema de provisional IDs (#99999, #0) já tinha
+    // infraestrutura — faltava só estender o vocabulário (X+ puro).
+    texto: 'h1. Requisitos Novos\n\n#XXX - Devolução RFID\n\nh1. Detalhamento de Projeto\n\nh3. REQUISITO: #XXX - Devolução RFID\n\n*CONDIÇÕES/REGRAS:*\n\nRN1 - regra um\nconteúdo da regra um.',
+    esperado_ids: ['XXX']
+  },
+  {
+    nome: 'sintetico/h2_requisito_placeholder_com_sufixo_207232',
+    descricao: 'v35.11.6: placeholders X+ com sufixo numérico (XXX1, XX2, XXX3) — caso #207232',
+    // Antes da v35.11.6, X+ puro consumia só "XXX" e deixava "1" órfão.
+    // Resultado: XXX1 e XXX3 viravam ambos id "XXX" (colisão).
+    // Agora X+\d* aceita o sufixo numérico opcional — IDs ficam distintos.
+    texto: 'h1. Detalhamento de Projeto\n\nh2. REQUISITO: XXX1 - Exibir CSAT\n\n*CONDIÇÕES/REGRAS:*\n*RNX1 – Regra A*\nProsa.\n\n---\n\nh2. REQUISITO: XX2 - Pesquisa CSAT\n\n*CONDIÇÕES/REGRAS:*\n*RNX1 – Regra B*\nProsa.\n\n---\n\nh2. REQUISITO: XXX3 - Manter dados\n\n*CONDIÇÕES/REGRAS:*\n*RNX1 – Regra C*\nProsa.',
+    esperado_ids: ['XXX1', 'XX2', 'XXX3']
+  },
+  {
+    nome: 'sintetico/placeholder_y_com_sufixo',
+    descricao: 'v35.11.6: simetria — placeholder Y+ com sufixo numérico (Y1, YY2, YYY) funciona igual X+',
+    texto: 'h1. Detalhamento de Projeto\n\nh2. REQUISITO: Y1 - Algo Y\n\n*REGRAS:*\nRN1 - regra\n\n---\n\nh2. REQUISITO: YY2 - Outro Y\n\n*REGRAS:*\nRN1 - regra',
+    esperado_ids: ['Y1', 'YY2']
+  },
+  {
+    nome: 'sintetico/placeholder_provisional_id_check',
+    descricao: 'v35.11.6: isProvisionalId aceita X+\\d* / Y+\\d* além de 99999 e 0\\d*',
+    // Esse sintético testa o isProvisionalId indiretamente — todos os IDs aqui são provisórios.
+    texto: 'h1. Detalhamento de Projeto\n\nh3. REQUISITO: #XXX - Provisório puro\n\n*REGRAS:*\nRN1 - r\n\n---\n\nh3. REQUISITO: #XX42 - Provisório com sufixo\n\n*REGRAS:*\nRN1 - r\n\n---\n\nh3. REQUISITO: #99999 - Provisional clássico\n\n*REGRAS:*\nRN1 - r',
+    esperado_ids: ['XXX', 'XX42', '99999']
+  },
+  {
+    nome: 'sintetico/condicoes_regras_com_espacos_207232',
+    descricao: 'v35.11.6: marker "*CONDIÇÕES / REGRAS" com espaços ao redor da "/" agora casa (caso #207232 req XX2)',
+    // Antes da v35.11.6, o regex literal "CONDI[CÇ][OÕ]ES\/REGRAS" exigia barra sem espaços.
+    // No #207232, dois dos 3 reqs usavam "*CONDIÇÕES / REGRAS" (com espaços) → 0 regras extraídas.
+    // Agora \s*\/\s* tolera ambos os formatos.
+    texto: 'h1. Detalhamento de Projeto\n\nh3. REQUISITO: 100 - Marker sem espaços\n\n*CONDIÇÕES/REGRAS:*\n\nRN1 - regra 1\n\n---\n\nh3. REQUISITO: 200 - Marker com espaços\n\n*CONDIÇÕES / REGRAS\n\nRN1 - regra 2\n\n---\n\nh3. REQUISITO: 300 - Marker com asterisco e espaços\n\n*CONDIÇÕES / REGRAS*\n\nRN1 - regra 3',
+    esperado_ids: ['100', '200', '300']
   }
 ];
 
