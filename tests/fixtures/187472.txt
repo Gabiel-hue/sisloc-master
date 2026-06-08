@@ -1,0 +1,90 @@
+---
+
+h1. Requisitos Novos
+
+#XXX - Devolução de Equipamentos Locados via RFID
+- Obtém dados via integração RFID de todos os itens enviados para Devolução (Identificador '0') e cria, aprova e faz a recpeção das Devolução(ões) de forma automatizada para os Equipamentos Patrimoniados em suas respectivas Fichas de Locação.
+
+---
+
+h1. Detalhamento de Projeto
+
+h2. *%{color:#82B6E1}Contexto:%*
+> A integração via leitura RFID na devolução por dentro da Ficha de Locação, possui o filtro que exibe na tela de "Leitura de RFID" apenas os itens que tiveram saída na respectiva ficha e faz a vinculação desses itens com a Devolução dessa Ficha.
+>> Na tela de "Devolução de equipamentos Locados", o sistema deverá obter os dados de todos os itens patrimoniados, enviados via leitura RFID para Devolução e gerar de forma automática a Devolução desses itens em suas respectivas Fichas de Locação onde estão atualmente Locados, as devoluções criadas através da integração RFID serão aprovação e terão a recepção realizada também de forma automatizada.
+
+---
+
+h3. REQUISITO: #XXX - Devolução de Equipamentos Locados via RFID
+
+*O QUE DEVE SER FEITO:*
+Na tela de Devolução de Equipamentos Locados (Form: TLocDevolucaoViewFrame / Unit: uLocDevolucaoViewFrame)
+
+Criar o processo _*RFID*_
+!clipboard-202601021209-3uiop.png!
+
+> Esse será exibido quando o Módulo *'Integração RFID'* estiver habilitado e nas configurações de Empresa, o processo 'Controle RFID' etiver marcado e com a opção _'Ficha de Locação'_ definida:
+> !clipboard-202601021212-ivzin.png!
+
+O Processo 'RFID' na tela geral de Devolução de Equipamentos Locados irá obter os dados recebidos através da integração de Devolução abaixo:
+
+"Iventerário RFID - Remessa/Devolução":http://net1/redmine/issues/201014#4-POST-INVENT%C3%81RIO-RemessaDevolu%C3%A7%C3%A3o
+
++Obs:+ O post _"Inventário"_ na integração RFID é utilizado pra Remessa e Devolução, sendo diferenciado pelo código de _*Identificador*_ enviado na URL, quando a leitura está sendo feita para uma 'Remessa' é enviado no parâmetro _*Identificador*_ o número da Remessa, quando a leitura está sendo feita para 'Devolução' é enviado no parâmetro _*Identificador*_ o '0' (zero). 
+
+> Diferentemente da Obtenção de dados via integração RFID na Devolução por dentro da Ficha, a obtenção de dados RFID na tela de _'Devolução de Equipamentos Locados'_, não deve conter o filtro para exibição apenas dos itens locados na ficha, esse processo irá exibir todos os itens patrimoniados, enviados pela integração, com o _*Identificador*_ o '0' (zero), ou seja, enviados para 'Devolução', que ainda não foram processados, exibindo a Ficha e o Cliente da Ficha em que estão atualmente Locados:
+
+> !clipboard-202601021502-cclzy.png!
+
+>> h2. A seleção dos itens e a Confirmação da Leitura RFID deverá criar uma _Nova Devolução_ em cada ficha dos equipamentos Locados, equipamentos da mesma ficha serão inseridos em uma mesma devolução, com a data de cobrança e devolução = ao da obtenção dos dados RFID.
+
+>> As Devolução(ões) serão criadas e Aprovadas e terão a Recpção feita de forma automática, com os respectivos patrimônios vinculados aos códigos RFID lidos já "selecionados".
+
+---
+
+h2. Após confirmação do processo o sistema deve mostrar a mensagem informando quantos e quais registros foram processados:
+
+<pre>
+Processo executado com sucesso.
+
+Quantidade de Devoluções geradas: 3
+Devoluções:
+470039378-01
+0003935-02
+470039965-01
+</pre>
+
+!clipboard-202603051700-2xlac.png!
+
+---
+
+Os códigos RFID e seus respectivos patrimônios que tiveram a criação da devolução realizada no processo acima, devem ter a coluna _'fl_processado'_ da integração RFID para *'S'* (Tabela: loc_integracaorfid / Coluna: fl_processado)
+
+Dessa forma, esses mesmos itens não poderão mais ser utilizados para uma nova criação automática de Devoluções, ou vinculação em devoluções por dentro da Ficha de Locação.
+
+> As devoluções criadas devem conter o 'vínculo' de RFID já concluído, ou seja, assim como acontece nas Remessas, essas devoluções devem exibir o processo _'Desvincular RFID'_ pois já possuem a integração realizada.
+
+> !clipboard-202603051722-ipfdg.png!
+
+> A desvinculação do RFID na devolução também irá proceder como na remessa, alterando a coluna _fl_processado_ para *'N'*, somente dos itens da respectiva Devolução.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+RNx - Integração RFID na Devolução de Equipamentos Locados
+A obtenção de dados na tela de Devolução de Equipamentos Locados exibe todos os itens enviados via integração RFID para 'Devolução' (_*Identificador*_ = '0')
+
+RNx2 - Criação automática de Devoluções
+Após confirmação da leitura via Integração RFID, o sistema criará automaticamente as devidas Devolução(ões), também realizará a _*Aprovação*_ e _*Recepção*_ de forma automatizada, nas respectivas Fichas onde os equipamentos estão atualmente Locados.
+
+Rnx3 - Leitura de mais de um item da mesma Ficha
+Quando obtido mais de um item de uma mesma ficha via Integração RFID, será criada apenas  uma devolução na respectiva ficha com todos esses itens.
+
+Rnx4 - Data de 'Cobrar até' e 'Previsão devolução'
+As devoluções criadas de forma automática pela leitura RFID serão criadas com a Data de 'Cobrar até' e 'Previsão devolução' igual à data/hora da obtenção dos registros.
+
+Rnx5 - Criação de Devolução com devoluções já criadas na Ficha
+O Sisloc sempre irá criar uma nova devolução nas respectivas fichas dos itens lidos via integração RFID, mesmo que na ficha já possua Devolução previamente criada, em qualquer Status.
+
+---
