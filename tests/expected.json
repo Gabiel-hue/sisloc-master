@@ -287,6 +287,21 @@
       }
     ]
   },
+  "187472": {
+    "length": 5535,
+    "requirements": [
+      {
+        "id": "XXX",
+        "rules": [
+          "RNx - Integração RFID na Devolução de Equipamentos Locados",
+          "RNx2 - Criação automática de Devoluções",
+          "Rnx3 - Leitura de mais de um item da mesma Ficha",
+          "Rnx4 - Data de 'Cobrar até' e 'Previsão devolução'",
+          "Rnx5 - Criação de Devolução com devoluções já criadas na Ficha"
+        ]
+      }
+    ]
+  },
   "188640": {
     "length": 13259,
     "requirements": [
@@ -471,6 +486,40 @@
       }
     ]
   },
+  "207232": {
+    "length": 10142,
+    "requirements": [
+      {
+        "id": "XXX1",
+        "rules": [
+          "RNX1 - Exibição automática da pesquisa",
+          "RNX2 - Exibição da pergunta CSAT",
+          "RNX3 - Controle de tentativas",
+          "RNX4 - Armazenamento das respostas"
+        ]
+      },
+      {
+        "id": "XX2",
+        "rules": [
+          "RNX1 - Ciclo de pesquisa por usuário",
+          "RNX2 - Validação de vigência",
+          "RNX3 - Controle de resposta",
+          "RNX4 - Controle de tentativas"
+        ]
+      },
+      {
+        "id": "XXX3",
+        "rules": [
+          "RNX1 - Controle da exibição da pesquisa por data",
+          "RNX2 - Reinicialização do ciclo da pesquisa",
+          "RNX3 - Reagendamento por não resposta",
+          "RNX4 - Validação do período de pesquisa",
+          "RNX5 - Atualização da próxima pesquisa após resposta",
+          "RNX6 - Bloqueio de novas exibições após resposta"
+        ]
+      }
+    ]
+  },
   "207663": {
     "length": 993,
     "requirements": [
@@ -543,6 +592,8 @@
     "como_atualizar": "Quando uma mudança intencional alterar o output (ex: novo formato suportado), rodar 'node tests/run_tests.js --update-snapshots' e revisar o diff antes de commitar.",
     "versao_bookmarklet": "v35.11.4",
     "data_atualizacao": "2026-06-03",
-    "observacao": "Atualizado para v35.11.4: nova entry 188640 + refresh de 175029 (snapshot bugado da v35.11.2/3 com RN18 - 1 corrigido). 14 fixtures catalogadas."
+    "observacao": "Atualizado para v35.11.4: nova entry 188640 + refresh de 175029 (snapshot bugado da v35.11.2/3 com RN18 - 1 corrigido). 14 fixtures catalogadas.",
+    "version": "v35.11.6",
+    "fixtures": 17
   }
 }
