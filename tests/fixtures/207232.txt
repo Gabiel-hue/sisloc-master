@@ -1,0 +1,288 @@
+h3. Descrição
+
+Hoje o sistema não possui um mecanismo estruturado para coleta contínua de feedback dos clientes. Será implementada uma Pesquisa de Satisfação (CSAT) diretamente no sistema Sisloc, com o objetivo de capturar a percepção e experiência dos clientes de forma contextual, automatizada e recorrente.
+
+h1. Requisitos Novos
+
+*XXX1  - Exibir pesquisa CSAT*
+Processo que exibi a pesquisa de satisfação como pop up na tela inicial do Sisloc   
+
+*XXX2 - Parâmetro pesquisa CSAT*
+Parâmetros de configuração da pesquisa CSAT Sisloc
+
+*XXX3 - Manter dados usuário - pesquisa CSAT*
+---
+
+h1. Requisitos Impactados
+
+N/A 
+
+---
+
+h1. Detalhamento de Projeto
+
+*Como*  dono do produto Sisloc,
+*Quero* incluir um processo de pesquisa CSAT dentro do sistema Sisloc,
+*Para* ter feedbacks de promotores e detratores ajudando assim a definir uma melhor assertividade do produto .
+
+---
+
+h2. REQUISITO: XXX1  - Exibir pesquisa CSAT
+
+*O QUE DEVE SER FEITO:*
+*Iniciar\Pesquisa de satisfação CSAT*
+
+Ao iniciar o sistema Sisloc, após a realização do login, caso o usuário esteja contemplado pelas regras definidas em Opções\Parâmetros\CSAT, o sistema deverá exibir automaticamente a pesquisa de satisfação CSAT.
+
+incialmente deverá ser apresentada a mensagem:
+
+"Seja bem-vindo ao Sisloc. Gostaríamos de saber se você poderia avaliar sua experiência com o uso do Sisloc?"
+
+A pesquisa deverá conter os botões:
+
+     Gostaria
+No momento não
+
+Caso o usuário selecione a opção “Gostaria”, o sistema deverá exibir a pergunta cadastrada em Opções\Parâmetros\CSAT > Pergunta, permitindo avaliação de 1 a 5, conforme abaixo:
+
+* 1 – Muito Insatisfeito
+* 2 – Insatisfeito
+* 3 – Neutro
+* 4 – Satisfeito
+* 5 – Muito Satisfeito
+
+Na mesma tela idepentente da resposta acima deverá contemplar um campo de texto livre para preenchimento da Opinião do usuário.
+
+Após o envio da pesquisa, o sistema deverá apresentar a mensagem:
+
+"A Sisloc agradece por responder à pesquisa."
+
+
+
+*Distribuição dos ciclos:*
+
+A definição dos meses de exibição da pesquisa será baseada no cálculo ID do usuário % 3, definindo automaticamente o grupo trimestral do usuário e distribuindo a pesquisa em intervalos de 3 meses ao longo do ano.
+
+Resultado 1: Janeiro, Abril, Julho e Outubro
+Resultado 2: Fevereiro, Maio, Agosto e Novembro
+Resultado 0: Março, Junho, Setembro e Dezembro
+
+Caso o usuário não responda a pesquisa, o sistema deverá reagendar automaticamente uma nova tentativa após 10 dias, permitindo no máximo 3 tentativas por ciclo trimestral. Caso o ciclo vigente seja encerrado sem resposta, a pesquisa deverá ser reapresentada apenas no próximo ciclo válido do usuário.
+
+
+!clipboard-202605201332-ylhfy.png!
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+As respostas da pesquisa deverão ser armazenadas em banco de dados SQL Server e integradas ao POWER B.I.
+As respostas textuais deverão ser vinculadas ao usuário, data/hora da resposta e nota atribuída.
+O histórico de tentativas deverá ser armazenado para controle de recorrência e reagendamento.
+
+
+*CONDIÇÕES/REGRAS:*
+*RNX1 – Exibição automática da pesquisa* 
+Ao realizar login no sistema Sisloc, o sistema deverá exibir automaticamente o pop-up da pesquisa CSAT para usuários contemplados pelas regras configuradas em Opções\Parâmetros\CSAT.
+*RNX2 – Exibição da pergunta CSAT*
+Ao selecionar a opção “Gostaria”, o sistema deverá apresentar a pergunta cadastrada em Opções\Parâmetros\CSAT > Pergunta, permitindo avaliação de 1 a 5.
+*RNX3 – Controle de tentativas*
+Caso o usuário não responda a pesquisa, o sistema deverá realizar nova tentativa após 10 dias, permitindo no máximo 3 tentativas por ciclo trimestral.
+*RNX4 – Armazenamento das respostas*
+As respostas da pesquisa serão ser armazenadas em um banco de dados SQL Server e disponibilizadas para integração com POWER B.I.
+
+---
+
+h2. REQUISITO: XX2 - Pesquisa CSAT
+
+*O QUE DEVE SER FEITO:*
+*Opções\Parâmetros*
+
+No menu Opções\Parâmetros, deverá ser criada uma nova tela Opções\Parâmetros\CSAT. A nova tela permitirá o cadastro e gerenciamento das configurações da pesquisa de satisfação (CSAT), contemplando os seguintes campos:
+
+Pergunta: Texto principal da pergunta CSAT que será apresentada ao usuário.
+Descrição: Texto complementar/descritivo da pesquisa CSAT.
+Status: Define a situação da pesquisa (Ativo/Inativo).
+Dt. Inicial: Data inicial de vigência da pesquisa.
+Dt. Final: Data final de vigência da pesquisa.
+Dias Disponíveis: Quantidade de dias em que a pesquisa permanecerá disponível para resposta dentro do ciclo.
+
+
+
+A pesquisa deverá ser exibida automaticamente ao usuário após o login no sistema Sisloc, desde que:
+
+* A pesquisa esteja com status Ativo;
+* A data atual esteja dentro do período de vigência;
+* O usuário pertença ao ciclo vigente;
+* O usuário ainda não tenha respondido a pesquisa no ciclo atual;
+* A quantidade máxima de tentativas não tenha sido atingida.
+
+*REGRA DE CICLO DE EXIBIÇÃO*
+
+A definição do ciclo trimestral da pesquisa será baseada nos dois últimos dígitos do ID do usuário, utilizando a seguinte regra ID do usuário % 3
+
+O resultado da operação definirá o grupo trimestral do usuário.
+Cada grupo possuirá 4 ciclos anuais de pesquisa, respeitando um intervalo mínimo de 3 meses entre as exibições para o mesmo usuário.
+
+Exemplo de agrupamento:
+* Resultado 0 → Grupo A
+* Resultado 1 → Grupo B
+* Resultado 2 → Grupo C
+
+*REGRA DE NOVAS TENTATIVAS*
+
+Caso o usuário não responda a pesquisa apresentada:
+O sistema deverá realizar uma nova tentativa de exibição após o período configurado no parâmetro Intervalo entre Tentativas.
+O total de tentativas deverá respeitar o valor definido no parâmetro Qtd. Máxima de Tentativas.
+Por padrão, o sistema deverá considerar:
+Intervalo: 10 dias
+Máximo: 3 tentativas por ciclo
+Após atingir o limite de tentativas sem resposta, a pesquisa não deverá mais ser exibida ao usuário até o próximo ciclo.
+
+!clipboard-202605201525-gmddc.png!
+
+HINT
+_Pergunta: Texto principal da pergunta CSAT.
+Descrição: Texto complementar da pesquisa.
+Status: Situação atual da pesquisa.
+Dt. Inicial: Data inicial de vigência.
+Dt. Final: Data final de vigência.
+Dias Disponíveis: Tempo total de disponibilidade da pesquisa no ciclo.
+
+
+*CONVERSÃO / DEFINIÇÃO DE DADOS* 
+Valores padrão:
+Status: Ativo
+Dias Disponíveis: 30 dias
+Qtd. Máxima de Tentativas: 3
+Intervalo entre Tentativas: 10 dias
+Exibir automaticamente no login: Sim
+
+*CONDIÇÕES / REGRAS
+*RNX1 – Ciclo de pesquisa por usuário*
+O sistema deverá aplicar a regra ID do usuário % 3
+O resultado definirá o grupo trimestral do usuário, garantindo intervalo mínimo de 3 meses entre as exibições da pesquisa.
+*RNX2 – Validação de vigência*
+A pesquisa somente poderá ser exibida caso a data atual esteja compreendida entre a Dt. Inicial e Dt. Final.
+*RNX3 – Controle de resposta*
+Usuários que já responderam a pesquisa no ciclo vigente não deverão visualizar novamente a pesquisa até o próximo ciclo.
+*RNX4 – Controle de tentativas*
+Usuários que não responderem a pesquisa poderão receber novas tentativas conforme parametrização de intervalo e quantidade máxima definida nos parâmetros CSAT.
+
+---
+
+h2. REQUISITO: XXX3 - Manter dados usuário - pesquisa CSAT
+
+*O QUE DEVE SER FEITO:*
+
+Criar no cadastro de usuário os campos necessários para controle da exibição da Pesquisa CSAT, permitindo identificar quando a pesquisa deverá ser apresentada novamente ao usuário e se a pesquisa do ciclo atual já foi respondida.
+Os novos campos serão utilizados para controlar os ciclos de exibição da pesquisa, reenvios e encerramento do período de resposta.
+
+Adicionar os seguintes campos ao cadastro do usuário:
+
+* Próxima Data da Pesquisa CSAT
+  ** Campo do tipo Data.
+  ** Armazena a próxima data em que a pesquisa poderá ser exibida para o usuário.
+
+* Pesquisa CSAT Respondida
+  ** Campo do tipo Sim/Não.
+  ** Indica se o usuário já respondeu a pesquisa referente ao ciclo atual.
+
+*Ao responder a pesquisa:*
+Marcar o campo "Pesquisa CSAT Respondida" como "Sim".
+Atualizar o campo "Próxima Data da Pesquisa CSAT" somando 90 dias à data da resposta.
+
+*Ao não responder a pesquisa após 3 tentativas:
+Atualizar o campo "Próxima Data da Pesquisa CSAT" somando 90 dias
+Para usuários já cadastrados na base, o campo "Próxima Data da Pesquisa CSAT" deverá ser inicializado conforme a regra de distribuição trimestral baseada no código do usuário.
+
+*HINT*
+
+Próxima Data da Pesquisa CSAT
+Pesquisa CSAT Respondida
+
+*CONVERSÃO / DEFINIÇÃO DE DADOS*
+A definição do ciclo trimestral deverá ocorrer através do cálculo:
+
+cd_usuario % 3
+
+Resultado 0:
+
+* Janeiro
+* Abril
+* Julho
+* Outubro
+
+Resultado 1:
+
+* Fevereiro
+* Maio
+* Agosto
+* Novembro
+
+Resultado 2:
+
+* Março
+* Junho
+* Setembro
+* Dezembro
+
+
+*CONDIÇÕES / REGRAS*
+RNX1 – Controle da exibição da pesquisa por data
+A pesquisa CSAT somente deverá ser exibida para o usuário quando a data atual for maior ou igual à data informada no campo "Próxima Data da Pesquisa CSAT".
+RNX2 – Reinicialização do ciclo da pesquisa
+Ao iniciar um novo ciclo de pesquisa para o usuário, o sistema deverá atualizar o campo "Pesquisa CSAT Respondida" para "Não".
+RNX3 – Reagendamento por não resposta
+Caso o usuário feche a pesquisa ou não a responda, o sistema não deverá marcar a pesquisa como respondida e deverá atualizar o campo "Próxima Data da Pesquisa CSAT" adicionando 10 dias à data da tentativa de exibição.
+RNX4 – Validação do período de pesquisa
+Caso a nova data calculada para exibição da pesquisa ultrapasse o mês pertencente ao ciclo trimestral do usuário, o sistema não deverá exibir a pesquisa nos meses subsequentes fora do ciclo e deverá reagendar a exibição para o próximo mês válido do ciclo do usuário.
+RNX5 – Atualização da próxima pesquisa após resposta
+Ao responder a pesquisa CSAT, o sistema deverá atualizar o campo "Pesquisa CSAT Respondida" para "Sim" e recalcular o campo "Próxima Data da Pesquisa CSAT", adicionando 90 dias à data da resposta.
+RNX6 – Bloqueio de novas exibições após resposta
+Após o usuário responder a pesquisa CSAT, o sistema não deverá exibir uma nova pesquisa até que seja atingida a data registrada no campo "Próxima Data da Pesquisa CSAT".
+
+
+---
+
+
+*+CENÁRIOS:+*
+
+*Cenário 1 – Exibição automática da pesquisa*
+*Dado que* a pesquisa CSAT esteja ativa e dentro do período de vigência
+e o usuário pertença ao ciclo vigente
+*Quando* o usuário realizar login no sistema Sisloc
+*Então* o sistema deverá exibir automaticamente a pesquisa CSAT.
+
+*Cenário 2 – Resposta da pesquisa*
+*Dado que* a pesquisa foi exibida ao usuário
+*Quando* o usuário selecionar a opção “Gostaria”
+*Então* o sistema deverá exibir a pergunta configurada
+E permitir avaliação de 1 a 5.
+
+*Cenário 3 – Pergunta complementar para detratores*
+*Dado que* o usuário selecionou nota entre 1 e 3
+*Quando* a avaliação for confirmada
+*Então* o sistema deverá solicitar informações sobre pontos de melhoria em campo de texto livre.
+
+*Cenário 4 – Pergunta complementar para promotores*
+*Dado que* o usuário selecionou nota entre 4 e 5
+*Quando* a avaliação for confirmada
+*Então* o sistema deverá solicitar informações sobre pontos positivos e sugestões em campo de texto livre.
+
+*Cenário 5 – Finalização da pesquisa*
+*Dado que* o usuário respondeu a pesquisa
+*Quando* o envio for realizado
+*Então* o sistema deverá apresentar a mensagem de agradecimento.
+
+*Cenário 6 – Reagendamento da pesquisa*
+*Dado que* o usuário não respondeu a pesquisa
+*Quando* a tentativa for encerrada sem resposta
+*Então* o sistema deverá reagendar uma nova tentativa conforme parametrização definida.
+
+*Cenário 7 – Limite de tentativas*
+*Dado que* o usuário atingiu o limite máximo de tentativas no ciclo atual
+*Quando* realizar novo login no sistema
+*Então* a pesquisa não deverá ser exibida novamente até o próximo ciclo trimestral.
+
+*Cenário 8 – Controle de ciclo trimestral*
+*Dado que* a pesquisa utiliza a regra ID do usuário % 3
+*Quando* o sistema identificar o grupo trimestral do usuário
+*Então* a pesquisa deverá ser exibida somente nos meses correspondentes ao ciclo definido.
