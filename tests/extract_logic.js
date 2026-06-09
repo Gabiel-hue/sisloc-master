@@ -74,7 +74,7 @@ function extractRules(sec) {
   const rules = [];
   // v35.6.6: aceita "RN" puro quando vem seguido de espaço(s) + hífen/endash (lookahead)
   // v35.11: 3ª alternativa fora do escopo do \b cobre o padrão reqsearch
-  const parts = rulesMatch[1].split(/\n(?=\s*(?:#{1,2}\s+)?(?:\([^)]*\)\s*)?(?:h\d+\.\s*)?(?:\*?(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN(?:\s?[A-Z0-9]+(?:\.\d+)?|(?=\s+[-–])))\*?\b|["\u201C\u201D](?:\d+|RN[A-Z0-9]*)\s*[-–]))/i);
+  const parts = rulesMatch[1].split(/\n(?=\s*(?:#{1,2}\s+)?(?:\([^)]*\)\s*)?(?:h\d+\.\s*)?(?:\*?(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN(?:\s?[A-Z0-9]+(?:\.\d+)?|(?=\s+[-–])))\*?\b|["\u201C\u201D](?:\d+|RN[A-Z0-9]*)(?:\s*[-–]|\s+)))/i);
 
   parts.forEach(function (part) {
     let t = part.trim().replace(/^h\d+\.\s*/, '');
@@ -83,7 +83,7 @@ function extractRules(sec) {
     t = t.replace(/^#{1,2}\s+/, '');
 
     // v35.11: Branch reqsearch
-    const reReqsearch = /^(\([^)]*\)\s*)?["\u201C\u201D]((?:\d+|RN[A-Z0-9]*))\s*[-–]\s*([^\n\r]+?)["\u201C\u201D]:(https?:\/\/[^\s]*reqsearch[^\s]+)/i;
+    const reReqsearch = /^(\([^)]*\)\s*)?["\u201C\u201D]((?:\d+|RN[A-Z0-9]*))(?:\s*[-–]\s*|\s+)([^\n\r]+?)["\u201C\u201D]:(https?:\/\/[^\s]*reqsearch[^\s]+)/i;
     const mReq = t.match(reReqsearch);
     if (mReq) {
       const verbo = (mReq[1] || '').trim();
