@@ -1,0 +1,56 @@
+h1. Requisitos Impactados
+
+#61567 - Parâmetros Contabilidade
+Implementar parâmetro de formatação da exibição do número do documento no lançamento contábil.
+
+#56191 - Manter Dados LANÇAMENTO CONTÁBIL
+Validar a exibição dos valores relativos ao número do documento, quando parâmetro tiver marcado.  
+
+---
+
+h1. Detalhamento de Projeto
+
+*Como* responsável pela conciliação contábil,
+*Quero que o número do documento vinculado ao lançamento contábil seja apresentado em um padrão sem pontos,
+*Para* facilitar o cruzamento das informações na rotina de conciliação das contas de balanço.
+
+---
+
+h2. REQUISITO: #61567 - Parâmetros Contabilidade
+
+*O QUE DEVE SER FEITO:*
+1) Implementar o parâmetro *Mascara para formatação do número do documento, no Lançamento Contábil*
+2) Informar para o novo parâmetro o hint: 
+Se marcado, apresentará o “Número do documento” no Lançamento Contábil, sem pontos
+Se desmarcado, apresentará o “Número do documento” no Lançamento Contábil, conforme o registrado em sua origem.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+Por padrão o campo deverá vir desmarcado.
+
+*CONDIÇÕES/REGRAS:*
+"2461 Comportamento do parâmetro Mascara para formatação do número do documento, no Lançamento Contábil":https://internos.app.sisloc.com/sisloc.reqsearch/regradenegocio/form?id=64fd8a60-18de-11f1-80da-6f40338893ef
+
+Quando habilitado, o parâmetro de Máscara para formatação do número do documento fará com que o ‘Número do Documento’ no Lançamento Contábil seja exibido sem pontos, independentemente de sua origem. As alterações passam a valer apenas para os registros gerados após a ativação do parâmetro.
+
+---
+
+h2. REQUISITO: #56191 - Manter Dados LANÇAMENTO CONTÁBIL
+
+*O QUE DEVE SER FEITO:*
+Validar regra: "2461 Comportamento do parâmetro Mascara para formatação do número do documento, no Lançamento Contábil":https://internos.app.sisloc.com/sisloc.reqsearch/regradenegocio/form?id=64fd8a60-18de-11f1-80da-6f40338893ef
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+NA
+
+
+---
+
+*+CENÁRIOS:+*
+
+*Cenário 1 – Validação do parâmetro de contabilidade Mascara para formatação do número do documento, no Lançamento Contábil
+*Dado que* O parâmetro Mascara para formatação do número do documento, no Lançamento Contábil,
+*Quando* estiver marcado
+*Então* o número do documento no Lançamento Contábil, será apresentado sem pontos.
