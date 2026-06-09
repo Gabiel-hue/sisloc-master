@@ -163,6 +163,15 @@ const SYNTHETIC = [
     // Agora \s*\/\s* tolera ambos os formatos.
     texto: 'h1. Detalhamento de Projeto\n\nh3. REQUISITO: 100 - Marker sem espaços\n\n*CONDIÇÕES/REGRAS:*\n\nRN1 - regra 1\n\n---\n\nh3. REQUISITO: 200 - Marker com espaços\n\n*CONDIÇÕES / REGRAS\n\nRN1 - regra 2\n\n---\n\nh3. REQUISITO: 300 - Marker com asterisco e espaços\n\n*CONDIÇÕES / REGRAS*\n\nRN1 - regra 3',
     esperado_ids: ['100', '200', '300']
+  },
+  {
+    nome: 'sintetico/reqsearch_sem_hifen_201650',
+    descricao: 'v35.11.7: formato reqsearch sem hífen entre <id> e <título> (caso #201650 req #61567)',
+    // Antes da v35.11.7, o regex reReqsearch exigia "\\s*[-–]\\s*" obrigatório entre <id> e <título>.
+    // No #201650, a regra "2461 Comportamento ...":URL_reqsearch usa apenas ESPAÇO (sem hífen).
+    // Agora "(?:\\s*[-–]\\s*|\\s+)" aceita ambos os separadores.
+    texto: 'h1. Detalhamento de Projeto\n\nh2. REQUISITO: #100 - Reqsearch sem hífen\n\n*CONDIÇÕES/REGRAS:*\n"2461 Comportamento do parâmetro":https://internos.app.sisloc.com/sisloc.reqsearch/regradenegocio/form?id=abc\n\n---\n\nh2. REQUISITO: #200 - Reqsearch clássico com hífen (não regride)\n\n*CONDIÇÕES/REGRAS:*\n"789 - Outro título":https://x.com/sisloc.reqsearch/y?id=def',
+    esperado_ids: ['100', '200']
   }
 ];
 
