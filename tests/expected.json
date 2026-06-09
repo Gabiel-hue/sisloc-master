@@ -288,7 +288,7 @@
     ]
   },
   "187472": {
-    "length": 5535,
+    "length": 5618,
     "requirements": [
       {
         "id": "XXX",
@@ -428,6 +428,21 @@
       }
     ]
   },
+  "201650": {
+    "length": 2381,
+    "requirements": [
+      {
+        "id": "61567",
+        "rules": [
+          "RN - Comportamento do parâmetro Mascara para formatação do número do documento, no Lançamento Contábil"
+        ]
+      },
+      {
+        "id": "56191",
+        "rules": []
+      }
+    ]
+  },
   "204289": {
     "length": 3529,
     "requirements": [
@@ -487,7 +502,7 @@
     ]
   },
   "207232": {
-    "length": 10142,
+    "length": 12219,
     "requirements": [
       {
         "id": "XXX1",
@@ -590,10 +605,10 @@
     "gerado_em": "2026-05-29",
     "descricao": "Snapshot do output esperado de cada fixture. Mudanças neste arquivo = regressão (se inesperada) ou feature nova (se intencional, com bump de versão).",
     "como_atualizar": "Quando uma mudança intencional alterar o output (ex: novo formato suportado), rodar 'node tests/run_tests.js --update-snapshots' e revisar o diff antes de commitar.",
-    "versao_bookmarklet": "v35.11.4",
-    "data_atualizacao": "2026-06-03",
-    "observacao": "Atualizado para v35.11.4: nova entry 188640 + refresh de 175029 (snapshot bugado da v35.11.2/3 com RN18 - 1 corrigido). 14 fixtures catalogadas.",
-    "version": "v35.11.6",
-    "fixtures": 17
+    "versao_bookmarklet": "v35.11.7",
+    "data_atualizacao": "2026-06-09",
+    "observacao": "Atualizado para v35.11.7: nova entry 201650 (reqsearch sem hífen, só espaço entre <id> e <título>) + refresh dos lengths das fixtures 187472 e 207232 (stale, sem regressão de requirements). 18 fixtures catalogadas.",
+    "version": "v35.11.7",
+    "fixtures": 18
   }
 }
