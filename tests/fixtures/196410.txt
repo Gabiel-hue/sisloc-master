@@ -1,0 +1,163 @@
+h1. Requisitos Impactados
+
+Requisito #31243 - Manter dados Pessoa
+Implementar o campo Beneficiário Regime Especial de IPI
+
+Requisito #75 - Manter dados Produto
+Calcular o Beneficiário Regime Especial de IPI confirmando a origem e fabricação do Produto
+
+Requisito #31225 - Manter dados Pedido de Venda
+Validar o Beneficiário Regime Especial de IPI no Pedido de Venda
+
+Requisito #32827 - Gerar NF
+Calcular as informações do Beneficiário Regime Especial de IPI na geração da Nota Fiscal
+
+Requisito #31452 - Totalizar Pedido Venda
+Calcular as informações do Beneficiário Regime Especial de IPI na totalização do Pedido de Venda
+
+Requisito #79 - Manter dados NF
+Exibir na Nota Fiscal os valores correspondentes quando o destinatário da NF for Beneficiário Regime Especial de IPI
+
+---
+
+h1. Detalhamento do Projeto
+
+*Como* responsável por emitir nota fiscal das operações de venda
+*Quero* que o Sisloc gere corretamente as informações relativas aos clientes com benefício de regime especial de IPI
+*Para* que as notas sejam geradas corretamente, sem alterações pela equipe comercial.
+
+---
+
+h3. Requisito #31243 - Manter dados Pessoa
+
+*O QUE DEVE SER FEITO*
+1) Criar, no cadastro de Pessoa, aba Informações Tributárias/Fiscais, o campo Beneficiário Regime Especial de IPI, o campo contará com as opções "Sim" e "Não".
+2) Incluir para este campo o hint: 
+Permitirá identificar se o cliente possui benefício fiscal relacionado ao IPI, se:
+* Definido como Sim - Nas operações de venda com IPI destinadas Industrialização ou Aplicação Final, o IPI não será calculado.
+* Definido como Não - Nas operações de vendas com IPI,  as regras para cálculo do imposto industrializado seguirão as diretrizes definidas no NCM e CFOP.
+
+3) Se definido como "Sim" deverá exibir/habilitar os campos:
+* CST IPI
+* Enquadramento Legal de IPI
+* Dispositivo Legal de IPI
+
+*Importante:*
+* O campo Enquadramento Legal do IPI é de preenchimento obrigatório se selecionado os CST's: 52, 54, ou 55.
+* O campo Dispositivo Legal de IPI é de preenchimento obrigatório.
+
+*Observação:*
+As tabelas do CST IPI e Enquadramento Legal de IPI, seguem como referência as opções dos campos *fl_calculo_ipi* e *lookup_cod_enqipi*, ambos da tabela nat_op .
+
+4) Validar a regra: "RNX1 - Beneficiário Regime Especial de IPI":http://net1/redmine/issues/31243#RNX1
+
+*CONVERSOR*
+Definir o valor padrão do campo como Não.
+
+*REGRAS*
+(Criar) "RNX1 - Beneficiário Regime Especial de IPI":http://net1/redmine/issues/31243#RNX1
+O campo *Beneficiário Regime Especial IPI*, deve ser exibido somente quando o relacionamento da Pessoa for Cliente ou Cliente/Fornecedor, este cadastro deve estar relacionado a finalidade Industrialização e/ou Aplicação Final .
+Se o campo Beneficiário Regime Especial de IPI for igual a Sim, devem ser exibidas para seleção os seguintes CST' de IPI:
+52 - Isento
+53 - Não Tributado
+54 - Imune
+55 - Suspenso
+
+O campo Enquadramento Legal de IPI, deve apresentar a mesma lista de seleção do campo *Enquadramento Legal IPI* do cadastro CFOP, quando for do tipo saída. 
+O preenchimento do campo Dispositivo Legal de IPI é obrigatório.
+
+---
+
+h3. Requisito #75 - Manter dados Produto
+
+*O QUE DEVE SER FEITO*
+1) Validar a regra "RNX1 - Beneficiário Regime Especial de IPI":http://net1/redmine/issues/31243#RNX1 para os produtos que atendam as seguintes condições:
+* Fabricação própria igual a "Sim", ou
+* Origem igual a 1
+
+*CONVERSOR*
+Não se aplica
+
+*REGRAS*
+(Criar) "RNX1 - Produtos com beneficio de regime especial IPI":http://net1/redmine/issues/75#RNX1
+Produtos com benefício de suspensão de IPI, devem ser obrigatoriamente:
+* De fabricação própria, ou
+* Possuir origem igual a 1 (Importado).
+Caso o produto não atenda a uma dessas condições, não deve ser permitido o benefício do IPI.
+
+---
+
+h3. Requisito #31225 - Manter dados Pedido de Venda
+
+*O QUE DEVE SER FEITO*
+1) Implementar o campo Beneficiário do IPI, este campo contará com as opções "Sim" e "Não", mas buscará o que está definido no campo Beneficiário Regime Especial IPI
+do cadastro de Pessoa.
+2) Implementar para o campo, o hint: Busca do cadastro de Pessoa, a opção escolhida para o campo *Beneficiário do IPI*
+3) Validar as configurações de IPI definidas no cadastro de Pessoa ao Pedido de Venda, conforme o cliente e a finalidade da operação. Aplicar as definições de CST e Enquadramento Legal de IPI aos produtos do pedido.
+
+*CONVERSOR*
+Por padrão o campo Beneficiário Regime Especial IPI deverá ser preenchido com o mesmo valor definido no campo *Beneficiário Regime Especial IPI* do cadastro de Pessoa.
+
+*REGRAS*
+NA
+
+----
+
+h3. Requisito #32827 - Gerar NF
+
+*O QUE DEVE SER FEITO*
+1) Validar para que as informações do Beneficiário Regime Especial IPI definidas no Pedido de Venda e no cadastro de Pessoa sejam corretamente refletidas na Nota Fiscal.
+* Se definido como "Sim", a nota deverá adotar o CFOP definido no Tipo de Venda, vinculado ao Pedido e adotará o CST definido no cadastro de Pessoa,
+juntamente com Enquadramento Legal do IPI e mensagem a ser gravada no campo Dados Adicionais da Nota.
+
+2) Validar a regra: "RNX1 - Cálculo para o Beneficiário Regime Especial de IPI":http://net1/redmine/issues/32827#RNX1
+
+*CONVERSOR*
+NA
+
+*REGRAS*
+(Criar) "RNX1 - Cálculo para o Beneficiário Regime Especial de IPI":http://net1/redmine/issues/32827#RNX1
+Para cada produto da NF utilizar o CST de IPI e o Enquadramento de IPI salvos no Pedido de Venda. Dito isto:
+* Se o campo Beneficiário Regime Especial de IPI estiver definido como "Sim" - Sisloc deve adotar o CFOP definido no Tipo de Venda, vinculado ao Pedido e adotará o CST definido no cadastro de Pessoa, juntamente com Enquadramento Legal do IPI e mensagem a ser gravada no campo Dados Adicionais da Nota. Para esta condição a finalidade do Pedido de Venda, deve ser Industrialização ou Aplicação Final.
+* Se o campo Beneficiário Regime Especial de IPI estiver definido como "Não" - Mantém o comportamento atual para cálculo do IPI, aplicando as informações definidas no Tipo Venda, Produto e cadastro de Pessoa.
+
+---
+
+h3. Requisito #31452 - Totalizar Pedido Venda
+
+*O QUE DEVE SER FEITO*
+1) Ao totalizar o Pedido de Venda, recalcular o pedido aplicando Beneficiário Regime Especial IPI se houver.
+2) Validar a regra: "RNX1 Comportamento do campo Beneficiário Regime Especial IPI":http://net1/redmine/issues/31452#RNX1
+
+*CONVERSOR*
+NA
+
+*REGRAS*
+(Criar) "RNX1 Comportamento do campo Beneficiário Regime Especial IPI":http://net1/redmine/issues/31452#RNX1
+Quando alterado o campo Beneficiário Regime Especial IPI, e o pedido for totalizado, Sisloc deve para cada produto da NF utilizar o CST de IPI e o Enquadramento de IPI salvos no Pedido de Venda. Dito isto:
+* Se o campo Beneficiário Regime Especial de IPI estiver definido como "Sim" - Sisloc deve adotar o CFOP definido no Tipo de Venda, vinculado ao Pedido e adotará o CST definido no cadastro de Pessoa, juntamente com Enquadramento Legal do IPI e mensagem a ser gravada no campo Dados Adicionais da Nota. Para esta condição a finalidade do Pedido de Venda, deve ser Industrialização ou Aplicação Final.
+* Se o campo Beneficiário Regime Especial de IPI estiver definido como "Não" - Mantém o comportamento atual para cálculo do IPI, aplicando as informações definidas no Tipo Venda, Produto e cadastro de Pessoa.
+
+---
+
+h3. Requisito #79 - Manter dados NF
+
+*O QUE DEVE SER FEITO*
+1) Validar na Nota Fiscal que os valores de CST, CFOP dos produtos busquem corretamente as informações definidas no Pedido de Venda quando o destinatário for Beneficiário Regime Especial IPI.
+2) As informações serão refletidas nas abas:
+* Aba Mercadorias - CST, CFOP, Alíquota IPI;
+* Aba Complemento - Campo Dados Adicionais da Nota, que mostrará a mensagem configurada no campo *Dispositivo Legal de IPI* do cadastro de Pessoa.
+
+*CONVERSOR*
+NA
+
+*REGRAS*
+NA
+
+---
+
+*CENÁRIOS*
+*Cenário 1 -  Emitir NF com destinatário Beneficiário Regime Especial IPI*
+*Dado que* foi inserido um Pedido de Venda onde o destinatário é Beneficiário Regime Especial IPI
+*Quando* for gerada a NF-e, onde a operação seja uma venda destinada a industrialização ou aplicação final
+*Então* o IPI não será calculado, e buscará as informações definidas no campo Beneficiário Regime Especial de IPI no cadastro de Pessoa.
