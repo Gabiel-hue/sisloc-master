@@ -1,0 +1,245 @@
+h3. Objetivo da Demanda:
+
+Criar processo "Arquivos" no cadastro de pessoa do Sisloc e melhora-lo de forma geral no Sisloc.
+
+h3. Contexto/Problemas:
+
+* O cadastro de pessoa não possui o processo *'Arquivos'*, impossibilitando a visualização de arquivos e fotos provenientes do Força de vendas e inclusão de arquivos e fotos diretamente do Sisloc
+* É possível incluir um novo arquivo via Sisloc, porém, não há o processo para excluí-lo.
+* O cadastro de arquivos no sisloc não é tipado, o que impossibilita seu direcionamento para OutSystems
+* Dada integração com OutSystems, a OM exibe os processos *'Fotos'* e *'Arquivos'*, e ambos exercem a mesma função.
+* Excluindo uma foto na OM no OutSystems, seu cadastro não é excluído do Sisloc.
+
+h3. Contexto esperado:
+
+* Deve ser possível visualizar e adicionar arquivos e fotos a partir do cadastro de pessoas no Sisloc e que esses sejam integrados ao Força de Vendas.
+* O cadastro de arquivos no Sisloc deve receber um tipo.
+* Na OM, caso haja integração com OutSystems, o processo *'Fotos'* não deve ser exibido, apenas *'Arquivos'*
+* Ao excluir uma foto na OM no OutSystems, seu cadastro deverá ser excluído também no Sisloc.
+
+---
+
+h1. Requisitos Impactados
+
+#31243 - Manter Dados Pessoa
+- Criar processo Arquivos
+
+#146823 - Manter dados Arquivos
+- Criar processo *'Excluir Arquivo'*
+
+#REQxx - Incluir Arquivo
+- Processo que permite incluir arquivos no cadastro de pessoa
+
+#REQyy - Excluir Arquivo
+- Processo que permite remover arquivos no cadastro de pessoa
+
+#REQzz - Abrir Arquivo
+- Processo que permite abrir arquivos no cadastro de pessoa
+
+#50 - Manter Dados ORDEM DE MANUTENÇÃO
+- Condicional para exibição dos processos *'Fotos'* e *'Arquivos'*
+
+#31157 - Parâmetro Ordem Manutenção
+- Parâmetro de conversão de foto em arquivos
+
+---
+
+Requisito: #31243 - Manter dados Pessoa
+
+*Implementar:*
+
+Em Cadastros/Pessoa, no barra lateral direita de processos, abaixo de *'Copiar Pessoa'*, será implementado o processo *'Arquivos'*
+
+p=. !processoPessoa.png!
+* Este processo levará a um CRUD de arquivos integrados ao OutSystems e ficará disponível somente para clientes que tenham integração com o OutSystems, sendo que, a integração deve ser bilateral;
+
+*Conversor:*
+N/A
+
+*Regras:*
+"RNa - Arquivos":http://net1/redmine/issues/31243#RNa
+* Este processo leva a um CRUD de arquivos integrados ao OutSystems e ficará disponível somente para clientes que tenham integração com o OutSystems, sendo que, a integração deve ser bilateral;
+
+"RNb":http://net1/redmine/issues/31243#RNb
+* Ao executar o processo "Arquivos" é realizada a busca dos arquivos que já existem registrados no OutSystems com o caminho já existente do Dropbox, e nesse momento é realizada a integração e a busca de dados por demanda.
+
+---
+
+Requisito: #146823- Manter dados Arquivos
+
+*Implementar*
+
+> A tela e comportamento da tela do processo *'Arquivos'* do cadastro de pessoa será como as demais já existentes no Sisloc como na 
+* *'Remessa'*
+* *'Ordem de Manutenção'*
+* *'Devolução de Equipamentos'*
+* *'Venda Loc'*
+
+*Entretanto com 3 novas implementações que deverão também ser implementadas para as demais áreas do Sisloc onde é implementado esse processo.*
+
+1. Na seção *'Arquivos'*, na barra lateral direita, será implementado o novo processo *'Excluir Arquivo'*
+** Será um botão entre *'Incluir Arquivo'* e *'Abrir Arquivo'*
+
+!ordemProcessosArquivoPessoa.png!
+
+O processo "Excluir Arquivo" deve ser implementado em todas as telas que utilizam o processo 'Arquivos':
+
+* *'Remessa'*
+* *'Ordem de Manutenção'*
+* *'Devolução de Equipamentos'*
+* *'Venda Loc'*
+
++Obs:+
+Caso o registro tenha o campo Mobile (Tabela: wcore_arquivo / Coluna: fl_mobile) = SIM, esse registro não poderá ser excluído via Sisloc, somente via Service Mobile.
+Deve ser bloqueada a exclusão com a mensagem:
+<pre>
+"Arquivos adicionados via Sisloc Service só poderão ser excluídos via aplicativo Mobile"
+</pre>
+
+
+2. No cadastro de um novo arquivo, no processo *'Incluir Arquivo'*, será adicionado o campo *'Tipo'*, que terá as opções *'Foto'* e *'Anexo'*.
+** Esse campo indicará se esse arquivo será exibido no OutSystems e onde.
+!tipoArquivo.png!
+
+3. Na tela de visualização de um cadastro, será adicionado o campo *'Tipo'*
+** Caso o arquivo tenha sido originado no Sisloc, esse campo será preenchido com a informação preenchida no campo *'Tipo'* do cadastro;
+** Caso seja um arquivo originado no OutSystems, o sistema deverá verificar se foi originado na aba *'Fotos'* ou *'Anexos'* para que seja atribuído o tipo;
+** O novo campo será o ultimo da coluna da direita e deverá ficar abaixo do campo *'Nome'*.
+!cadastroTipo.png!
+
++Obs:+
+* Os cadastros feitos a partir do processo *'Arquivos'* no Sisloc, continuarão seguindo o padrão de exportação para o DropBox.
+
+*Conversor:*
+# Dado o cadastro de um novo arquivo campo tipo na tela de cadastro deverá vir por padrão vazio.
+# Para implementação do campo *'Tipo'*, arquivos já cadastrados no Sisloc também deverão ter esse campo preenchido. Para eles, o valor a ser atribuído ao novo campo *'Tipo'*, deverá verificar a extensão:
+** Caso seja um arquivo com extensão de imagem ((Extensao = "jpg") or (Extensao = "png") or (Extensao = "bmp") or (Extensao = "jpeg") or (Extensao = "jpe") or (Extensao = "jfif") or (Extensao = "gif") or (Extensao = "tif") or (Extensao = "tiff") *'Trecho extraído do OutSystems'*), o campo deverá ser preenchido como *'Foto'*;
+** Caso não seja extensão imagem, o campo deverá ser preenchido como *'Anexo'*.
+
+*Regras:*
+"RN1 - Disponibilidade":http://net1/redmine/issues/146823#RN1
+* Este processo somente fica disponível para clientes que tem integração com o OutSystems, sendo que, a integração é bilateral.
+
+"RN2 - Armazenar Arquivos":http://net1/redmine/issues/146823#RN2
+* Para que os arquivos sejam armazenados, é preciso que o usuário tenha uma conta do Dropbox configurada no Services Web > Cadastros > Integração Dropbox. Caso não haja conta Dropbox configurada não é possível realizar o armazenamento.
+
+"RNa - Tipo":http://net1/redmine/issues/146823#RNa
+# Dada execução do processo *'Arquivos'* a partir de uma OM
+** cadastros com o campo *'Tipo'* preenchido com *'Foto'* e *'Anexo'* serão enviados para o DropBox, entretanto somente arquivos salvos como *'Foto'* serão exibidos na atividade OM do Services.
+# Dada execução do processo *'Arquivos'* a partir de uma remessa, ou devolução
+** cadastros com o campo *'Tipo'* preenchido com *'Foto'* e *'Anexo'* serão enviados para o DropBox, entretanto os preenchidos como *'Foto'* serão acessados na aba *'Fotos'* e como *'Anexo'* na aba *'Arquivos'* das atividades de devolução ou remessa no Services.
+# Dada execução do processo *'Arquivos'* a partir de um cadastro de pessoa
+** cadastros com o campo *'Tipo'* preenchido com *'Foto'* e *'Anexo'* serão enviados para o DropBox, entretanto os preenchidos como *'Foto'* serão acessados na aba *'Fotos'* e como *'Anexo'* na aba *'Arquivos'* das contas em "Processos/Conta" Força de Vendas.
+
+"RNb - Inclusão/exclusão":http://net1/redmine/issues/146823#RNb
+* Caso um arquvivo seja incluído ou excluído no OutSystems, esse também será no Sisloc.
+
+---
+
+Requisito: #REQxx - Incluir Arquivo Pessoa
+
+*Implementar*
+
+* Esse processo estará contido dentro da tela de pesquisa e arquivos cadastrados e permitirá incluir um novo arquivo ao Sisloc, que posteriormente será repassado para o DropBox e consultado pelas aplicações OutSystems.
+
+*Conversor:*
+N/A
+
+*Regras*
+"RNx":http://net1/redmine/issues/REQxx#RNx
+Esse processo abre a tela de cadastro para uma nova inclusão de arquivo no sistema.
+
+---
+
+Requisito: #REQyy - Excluir Arquivo Pessoa
+
+*Implementar*
+
+* Esse será um novo processo da tela de arquivos, estará contido dentro da tela de pesquisa e visualização de cadastros e permitirá excluir um arquivo existente.
+> Dada execução do processo sobre um arquivo, esse será também excluído do DropBox e, consecutivamente, do OutSystems.
+
+*Conversor:*
+N/A
+
+*Regras*
+"RNx":http://net1/redmine/issues/REQxx#RNx
+* Dada exclusão de um arquivo, esse será também excluído do DropBox e consecutivamente do OutSystems
+
+---
+
+Requisito: #REQzz - Abrir Arquivo
+
+*Implementar:*
+
+* Esse processo estará contido dentro da tela de pesquisa e visualização de cadastros e permitirá abrir o arquivo anexado, do cadastro selecionado, no aplicativo padrão do sistema.
+* O aplicativo selecionado pelo sistema dependerá do tipo de arquivo a ser aberto.
+
+*Conversor:*
+N/A
+
+*Regras*
+"RNx":http://net1/redmine/issues/REQxx#RNx
+* O aplicativo selecionado pelo sistema para abrir um arquivo dependerá do tipo do arquivo.
+
+---
+
+Requisito: #50 - Manter Dados ORDEM DE MANUTENÇÃO
+
+*Implementar:*
+*  Em uma ordem de manutenção, os processos *'Foto'* e *'Arquivos'* não deverão ser exibidos simultaneamente.
+## Dado um cliente que possua integração com OutSystems, apenas o processo *'Arquivos'* deverá ser exibido, operando da mesma forma que hoje. Entretanto, ao excluir um registro no OutSystems esse também deverá ser excluído do registro de arquivos da OM no Sisloc, atualmente isso não acontece dessa forma.
+
+*Conversor:*
+* Caso um cliente já possua o Sisloc e adquira posteriormente a integração com OutSystems, seus arquivos, cadastrados em *'Foto'*, deverão ser convertidos para *'Arquivos'* e *'Foto'* será desabilitado.
+
++Obs:+
+Esse processo será igual à Remessa de Locação onde, mesmo adicionando Fotos ou Anexos na Remessa pelo Service Mobile, o registro é guardado no Processo "Arquivos" da Remessa
+
+*Regras*
+"RNx":http://net1/redmine/issues/50#RNx
+Em uma ordem de manutenção, os processos *'Foto'* e *'Arquivos'* não deverão ser exibidos simultaneamente.
+* Dado um cliente que possua integração com OutSystems, apenas o processo *'Arquivos'* deverá ser exibido, operando da mesma forma que hoje. Entretanto, ao excluir um registro no OutSystems esse também deverá ser excluído do registro de arquivos da OM no Sisloc, atualmente isso não acontece dessa forma.
+
+---
+
+Requisito: #31726 - Manter Dados CONFIGURAR MÓDULOS
+
+*Implementar:*
+Caso um cliente já possua o Sisloc e adquira posteriormente a integração com OutSystems:
+* Uma possível conversão, na Ordem de Manutenção, de arquivos salvos em *'Fotos'* para *'Arquivos'* deverá ser alertada para o usuário. 
+!habMdl.png!
+Nesse momento uma caixa suspensa exibirá a mensagem: 
+> "Deseja realizar a conversão de arquivos do processo *'Foto'* da OM para *'Arquivos'* agora? 
+> Caso não seja feito agora, isso será possível posteriormente através do parâmetro "Converter *Foto* em *Arquivo*" na aba *'Ordem de Manutenção'*, sub aba *'Parâmetros 2'*"
+** Opção *"Sim"*: Os arquivos cadastrados em *'Foto'* na Ordem de Manutenção, *dos últimos 2 anos*, serão convertidos para *'Arquivos'* e o processo *'Foto'* será desabilitado. Uma vez desabilitado, mesmo que o cliente deixe de usar a integração com o OutSystems, o processo *'Foto'* não retornará para tela de ordem de manutenção.
+** Opção *"Não"*: O processo *'Fotos'* será mantido e o processo *'Arquivos'* será habilitado normalmente como ocorre atualmente.
+* Desabilitado o modulo de integração, o cliente ficará sujeito a ter suas fotos salvas apenas no Dropbox. Dados que não terá mais o processo de *'Fotos'* ou *'Arquivos'*.
+
+*Conversor:*
+* Dada habilitação do modulo de integração com outsystems, e marcação sim na condição da caixa suspensa, o sistema irá converter os arquivos cadastrados em *'Foto'* para *'Arquivos'*.
+
+*Regras*
+"RNx - Integração com OutSystems":http://net1/redmine/issues/31726#RNx
+* Caso um cliente já possua o Sisloc e adquira posteriormente a integração com OutSystems, seus arquivos, cadastrados em *'Foto'*, deverão ser convertidos para *'Arquivos'* e *'Foto'* será desabilitado.
+** Apenas fotos dos últimos 2 anos serão convertidas.
+
+"RNy - Downgrade integração outsystems":http://net1/redmine/issues/31726#RNy
+* Caso o cliente deixe de ter a integração e tenha feito a conversão de foto para arquivos, terá seus arquivos salvos somente no DropBox, pois terá desabilitado foto e arquivos.
+
+---
+
+Requisito: #31157 - Parâmetro Ordem Manutenção
+
+*Implementar:*
+Na sub aba *'Parâmetros 2'* da aba *'Ordem de Manutenção'* dos parâmetros gerais, será implementada a sessão *'Integração OutSystems'* onde conterá o botão "Converter *Foto* em *Arquivo*".
+!fotoArquivos_parametro.png!
+* A sessão *'Integração OutSystems'* somente será exibida caso o módulo *'Integração Outsystems'* esteja habilitado e os arquivos de foto , na OM, ainda não tenham sido convertidos em arquvios.
+* Clicando em "Sim" o sistema prosseguirá com a conversão de foto, *dos últimos 2 anos*, para arquivos e o botão ficará desabilitado para modificações o texto assumirá a cor #6c6c6c.
+
+*Conversor:*
+* Dada marcação "Sim" em *"Converter fotos em arquivos"*, o sistema irá converter os arquivos cadastrados em *'Foto'* para *'Arquivos'*.
+
+*Regras*
+"RNx - Converter fotos em arquivos":http://net1/redmine/issues/31157#RNx
+* Dada marcação "Sim" em *"Converter fotos em arquivos"*, o sistema irá converter os arquivos cadastrados em *'Foto'* para *'Arquivos'*.
+** Apenas fotos dos últimos 2 anos serão convertidas.
