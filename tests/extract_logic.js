@@ -7,14 +7,15 @@
 //
 // Funções exportadas:
 //   - extractRules(sec): [{title, content, _reqsearch?}]
-//   - splitSections(ds): string[]  (já aplicando o corte por h1. Detalhamento de Projeto)
+//   - splitSections(ds): string[]  (já aplicando o corte da descrição em cascata)
 //   - getReqIdFromSection(sec): string | null
 //   - getReqSectionBounds(ds, reqId): {start, end} | null
 //   - buildPlaceholderMap(ds): [{id, title}]
 //   - isProvisionalId(id): boolean
+//   - getDescriptionArea(ds): string  (v35.11.8 — helper de corte em cascata)
 //   - analyze(ds): [{id, rules: string[]}]  (pipeline completo)
 //
-// Versão espelhada: v35.11.6
+// Versão espelhada: v35.11.8
 // Mudanças desde a v35.11.1:
 //   v35.11.2 — Fix do split do dSections: 1ª alternativa "REQUISITO ##N" ancorada em
 //              início de linha com "(?<=^|\n)\s*(?:h\d+\.\s*)?" pra não casar menções
@@ -36,16 +37,8 @@
 //              alt: (?:h\d+\.\s*)? opcional pra alinhar com o splitSections.
 //   v35.11.6 — Aceitar placeholders textuais #X+/#Y+ (com sufixo numérico opcional) como
 //              IDs provisórios + tolerância a espaços ao redor da "/" em
-//              "CONDIÇÕES / REGRAS". Dois casos reais:
-//              (1) #187472: header "h3. REQUISITO: #XXX - Devolução RFID" não aparecia
-//                  porque \d+ não casa "XXX". Sistema de provisional IDs (#99999, #0)
-//                  já tinha infraestrutura — faltava estender o vocabulário.
-//              (2) #207232: 3 reqs com placeholders "XXX1", "XX2", "XXX3" (placeholder
-//                  textual + sufixo numérico) e marker "*CONDIÇÕES / REGRAS" (espaços
-//                  ao redor da "/"). IDs eram truncados (X+ puro consumia só XXX e
-//                  deixava 1/2/3 órfão → 2 reqs colidiam como "XXX"). Marker com
-//                  espaços não casava o regex literal "CONDIÇÕES/REGRAS" → 0 regras.
-//              Mudanças (todas com /i + .toUpperCase() pra normalizar case):
+//              "CONDIÇÕES / REGRAS". Casos #187472 e #207232. Mudanças (todas com /i +
+//              .toUpperCase() pra normalizar case):
 //                - splitSections (4 alts): \d+ → (?:\d+|X+\d*|Y+\d*)
 //                - getReqIdFromSection (3 alts): (\d+) → (\d+|X+\d*|Y+\d*) + toUpper
 //                - getReqSectionBounds.nextM (4 alts): \d+ → (?:\d+|X+\d*|Y+\d*)
@@ -53,10 +46,36 @@
 //                - extractRules.rulesMatch: CONDI[CÇ][OÕ]ES\/REGRAS →
 //                                           CONDI[CÇ][OÕ]ES\s*\/\s*REGRAS
 //                - isProvisionalId: + checks /^X+\d*$/i e /^Y+\d*$/i
-//              Decisão: X+ e Y+ separados (não [XY]+) pra evitar misturas tipo "XYX".
-//              Sufixo numérico opcional permite "X1", "XX2", "XXX3", mas não "XY2" ou
-//              "12X". Mesma técnica das v35.11.2/4/5 (estender tolerância com zero
-//              regressão).
+//   v35.11.7 — Aceitar formato reqsearch SEM hífen entre <id> e <título> — só espaço.
+//              Caso real #201650. Fix: \s*[-–]\s* → (?:\s*[-–]\s*|\s+) em 3 lugares
+//              (split, reReqsearch no forEach, rollbackLinksHandler com escOldId).
+//   v35.11.8 — DOIS fixes consolidados num release (casos #196410 e #145438):
+//              (A) Área de corte da descrição em CASCATA (helper getDescriptionArea):
+//                  Antes: splitSections cortava só por "h1. Detalhamento de Projeto". Se
+//                  falhasse, usava a descrição inteira → sumário gerava duplicatas via
+//                  1ª/4ª alt do split (case-insensitive). Caso #196410: a fixture tem
+//                  "h1. Detalhamento *do* Projeto" (com "do" em vez de "de") → detM falha
+//                  → 12 reqs detectados em vez de 6.
+//                  Fix: helper novo `getDescriptionArea(ds)` tenta 3 estratégias:
+//                    1) /h1\.\s*Detalhamento\s+d[eo]\s+Projeto/i  (relax: "do" também)
+//                    2) /h1\.\s*Requisitos?\s+Impactados?[\s\S]*?(?=\n\s*---|\n\s*h1\.|$)/i
+//                       → corta APÓS o sumário (até "---" ou próximo h1.)
+//                    3) fallback: descrição inteira (comportamento atual)
+//                  Caso #145438 não tem "Detalhamento de/do Projeto" — cai na estratégia 2.
+//                  getReqSectionBounds.detM2 também ganha "d[eo]" no regex (mantém offset=0
+//                  como fallback — semântica equivalente).
+//              (B) Vocabulário de ID aceita REQ\w+ como placeholder textual:
+//                  Caso #145438 usa #REQxx, #REQyy, #REQzz como placeholders novos (sem
+//                  ID Redmine ainda). Mesma técnica da v35.11.6 (X+\d*, Y+\d*): adicionar
+//                  REQ[A-Z0-9]+ ao vocabulário em 5 funções:
+//                    - splitSections (4 alts): (?:\d+|X+\d*|Y+\d*) → +REQ[A-Z0-9]+
+//                    - getReqIdFromSection (3 alts): captura idem
+//                    - getReqSectionBounds.nextM (4 alts): idem
+//                    - buildPlaceholderMap: idem
+//                    - isProvisionalId: + check /^REQ[A-Z0-9]+$/i
+//              Trava: REQ[A-Z0-9]+ só dispara em posição de ID (após "#" ou dentro de
+//              header de req). Mesma técnica das v35.11.2/4/5/6/7: estender tolerância
+//              dos regexes mantendo zero regressão.
 
 'use strict';
 
@@ -74,6 +93,7 @@ function extractRules(sec) {
   const rules = [];
   // v35.6.6: aceita "RN" puro quando vem seguido de espaço(s) + hífen/endash (lookahead)
   // v35.11: 3ª alternativa fora do escopo do \b cobre o padrão reqsearch
+  // v35.11.7: (?:\s*[-–]|\s+) — split tolera reqsearch sem hífen (só espaço)
   const parts = rulesMatch[1].split(/\n(?=\s*(?:#{1,2}\s+)?(?:\([^)]*\)\s*)?(?:h\d+\.\s*)?(?:\*?(?:["\u201C\u201D]RN\s?[A-Z0-9]+(?:\.\d+)?|RN(?:\s?[A-Z0-9]+(?:\.\d+)?|(?=\s+[-–])))\*?\b|["\u201C\u201D](?:\d+|RN[A-Z0-9]*)(?:\s*[-–]|\s+)))/i);
 
   parts.forEach(function (part) {
@@ -83,6 +103,7 @@ function extractRules(sec) {
     t = t.replace(/^#{1,2}\s+/, '');
 
     // v35.11: Branch reqsearch
+    // v35.11.7: (?:\s*[-–]\s*|\s+) — tolera sem hífen (só espaço entre <id> e <título>)
     const reReqsearch = /^(\([^)]*\)\s*)?["\u201C\u201D]((?:\d+|RN[A-Z0-9]*))(?:\s*[-–]\s*|\s+)([^\n\r]+?)["\u201C\u201D]:(https?:\/\/[^\s]*reqsearch[^\s]+)/i;
     const mReq = t.match(reReqsearch);
     if (mReq) {
@@ -138,20 +159,34 @@ function extractRules(sec) {
   return rules;
 }
 
+// v35.11.8 — helper de corte da descrição em cascata (3 estratégias)
+function getDescriptionArea(ds) {
+  // Estratégia 1: h1. Detalhamento de/do Projeto (atual + tolerância d[eo])
+  const detM = ds.match(/h1\.\s*Detalhamento\s+d[eo]\s+Projeto/i);
+  if (detM) return ds.slice(detM.index);
+  // Estratégia 2: cortar APÓS o "h1. Requisitos Impactados" (até --- ou próximo h1.)
+  const reqM = ds.match(/h1\.\s*Requisitos?\s+Impactados?[\s\S]*?(?=\n\s*---|\n\s*h1\.|$)/i);
+  if (reqM) return ds.slice(reqM.index + reqM[0].length);
+  // Fallback: descrição inteira (comportamento original)
+  return ds;
+}
+
 function splitSections(ds) {
-  const detM = ds.match(/h1\.\s*Detalhamento\s+de\s+Projeto/i);
-  const area = detM ? ds.slice(detM.index) : ds;
+  // v35.11.8: corte em cascata (não só "Detalhamento de Projeto" rígido)
+  const area = getDescriptionArea(ds);
   // v35.11.2: 1ª alt ancorada em início de linha (anti-prosa)
   // v35.11.5: \*?\s* tolera asterisco do negrito Textile entre Requisito e #
   // v35.11.6: \d+ → (?:\d+|X+\d*|Y+\d*) aceita placeholders textuais (XXX, XX2, YYY, Y1, etc)
-  return area.split(/(?=(?:(?<=^|\n)\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*)|h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*)|h3\.\s*#{1,2}\s*(?:\d+|X+\d*|Y+\d*)|\n\s*#(?:\d+|X+\d*|Y+\d*)\s*[-–]))/i);
+  // v35.11.8: + REQ[A-Z0-9]+ aceita placeholders REQxx, REQyy, REQzz, REQ001, etc
+  return area.split(/(?=(?:(?<=^|\n)\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|h3\.\s*#{1,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*#(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–]))/i);
 }
 
 function getReqIdFromSection(sec) {
   // v35.11.6: aceita placeholders X+\d* / Y+\d* + flag /i na 3ª alt + .toUpperCase() pra normalizar
-  const m = sec.match(/Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(\d+|X+\d*|Y+\d*)/i)
-         || sec.match(/^h3\.\s*#{1,2}\s*(\d+|X+\d*|Y+\d*)/im)
-         || sec.match(/^\s*#(\d+|X+\d*|Y+\d*)\s*[-–]/i);
+  // v35.11.8: + REQ[A-Z0-9]+ no vocabulário das 3 alts
+  const m = sec.match(/Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)/i)
+         || sec.match(/^h3\.\s*#{1,2}\s*(\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)/im)
+         || sec.match(/^\s*#(\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–]/i);
   return m ? m[1].toUpperCase() : null;
 }
 
@@ -164,7 +199,8 @@ function getReqSectionBounds(ds, reqId) {
     startM = ds.match(reH3Hash);
   }
   if (!startM) {
-    const detM2 = ds.match(/h1\.\s*Detalhamento\s+de\s+Projeto/i);
+    // v35.11.8: regex relaxado pra "do" também (estratégia 1 do helper)
+    const detM2 = ds.match(/h1\.\s*Detalhamento\s+d[eo]\s+Projeto/i);
     const offset = detM2 ? detM2.index : 0;
     const reHashHeader = new RegExp('(?:^|\\n)\\s*#' + reqId + '\\s*[-–]', '');
     const mH = ds.slice(offset).match(reHashHeader);
@@ -179,7 +215,8 @@ function getReqSectionBounds(ds, reqId) {
   const afterStart = ds.slice(start + startM[0].length);
   // v35.11.5: \*?\s* em todas as alts + (?:h\d+\.\s*)? na 2ª alt pra alinhar com split
   // v35.11.6: \d+ → (?:\d+|X+\d*|Y+\d*) em todas as 4 alts
-  const nextM = afterStart.match(/(?:\n\s*h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*)|\n\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*)|\n\s*h3\.\s*#{1,2}\s*(?:\d+|X+\d*|Y+\d*)|\n\s*#(?:\d+|X+\d*|Y+\d*)\s*[-–])/i);
+  // v35.11.8: + REQ[A-Z0-9]+ em todas as 4 alts
+  const nextM = afterStart.match(/(?:\n\s*h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*h3\.\s*#{1,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*#(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–])/i);
   const end = nextM ? start + startM[0].length + nextM.index : ds.length;
   return { start: start, end: end };
 }
@@ -191,19 +228,22 @@ function buildPlaceholderMap(ds) {
   listSections.forEach(function (sec) {
     sec.split('\n').forEach(function (line) {
       // v35.11.6: (\d+) → (\d+|X+\d*|Y+\d*) + flag /i + .toUpperCase() pra normalizar case
-      const m = line.match(/^#{0,2}\s*(\d+|X+\d*|Y+\d*)\s*[-–]\s*(.+)/i);
+      // v35.11.8: + REQ[A-Z0-9]+ aceita placeholders REQxx, REQyy, etc
+      const m = line.match(/^#{0,2}\s*(\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–]\s*(.+)/i);
       if (m) map.push({ id: m[1].toUpperCase(), title: m[2].trim().toLowerCase() });
     });
   });
   return map;
 }
 
-// v35.11.6: nova função — detecta se id é placeholder provisório
+// v35.11.6: detecta se id é placeholder provisório
+// v35.11.8: + check pra REQ[A-Z0-9]+ (REQxx, REQyy, REQzz, REQ001, etc)
 function isProvisionalId(id) {
   if (id === '99999') return true;
-  if (/^0\d*$/.test(id)) return true;       // 0, 00, 01, 02, ...
-  if (/^X+\d*$/i.test(id)) return true;     // X, XX, XXX, X1, XX2, XXX3, X42, ...
-  if (/^Y+\d*$/i.test(id)) return true;     // Y, YY, YYY, Y1, YY2, ...
+  if (/^0\d*$/.test(id)) return true;          // 0, 00, 01, 02, ...
+  if (/^X+\d*$/i.test(id)) return true;        // X, XX, XXX, X1, XX2, XXX3, X42, ...
+  if (/^Y+\d*$/i.test(id)) return true;        // Y, YY, YYY, Y1, YY2, ...
+  if (/^REQ[A-Z0-9]+$/i.test(id)) return true; // REQXX, REQYY, REQZZ, REQ001, ...
   return false;
 }
 
@@ -228,5 +268,6 @@ module.exports = {
   getReqSectionBounds: getReqSectionBounds,
   buildPlaceholderMap: buildPlaceholderMap,
   isProvisionalId: isProvisionalId,
+  getDescriptionArea: getDescriptionArea,
   analyze: analyze
 };
