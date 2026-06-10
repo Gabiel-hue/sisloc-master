@@ -172,6 +172,34 @@ const SYNTHETIC = [
     // Agora "(?:\\s*[-–]\\s*|\\s+)" aceita ambos os separadores.
     texto: 'h1. Detalhamento de Projeto\n\nh2. REQUISITO: #100 - Reqsearch sem hífen\n\n*CONDIÇÕES/REGRAS:*\n"2461 Comportamento do parâmetro":https://internos.app.sisloc.com/sisloc.reqsearch/regradenegocio/form?id=abc\n\n---\n\nh2. REQUISITO: #200 - Reqsearch clássico com hífen (não regride)\n\n*CONDIÇÕES/REGRAS:*\n"789 - Outro título":https://x.com/sisloc.reqsearch/y?id=def',
     esperado_ids: ['100', '200']
+  },
+  {
+    nome: 'sintetico/detalhamento_do_projeto_196410',
+    descricao: 'v35.11.8: aceita "h1. Detalhamento DO Projeto" (com "do" em vez de "de") — caso #196410',
+    // Antes da v35.11.8, o regex exigia exatamente "Detalhamento de Projeto". Se não casasse, splitSections
+    // usava a descrição inteira → sumário "h1. Requisitos Impactados" gerava seções fantasma duplicadas.
+    // Caso real #196410: 12 reqs em vez de 6 (6 do sumário + 6 do detalhamento, todos duplicados).
+    // Fix: helper getDescriptionArea com cascata — estratégia 1 aceita d[eo] (de OU do).
+    texto: 'h1. Requisitos Impactados\n\nRequisito #100 - Foo\nRequisito #200 - Bar\n\nh1. Detalhamento do Projeto\n\nh3. Requisito #100 - Foo\n\n*Regras*\nNA\n\n---\n\nh3. Requisito #200 - Bar\n\n*Regras*\nNA',
+    esperado_ids: ['100', '200']
+  },
+  {
+    nome: 'sintetico/cascata_sem_detalhamento_145438',
+    descricao: 'v35.11.8: corte em cascata estratégia 2 — sem "Detalhamento de Projeto", só "h1. Requisitos Impactados" + --- (caso #145438)',
+    // Antes da v35.11.8, fixtures sem "Detalhamento de Projeto" usavam a descrição inteira como área de split
+    // → sumário com "#N - Título" gerava seções fantasma na 4ª alt do split.
+    // Estratégia 2 do helper: corta APÓS o sumário, parando no primeiro "---" ou próximo h1.
+    texto: 'h3. Objetivo da Demanda:\n\nFoo\n\nh1. Requisitos Impactados\n\n#100 - Foo\n- subitem\n\n#200 - Bar\n- subitem\n\n---\n\nRequisito: #100 - Foo\n\n*Regras*\nNA\n\n---\n\nRequisito: #200 - Bar\n\n*Regras*\nNA',
+    esperado_ids: ['100', '200']
+  },
+  {
+    nome: 'sintetico/req_placeholder_textual_145438',
+    descricao: 'v35.11.8: vocabulário aceita REQ[A-Z0-9]+ como placeholder textual (caso #145438 #REQxx/#REQyy/#REQzz)',
+    // Antes da v35.11.8, vocabulário só tinha (?:\d+|X+\d*|Y+\d*). Placeholders #REQxx/yy/zz eram ignorados.
+    // Fix: adicionar REQ[A-Z0-9]+ ao vocabulário em splitSections, getReqIdFromSection, nextM,
+    // buildPlaceholderMap e isProvisionalId.
+    texto: 'h1. Requisitos Impactados\n\n#REQxx - Foo\n#REQyy - Bar\n#REQzz - Baz\n\n---\n\nRequisito: #REQxx - Foo\n\n*Regras*\nNA\n\n---\n\nRequisito: #REQyy - Bar\n\n*Regras*\nNA\n\n---\n\nRequisito: #REQzz - Baz\n\n*Regras*\nNA',
+    esperado_ids: ['REQXX', 'REQYY', 'REQZZ']
   }
 ];
 
