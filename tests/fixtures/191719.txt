@@ -1,0 +1,771 @@
+---
+
+h1. Requisitos Novos
+
+#207356 - Manter Dados PACOTES DE REQUISIÇÕES
+- CRUD de Pacotes de Faixas de Cobrança
+
+#209973 - Adicionar/Remover Faixa de Cobrança API
+- Criação, Alteração e Remoção de Faixa de Cobrança API
+
+#210067 - Manter Dados API
+- Listagem das Aplicações dos Clientes
+- Exibição dos dados das Aplicações
+
+#210067 - Acessar Dados API
+- Exibição dos dados das Aplicações
+
+#210085 - Ativar API
+- Criar processo para Ativar API
+- Criar Remessa
+
+#210210 - Inativar API
+- Criar processo para Inativar API
+- Criar Devolução
+
+h3. PROCESSO - Gerar Pendência API
+- Criar processo de Pendência de Dados
+
+h3. PROCESSO - Gerar Serviço Extra Automatico API
+- Gerar Serviço Extra automático
+
+#31564 - Manter Dados FICHA DE LOCAÇÃO
+- Criar Processo API
+
+#210388 - Relatório de API'S OLAP
+- Criar Relatório dinâmico
+
+---
+
+
+h1. Detalhamento de Projeto
+
+*Como* usuário responsável pelo processo de cobrança de acesso as API's disponibilizadas pela Sisloc,
+*Quero* que o sistema permita criar pacotes de requisições e controle de aplicações,
+*Para* controlar as requisições realizadas no sisloc e otimizar o processo de cobrança delas.
+
+!clipboard-202604171044-rkhbz.png!
+
+
+---
+
+-h3. REQUISITO: ##31726-
+
+-*O QUE DEVE SER FEITO:*-
+
+-Acrescentar o Módulo *API's* em Opções > Parâmetros > Suporte > Configurar Módulos : Categoria C - Módulos de Integração ao Sisloc. Disponível a partir do Sys.-
+
+-Quando *habilitado* e contendo um Pacote de API ativo, é possível utilizar qualquer API disponível do Sisloc.-
+
+-*CONVERSÃO/DEFINIÇÃO DE DADOS:*-
+
+-Módulo *API's* padrão *_desabilitado_*.-
+
+-*CONDIÇÕES/REGRAS:*-
+
+-h3. Módulo *API's*-
+
+-Quando *habilitado* e contendo um Pacote de API ativo, é possível utilizar qualquer API disponível do Sisloc.-
+
+---
+
+h3. REQUISITO: ##207356
+
+*O QUE DEVE SER FEITO:*
+
+Criação de CRUD de Pacotes e Faixas de Cobrança das API's.
+
+
+> *Listagem de Pacotes*
+
+Tela que deve listar todos os pacotes cadastrados.
+
+|*Coluna*|*Definição*|
+|Pacote|Descrição do Pacote de Requisições|
+|Valor|Valor base do Pacote|
+|Ativo|Pacote ativo ou inativo|
+
+> *Processos*
+
+* Criar Pacote
+Deve permitir a criação de Pacotes de Faixas de Requisições
+
+|*Campo*|*Tipo*|*Regra*|*Definição*|
+|ID|Number|Autoincrement|Define o ID do Pacote|
+|Ativo|Checkbox (Sim/Não)|Editável, Obrigatório, Padrão:Sim|Define se o Pacote está ativo ou inativo|
+|Pacote|Texto|Editável e Obrigatório|Define o nome do Pacote|
+|Valor|Decimal|Editável e Obrigatório|Define o valor base do Pacote para criação da Remessa|
+|Produto|Combobox|Selecionável (Lista de Produtos) e Obrigatório|Define o Produto base para inserção do item na Remessa|
+|Serviço|Combobox|Selecionável (Lista de Serviços) e Obrigatório|Define o Serviço do Serviço Extra que será gerado|
+
+*HINTS*
+
+|*Campo*|*Hint*|
+|ID|ID|
+|Ativo|Status do Pacote|
+|Pacote|Nome do Pacote de Requisições|
+|Valor|Valor base para criação da Remessa|
+|Produto|Produto base para inserção do item na Remessa|
+|Serviço|Serviço base do Serviço Extra que será gerado para faturamento das requisições|
+
+
+* Alterar Pacote
+Deve permitir alteração do pacote de faixa
+
+* Excluir Pacote
+Deve permitir exclusão do pacote de faixa, caso o pacote e nenhuma de suas faixas não estejam vinculadas a uma Aplicação / Empresa
+
+
+!clipboard-202602151523-n5nyy.png!
+
+
+> *Grid com listagem de faixas*
+
+* Processo: Criar Faixa
+
+* Processo: Alterar de Faixa
+
+* Processo: Excluir Faixa
+
+
+> *Exemplo* 
+
+*Pacote Basic*
+
+Valor Base: 200,00
+
+Faixa 1: 0 - 3.000 = 0,060 (cada requisição) = 180,00 (faixa)
+Faixa 2: 3.001 - 5.000 = 0,045 (cada requisição) = 225,00 (faixa)
+Faixa 3: 5.001 - 10.000 = 0,030 (cada requisição) = 300,00 (faixa)
+
+*Pacote Premium*
+
+Valor Base: 400,00
+
+Faixa 4: 10.001 - 15.000 = 0,025 (cada requisição) = 375,00 (faixa)
+Faixa 5: 15.001 - 20.000 = 0,020 (cada requisição) = 400,00 (faixa)
+Faixa 6: 20.001 - 30.000 = 0,015 (cada requisição) = 450,00 (faixa)
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+
+|*Campo*|*Padrão*|
+|ID|Autoincrement|
+|Ativo|Sim|
+|Pacote|Branco|
+|Valor|Branco|
+|Produto|Branco|
+|Serviço|Branco|
+
+
+*CONDIÇÕES/REGRAS:*
+
+h3. "RN1 - Exclusão de Pacote de Requisições":http://net1/redmine/issues/207356#RN1-Exclus%C3%A3o-de-Pacote-de-Requisi%C3%A7%C3%B5es
+
+É permitido exclusão de um Pacote de Requisição, somente se o pacote não estiver vinculado a *nenhuma* Aplicação.
+
+h3. "RN2 - Exclusão de Faixas":http://net1/redmine/issues/207356#RN2-Exclus%C3%A3o-de-Faixas
+
+Não é permitido excluir todas as Faixas de Cobrança de um Pacote de Requisições, quando o mesmo já está associado à uma Aplicação (API). Cada Pacote deve conter pelo menos uma Faixa.
+
+h3. "RN3 - Quantidade Inicial da Faixa":http://net1/redmine/issues/207356#RN3-Quantidade-Inicial-da-Faixa
+
+*Quantidade inicial* da faixa *não pode* ser +maior+ que a _Quantidade final_ da própria faixa e *não pode* ser +menor+ que a _Quantidade final_ da faixa anterior.
+
+h3. "RN4 - Quantidade Final da Faixa":http://net1/redmine/issues/207356#RN4-Quantidade-Final-da-Faixa
+
+*Quantidade final* da faixa *não pode* ser +menor+ que a _Quantidade inicial_ da própria faixa.
+
+h3. "RN5 - Valor Requisição e Faixa":http://net1/redmine/issues/207356#RN5-Valor-Requisi%C3%A7%C3%A3o-e-Faixa
+
+Valor Requisição e Valor Faixa não pode ser zero.
+
+---
+
+h3. REQUISITO: ##209973
+
+*O QUE DEVE SER FEITO:*
+
+> *Adicionar Faixa*
+Deve permitir criar faixas de preço (grid)
+
+|*Coluna*|*Tipo*|*Definição*|
+|Faixa|Texto|Define o nome da Faixa|
+|Inicial|Number|Define a quantidade *mínima* de requisições dessa faixa|
+|Final|Number|Define a quantidade *máxima* de requisições dessa faixa|
+|Valor Faixa|Decimal|Define o valor de cada faixa|
+|Valor Requisição|Decimal|Define o valor de cada requisição dessa faixa|
+
+*HINTS*
+
+|*Coluna*|*Hint*|
+|Faixa|Nome da Faixa de Requisições|
+|Qt. Inicial|Quantidade mínima de requisições dessa faixa|
+|Qt. Final|Quantidade máxima de requisições dessa faixa|
+|Valor Requisição|Valor de cada requisição dessa faixa|
+|Valor Faixa|Valor total da faixa|
+
+> *Alterar Faixa*
+Deve permitir alteração das faixas de preço (grid)
+
+> *Excluir Faixa*
+Deve permitir exclusão das faixas de preço (grid)
+
+
+!clipboard-202602151523-eljui.png!
+
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+
+|*Coluna*|*Tipo*|*Padrão*|
+|Faixa|Texto|Branco|
+|Qt. Inicial|Number|Branco|
+|Qt. Final|Number|Branco|
+|Valor Requisição|Decimal|Branco|
+|Valor Faixa|Decimal|Branco|
+
+
+*CONDIÇÕES/REGRAS:*
+
+h3. "RN1 - Exclusão de Faixas":http://net1/redmine/issues/209973#RN1-Exclus%C3%A3o-de-Faixas
+
+Não é permitido excluir todas as Faixas de Cobrança de um Pacote de Requisições, quando o mesmo já está associado à uma Aplicação (API). Cada Pacote deve conter pelo menos uma Faixa.
+
+h3. "RN2 - Quantidade Inicial da Faixa":http://net1/redmine/issues/209973#RN2-Quantidade-Inicial-da-Faixa
+
+*Quantidade inicial* da faixa *não pode* ser +maior+ que a _Quantidade final_ da própria faixa e *não pode* ser +menor+ que a _Quantidade final_ da faixa anterior.
+
+h3. "RN3 - Quantidade Final da Faixa":http://net1/redmine/issues/209973#RN3-Quantidade-Final-da-Faixa
+
+*Quantidade final* da faixa *não pode* ser +menor+ que a _Quantidade inicial_ da própria faixa.
+
+h3. "RN4 - Valor Requisição e Faixa":http://net1/redmine/issues/209973#RN4-Valor-Requisi%C3%A7%C3%A3o-e-Faixa
+
+Valor Requisição e Valor Faixa não pode ser zero.
+
+---
+
+
+h3. REQUISITO: ##210067
+
+*O QUE DEVE SER FEITO:*
+
+>> Alterar o nome do processo _"Aplicações Integradas Sisloc"_ para *"API"*
+
+>> Alterar o local do processo *API* (_Aplicações Integradas Sisloc_)
+
+* Deve ficar em Locação > Ficha de Locação > API 
+* Processo deve estar disponível em _Processos_ na listagem de Fichas e dentro da Ficha de Locação
+
+
+>> Alterar a forma do cadastro de Aplicações | API's
+O cadastro deve ser realizado agora no Sisloc interno e não no Sisloc do cliente
+
+>> Campos da tela de API's
+
+|*Campo*|*Tipo*|*Regra*|*Definição*|
+|ID|Number|Não Editável e Obrigatório|Define o ID da API (autoincrement)|
+|Empresa|Texto|Não Editável e Obrigatório|Exibe a empresa associada a API|
+|Ficha Referência|Texto|Não Editável e Obrigatório|Exibe qual a Ficha Referência da API|
+|Tipo Fatura|Combobox|Selecionável (Lista de Tipos de Fatura) e Obrigatório|Define o tipo fatura do Serviço Extra|
+|Dia Base|Number|Editável e Obrigatório|Define o dia do mês base do Serviço Extra|
+|Dia Vencimento|Number|Editável e Não Obrigatório|Define o dia do mês do vencimento do Serviço Extra|
+|Condição de Pagamento|Combobox|Selecionável (Lista de Condição de Pagamento) e Não Obrigatório|Define a condição de pagamento do Serviço Extra|
+|Pacote|Combobox|Selecionável (Lista de Pacotes) e Obrigatório|Define o Pacote que o cliente contratou|
+|Total de Requisições|Number|Calculado e Não Editável|Exibe o total de requisições realizadas no mês|
+|Período Atual|Data|Não Editável e Obrigatório|Define o período atual ativo|
+|Status|Texto|Não Editável e Obrigatório|Exibe a situação atual da API / Cliente|
+|Gera Serviço Extra|Checkbox|Editável e Não Obrigatório|Define se será gerado Serviço Extra automático para o cliente|
+
+!clipboard-202602151552-l4v7b.png!
+
+* Campo *Empresa*
+Exibir a empresa associada a API
+A API deve ser vinculada ao cliente e não a filial. Sendo assim, ao criar uma API à empresa da Ficha é automaticamente associada a API, e todas as suas filiais deverão ter acesso as API's, se módulo API estiver habilitado.
+
+* Campo *Ficha Referência*
+Exibir a Ficha Referência da API
+A Ficha na qual está sendo criada a API deve ser usada como ficha referência. Esta ficha referência será usada para criação do item na remessa e geração do Serviço Extra.
+
+* Campo *Tipo Fatura*
+Lista de Tipos de Fatura.
+Para seleção do Tipo de Fatura do Serviço Extra que será gerado.
+
+* Campo *Dia base*
+Na criação da API, puxar automaticamente o dia da próxima geração de fatura da ficha de locação referência, podendo ser editado. Dia a ser usado como data base no Serviço Extra que será gerado.
+
+* Campo *Dia Vencimento*
+Para definição do Dia de Vencimento do Serviço Extra que será gerado.
+
+* Campo *Condição de Pagamento*
+Listar as Condições de Pagamento.
+Para seleção da Condição de Pagamento do Serviço Extra que será gerado.
+
+* Campo *Pacote*
+Listar todos os Pacotes cadastrados
+Para seleção do Pacote contratado pelo cliente.
+
+* Campo *Total de Requisições*
+Exibir a soma de todas as requisições realizadas no período atual.
+
+* Campo *Período Atual*
+Exibir o período atual ativo das requisições.
+
+* Campo *Gera Serviço Extra*
+Define se será gerado Serviço Extra automático para o cliente em questão
+
+* Campo *Status*
+Exibe a situação atual da API / Cliente.
+
+*Status:*
+
+* Aguardando Ativação
+Status de quando a API é *cadastrada*, mas ainda não foi ativada (através do processo _Ativar API_).
+
+* Ativo
+Status de quando a API é *ativada*, através do processo _Ativar API_.
+
+* Pendente
+Status de quando a API *ativa*, não está retornando os dados para o Sisloc há *mais de 5 dias*.
+
+* Inativo
+Status de quando a API é *inativada*, através do processo _Inativar API_.
+
+
+>> Grid de Processos
+
+* Coluna *Período*
+Que exibe os períodos em que o pacote de requisições esteve ativo
+
+* Coluna *Requisições*
+Que exibe a quantidade de requisições no período.
+
+* Listagem dos processos
+Ao clicar no período, deve ser exibida a lista dos processos com suas respectivas quantidades de requisições.
+Ordenados de acordo com o maior número de requisições e ordem alfabética.
+
+>> Alterar a seleção de API's
+Ao cadastrar uma API para o cliente, todos os processos (API's) existentes na base de controle Sisloc devem ser disponibilizados automaticamente.
+
+>> Contagem de Requisições
+
+O sisloc deve manter a contagem de requisições.
+O sisloc deve realizar o calculo automático da faixa + requisições do cliente de acordo com o seu Pacote.
+
+- O cliente não deve ficar sem realizar requisições, mesmo excedendo a faixa de requiusições.
+- A cobrança do Serviço deve ser de acordo com o número total de requisições ao final do mês.
+
+>> Criar item na Remessa
+
+Criar uma Remessa Aprovada e Expedida + Item da Remessa (Pacote)
+Ao cadastrar uma API para o cliente, deve ser criado automaticamente uma remessa (Aprovada e Expedida) na respectiva Ficha Referência, com um item da remessa sendo o Produto do Pacote de Requisições.
+
+* Produto: o produto que será cadastrado para representar o Pacote de Requisições API
+* Quantidade: 1
+* Valor: valor base do pacote selecionado
+
+*Exemplo*
+
+Contrato do cliente: Pacote Basic
+Valor Base: 200,00
+
+Ou seja, valor do item da remessa = 200,00.
+
+>> Diariamente os dados das requisições do cliente devem ser carregados no sisloc (no primeiro acesso do cliente no dia, esse envio deve ser realizado)
+
+>> Criar os Processos
+
+* "Ativar API":http://net1/redmine/issues/210085
+
+* "Inativar API":http://net1/redmine/issues/210210
+
+* "Gerar Pendência":http://net1/redmine/issues/191719?issue_count=26&issue_position=21&next_issue_id=205073&prev_issue_id=194749#PROCESSO-Gerar-Pend%C3%AAncia-API
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+
+|*Campo*|*Padrão*|
+|ID|Autoincrement|
+|Empresa|Preenchimento automático|
+|Ficha Referência|Preenchimento automático|
+|Tipo Fatura|A|
+|Data base|Preenchimento automático|
+|Data Vencimento|Branco|
+|Condição de Pagamento|Nenhum|
+|Pacote|Nenhum|
+|Total de Requisições|Calculado|
+|Período Atual|Preenchimento automático|
+
+*CONDIÇÕES/REGRAS:*
+
+h3. "RN1 - Cadastro de Aplicação":http://net1/redmine/issues/210067#RN1-Cadastro-de-Aplica%C3%A7%C3%A3o
+
+Ao _cadastrar_ uma API, os processos (API's) não ficam disponíveis para utilização, somente após processo de *Aprovação*.
+
+Status da Aplicação: *Aguardando Ativação*
+
+h3. "RN2 - Ativação de Aplicação":http://net1/redmine/issues/210067#RN2-Ativa%C3%A7%C3%A3o-de-Aplica%C3%A7%C3%A3o
+
+Ao _ativar_ uma API, é criado automaticamente uma Remessa (Aprovada e Expedida) na respectiva Ficha Referência, com um item da remessa sendo o Produto do Pacote de Requisições e com o valor base do pacote selecionado.
+
+Status da Aplicação: *Aguardando Aprovação*
+
+h3. "RN3 - Cadastro, Ativação e Aprovação de Aplicação":http://net1/redmine/issues/210067#RN3-Cadastro-Ativa%C3%A7%C3%A3o-e-Aprova%C3%A7%C3%A3o-de-Aplica%C3%A7%C3%A3o
+
+Após _cadastramento_ da API, _ativação_ da Aplicação e _aprovação_ da Remessa, *todos* os processos (API's) existentes na base de controle Sisloc são disponibilizados para uso.
+
+Status da Aplicação: *Ativo*
+
+h3. "RN4 - Inativação de Aplicação":http://net1/redmine/issues/210067#RN4-Inativa%C3%A7%C3%A3o-de-Aplica%C3%A7%C3%A3o
+
+Ao _inativar_ uma API, é criado automaticamente uma devolução (Aprovada e Concluída) na respectiva Ficha Referência, com um item da devolução sendo o Produto do Pacote de Requisições e com o valor base do pacote selecionado.
+
+Status da Aplicação: *Inativo*
+
+h3. "RN5 - Processo Gerar Pendência na API":http://net1/redmine/issues/210067#RN5-Processo-Gerar-Pend%C3%AAncia-na-API
+
+Quando a API está *ativa* e não há retorno dos dados das requisições do cliente para o Sisloc há *mais de 5 dias*, o Status da API é alterado para *Pendente* e ocorre o bloqueio de requisições via API.
+
+Status da Aplicação: *Pendente*
+
+h3. "RN6 - Status das API's":http://net1/redmine/issues/210067#RN6-Status-das-APIs
+
+Exibe a situação atual da API / Cliente.
+
+*Status:*
+
+* Aguardando Ativação
+Status de quando a API é *cadastrada*, mas ainda não foi _ativada_.
+
+* Aguardando Aprovação
+Status de quando a API é *ativada*, através do processo _Ativar API_, mas ainda não foi _aprovada_.
+
+* Ativo
+Status de quando a API é *ativada*, após conclusão da remessa.
+
+* Inativo
+Status de quando a API é *inativada*, através do processo _Inativar API_.
+
+* Pendente
+Status de quando a *API ativa*, não retorna os dados para o Sisloc há *mais de 5 dias*.
+
+h3. "RN7 -Envio dos dados das Requisições":http://net1/redmine/issues/210067#RN7-Envio-dos-dados-das-Requisi%C3%A7%C3%B5es
+
+Diariamente os dados das requisições do cliente são carregados no sisloc (no primeiro acesso do cliente no dia, o envio é realizado)
+
+h3. "RN8 - Acesso aos dados da Aplicações":http://net1/redmine/issues/210067#RN8-Acesso-aos-dados-da-Aplica%C3%A7%C3%B5es
+
+O processo de API do lado do cliente, é disponibilizado somente para usuários com permissão de acesso.
+Nenhum dado da tela de API's é alterável, disponível apenas visualização.
+
+h3. "RN9 - Processo Gerar Pendência na API":http://net1/redmine/issues/210067#RN9-Processo-Gerar-Pend%C3%AAncia-na-API
+
+Quando a API está *ativa* e não há retorno dos dados das requisições do cliente para o Sisloc há *mais de 5 dias*, o Status da API é alterado para *Pendente*. E ocorre o bloqueio de requisições via API.
+
+h3. "RN10 - Gerar Serviço Extra Automaticamente":http://net1/redmine/issues/210067#RN10-Gerar-Servi%C3%A7o-Extra-Automaticamente
+
+Para todos os clientes contratantes do *Módulo API's* e que *Gera Serviço Extra*, ocorre a geração automática de um Serviço Extra. 
+Geração realizada mensalmente em sua Ficha de Locação do Sisloc, de acordo com a data base da ficha referência do cliente.
+O sisloc realiza o calculo automático da faixa + requisições excedentes do cliente de acordo com o seu Pacote.
+
+*Exemplo*
+
+Contrato do cliente: Pacote Basic
+Valor Base: 200,00
+
+Faixa 1: 0 - 3.000 = 0,060 (cada requisição) = 180,00 (faixa)
+Faixa 2: 3.001 - 5.000 = 0,045 (cada requisição) = 225,00 (faixa)
+Faixa 3: 5.001 - 10.000 = 0,030 (cada requisição) = 300,00 (faixa)
+
+Cliente gastou 4000 requisições 
+
+Então, o valor do serviço extra é 180,00 + 1000 requisições excedentes da Faixa 2 = 
+180,00 (valor total da Faixa 1) + 45,00 (1000 x 0,045) = 225,00
+
+- O cliente não fica sem realizar requisições, mesmo excedendo sua faixa.
+- A cobrança do Serviço Extra é de acordo com o número total de requisições ao final do período.
+
+>> Processo só ocorre automaticmente para os clientes que estão com a opção _Gera Serviço Extra_ *marcada* no cadastro de API
+
+
+---
+
+h3. REQUISITO: ##210067
+
+*O QUE DEVE SER FEITO:*
+
+>> Tela para visualização do cliente de suas Requisições.
+Relatório disponível em: Relatórios Gerenciais > Processos > API
+
+Exibir os dados da API cadastrada para a Empresa logada.
+
+>> Grid de Processos
+
+* Coluna *Período*
+Que exibe os períodos em que o pacote de requisições esteve ativo
+
+* Coluna *Requisições*
+Que exibe a quantidade de requisições no período.
+
+* Listagem dos processos
+Ao clicar no período, deve ser exibida a lista dos processos com suas respectivas quantidades de requisições.
+Ordenados de acordo com o maior número de requisições e ordem alfabética.
+
+!clipboard-202602151552-l4v7b.png!
+
+_(Nenhum dado pode ser alterado)_
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+
+N.A.
+
+
+*CONDIÇÕES/REGRAS:*
+
+h3. RN8 - "Acesso aos dados da Aplicações":http://net1/redmine/issues/210067#RN8-Acesso-aos-dados-da-Aplica%C3%A7%C3%B5es
+
+O processo de API do lado do cliente, é disponibilizado somente para usuários com permissão de acesso.
+Nenhum dado da tela de API's é alterável, disponível apenas visualização.
+
+---
+
+h3. REQUISITO: ##210085
+
+*O QUE DEVE SER FEITO:*
+
+Ao ser acionado na tela Ficha de Locação > API > Ativar API;
+
+* Criar item na Remessa
+
+Criar uma Remessa Aprovada e Expedida + Item da Remessa (Pacote)
+Ao ativar uma API para o cliente, deve ser criado automaticamente uma remessa (Aprovada e Expedida) na respectiva Ficha Referência, com um item da remessa sendo o Produto do Pacote de Requisições.
+
+Produto: o produto que será cadastrado para representar o Pacote de Requisições API
+Quantidade: 1
+Valor: valor base do pacote selecionado
+
+Exemplo
+
+Contrato do cliente: Pacote Basic
+Valor Base: 200,00
+
+Ou seja, valor do item da remessa = 200,00.
+
+* Alterar o Status da API para *Ativo*.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+
+N.A.
+
+
+*CONDIÇÕES/REGRAS:*
+
+h3. "RN1 - Ativação de Aplicação":http://net1/redmine/issues/210085#RN1-Ativa%C3%A7%C3%A3o-de-Aplica%C3%A7%C3%A3o
+
+Ao _ativar_ uma API, é criado automaticamente uma Remessa (Aprovada e Expedida) na respectiva Ficha Referência, com um item da remessa sendo o Produto do Pacote de Requisições e com o valor base do pacote selecionado.
+
+Status da Aplicação: *Aguardando Aprovação*
+
+---
+
+h3. REQUISITO: ##210210
+
+*O QUE DEVE SER FEITO:*
+
+Ao ser acionado na tela Ficha de Locação > API > Inativar API;
+
+* Criar Devolução
+
+Criar uma Devolução Aprovada e Concluída + Item da Devolução (Pacote)
+Ao inativar uma API para o cliente, deve ser criado automaticamente uma devolução (Aprovada e Concluída) na respectiva Ficha Referência, com um item da remessa sendo o Produto do Pacote de Requisições.
+
+* Alterar o Status da API para *Inativo*.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+
+N.A.
+
+
+*CONDIÇÕES/REGRAS:*
+
+h3. "RN1 - Inativação de Aplicação":http://net1/redmine/issues/210210#RN1-Inativa%C3%A7%C3%A3o-de-Aplica%C3%A7%C3%A3o
+
+Ao _inativar_ uma API, é criado automaticamente uma Devolução (Aprovada e Concluída) na respectiva Ficha Referência, com um item da remessa sendo o Produto do Pacote de Requisições e com o valor base do pacote selecionado.
+
+Status da Aplicação: *Aguardando Inativo*
+
+---
+
+h3. REQUISITO: PROCESSO: Gerar Pendência API
+
+*O QUE DEVE SER FEITO:*
+
+Quando a API está *ativa* e não está retornando os dados das requisições do cliente para o Sisloc há *mais de 5 dias*, deve ser Alterado o Status da API para *Pendente* e deve ocorrer o bloqueio de requisições deste cliente via API.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+
+N.A.
+
+
+*CONDIÇÕES/REGRAS:*
+
+h3. "NRX - Processo Gerar Pendência na API":http://net1/redmine/issues/210067#RN9-Processo-Gerar-Pend%C3%AAncia-na-API
+
+Quando a API está *ativa* e não há retorno dos dados das requisições do cliente para o Sisloc há *mais de 5 dias*, o Status da API é alterado para *Pendente*. E ocorre o bloqueio de requisições via API.
+
+
+---
+
+h3. REQUISITO: PROCESSO: Gerar Serviço Extra Automatico API
+
+*O QUE DEVE SER FEITO:*
+
+> Gerar Serviço Extra automaticamente para os clientes contratantes do *Módulo API's*
+
+* De acordo com a _Data base_ da API cadastrada para o cliente, o sisloc deve *gerar* um *Serviço Extra* automaticamente na Ficha Referência do cliente;
+
+>> DADOS DO SERVIÇO EXTRA
+
+* Ficha referência: ficha cadastrada como referência no cadastro de API do cliente;
+* Data Base: data base definida no cadastro de API do cliente;
+* Tipo Fatura: tipo fatura definido no cadastro de API do cliente;
+* Serviço: serviço definido como padrão no Pacote contratado pelo cliente;
+* Condição de Pagamento: condição de pagamento definida no cadastro de API do cliente;
+* Descrição: [NOME DO PACOTE] - [TOTAL DE REQUISIÇÕES] REQUISIÇÕES DE API [MÊS/ANO REFERENTE]
+Exemplo: PACOTE BASIC - 4000 REQUISIÇÕES DE API 02/2026
+* Quantidade: 1
+* Valor do Serviço Extra: Calculo de número de requisições.
+O sisloc deve realizar o calculo automático da faixa + requisições excedentes do cliente de acordo com o seu Pacote.
+
+*Exemplo*
+
+Contrato do cliente: Pacote Basic
+Valor Base: 200,00
+
+Faixa 1: 0 - 3.000 = 0,060 (cada requisição) = 180,00 (faixa)
+Faixa 2: 3.001 - 5.000 = 0,045 (cada requisição) = 225,00 (faixa)
+Faixa 3: 5.001 - 10.000 = 0,030 (cada requisição) = 300,00 (faixa)
+
+Cliente gastou 4000 requisições 
+
+Então, o valor do serviço extra é 180,00 + 1000 requisições excedentes da Faixa 2 = 
+180,00 (valor total da Faixa 1) + 45,00 (1000 x 0,045) = 225,00
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+
+N.A.
+
+
+*CONDIÇÕES/REGRAS:*
+
+h3. RNX - Gerar Serviço Extra Automaticamente
+
+Para todos os clientes contratantes do *Módulo API's* e que *Gera Serviço Extra*, ocorre a geração automática de um Serviço Extra. 
+Geração realizada mensalmente em sua Ficha de Locação do Sisloc, de acordo com a data base da ficha referência do cliente.
+O sisloc realiza o calculo automático da faixa + requisições excedentes do cliente de acordo com o seu Pacote.
+
+*Exemplo*
+
+Contrato do cliente: Pacote Basic
+Valor Base: 200,00
+
+Faixa 1: 0 - 3.000 = 0,060 (cada requisição) = 180,00 (faixa)
+Faixa 2: 3.001 - 5.000 = 0,045 (cada requisição) = 225,00 (faixa)
+Faixa 3: 5.001 - 10.000 = 0,030 (cada requisição) = 300,00 (faixa)
+
+Cliente gastou 4000 requisições 
+
+Então, o valor do serviço extra é 180,00 + 1000 requisições excedentes da Faixa 2 = 
+180,00 (valor total da Faixa 1) + 45,00 (1000 x 0,045) = 225,00
+
+- O cliente não fica sem realizar requisições, mesmo excedendo sua faixa.
+- A cobrança do Serviço Extra é de acordo com o número total de requisições ao final do período.
+
+>> Processo só ocorre automaticmente para os clientes que estão com a opção _Gera Serviço Extra_ *marcada* no cadastro de API
+
+---
+
+h3. REQUISITO: #31564 - Manter Dados FICHA DE LOCAÇÃO
+
+*O QUE DEVE SER FEITO:*
+
+Adicionar o processo *API*
+Localizado em Locação > Ficha de Locação > API
+
+* Processo deve estar disponível em _Processos_ na listagem de Fichas e dentro da Ficha de Locação
+* Para acionar o processo *API* na listagem das Fichas, *uma* Ficha de Locação deve estar *marcada*. 
+
+Se mais de uma Ficha estiver selecionada, apresentar a mensagem:
+
+<pre>
+Favor selecionar apenas uma Ficha de Locação.
+</pre>
+
+Se nenhuma Ficha estiver selecionada, apresentar a mensagem:
+
+<pre>
+Favor selecionar uma Ficha de Locação.
+</pre>
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+
+N.A.
+
+*CONDIÇÕES/REGRAS:*
+
+h3. "Acesso ao Processo de API":http://net1/redmine/issues/31564#RN89-Acesso-ao-Processo-de-API
+
+Processo disponível no Sisloc da Sisloc e para *usuários com permissão*.
+Para acionar o processo *API* na listagem das Fichas, *uma* Ficha de Locação precisa estar *marcada*. 
+
+---
+
+h3. REQUISITO: ##210388
+
+*O QUE DEVE SER FEITO:*
+
+>> Criar tabela dinâmica com os dados da API do cliente
+
+Campos disponíveis:
+
+- Empresa
+- Ficha Referência
+- Tipo Fatura
+- Data Base
+- Data Vencimento
+- Pacote
+- Período
+- Total de Requisições
+
+
+>> Acrecrecentar o Processo Exportar para Excel
+
+Que exporta os dados da tela para planilha excel
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+
+N.A.
+
+*CONDIÇÕES/REGRAS:*
+
+h3. "RN1 - Tabela dinâmica API's":http://net1/redmine/issues/210388#RN1-Tabela-din%C3%A2mica-APIs
+
+Disponível para todos os clientes que possuem qualquer pacote de requisição contratado.
+
+---
+
+h3. PROCESSO: Volumetria OutSystem
+
+*O QUE DEVE SER FEITO:*
+
+Realizar o mapeamento das requisições que o OutSystem faz no Sisloc.
+
+>> Processos à serem mapeados
+
+* Get | Set Cadastro de Pessoa
+* Get Cadastro de Produto
+* Get Cadastro de Serviço
+* Aprovação de proposta
+
+Deve ser implementado no Outsystem, um mecanismo de telemetria nos processos definidos acima. 
+Tal processo gerará dados que serão extraídos direto na base do Outsystem, para serem usados como parâmentro de quantidade de requisições que o sistema faz ao sisloc, por dia.
+
+---
