@@ -15,8 +15,35 @@
 //   - getDescriptionArea(ds): string  (v35.11.8 — helper de corte em cascata)
 //   - analyze(ds): [{id, rules: string[]}]  (pipeline completo)
 //
-// Versão espelhada: v35.11.8
+// Versão espelhada: v35.13
 // Mudanças desde a v35.11.1:
+//   v35.13   — Aceitar PROCESSO como token de ID de placeholder (sem # exigido).
+//              Casos onde uma seção legítima do detalhamento usa "h3. PROCESSO:" ou
+//              "h3. REQUISITO: PROCESSO:" em vez de "h3. REQUISITO: #N" — comum em
+//              demandas onde sub-processos derivados ainda não têm ID Redmine próprio
+//              (caso real #191719: "Gerar Pendência API", "Gerar Serviço Extra
+//              Automatico API", "Volumetria OutSystem"). Antes da v35.13, essas seções
+//              eram silenciosamente engolidas pela seção #N anterior (rules NÃO vazavam
+//              porque o stop \n\s*--- delimita, mas o card sumia do popup).
+//              Vocabulário estendido para incluir PROCESSO em 5 lugares — split,
+//              getReqId, nextM, placeholderMap, isProvisional. Como cada PROCESSO no
+//              source tem o mesmo "ID" literal ('PROCESSO'), o pipeline analyze() faz
+//              auto-numbering por ordem de aparição: 1º vira PROCESSO1, 2º PROCESSO2,
+//              etc. (mesma técnica de XXX1/XXX2/XXX3 da v35.11.6 mas auto-gerada).
+//              Mesmo princípio das v35.11.2/4/5/6/7/8: estender tolerância dos regexes
+//              mantendo zero regressão. Trava de segurança: PROCESSO só dispara em
+//              header (após h\d+\.) e exige separador imediato [:\-–] depois do token
+//              — evita "h3. Após confirmação do processo..." em prosa virar header.
+//              Mudanças (todas com /i + .toUpperCase()):
+//                - splitSections (+1 alt): (?<=^|\n)\s*h\d+\.\s*(?:REQUISITO\s*:?\s*)?PROCESSO\s*[:\-–]
+//                - getReqIdFromSection (+1 alt): ^h\d+\.\s*(?:REQUISITO\s*:?\s*)?(PROCESSO)\s*[:\-–]
+//                - getReqSectionBounds.nextM (+1 alt): \n\s*h\d+\.\s*(?:REQUISITO\s*:?\s*)?PROCESSO\s*[:\-–]
+//                - buildPlaceholderMap (+1 alt): ^h\d+\.\s*PROCESSO\s*[-–]\s*(.+) em cada linha
+//                - isProvisionalId: + check /^PROCESSO\d*$/i
+//                - analyze: auto-numbering — IDs 'PROCESSO' no placeholderMap e nas
+//                  seções viram PROCESSO1, PROCESSO2, ... na ordem de aparição.
+//
+// Mudanças anteriores:
 //   v35.11.2 — Fix do split do dSections: 1ª alternativa "REQUISITO ##N" ancorada em
 //              início de linha com "(?<=^|\n)\s*(?:h\d+\.\s*)?" pra não casar menções
 //              tipo "no requisito #N abaixo" em linguagem natural (caso #196911).
@@ -178,15 +205,19 @@ function splitSections(ds) {
   // v35.11.5: \*?\s* tolera asterisco do negrito Textile entre Requisito e #
   // v35.11.6: \d+ → (?:\d+|X+\d*|Y+\d*) aceita placeholders textuais (XXX, XX2, YYY, Y1, etc)
   // v35.11.8: + REQ[A-Z0-9]+ aceita placeholders REQxx, REQyy, REQzz, REQ001, etc
-  return area.split(/(?=(?:(?<=^|\n)\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|h3\.\s*#{1,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*#(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–]))/i);
+  // v35.13:   + 5ª alt para "h3. PROCESSO:" e "h3. REQUISITO: PROCESSO:" — separador
+  //           [:\-–] obrigatório protege contra prosa
+  return area.split(/(?=(?:(?<=^|\n)\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|h3\.\s*#{1,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*#(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–]|(?<=^|\n)\s*h\d+\.\s*(?:REQUISITO\s*:?\s*)?PROCESSO\s*[:\-–]))/i);
 }
 
 function getReqIdFromSection(sec) {
   // v35.11.6: aceita placeholders X+\d* / Y+\d* + flag /i na 3ª alt + .toUpperCase() pra normalizar
   // v35.11.8: + REQ[A-Z0-9]+ no vocabulário das 3 alts
+  // v35.13:   + 4ª alt para PROCESSO (sem # exigido, separador [:\-–] obrigatório)
   const m = sec.match(/Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)/i)
          || sec.match(/^h3\.\s*#{1,2}\s*(\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)/im)
-         || sec.match(/^\s*#(\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–]/i);
+         || sec.match(/^\s*#(\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–]/i)
+         || sec.match(/^h\d+\.\s*(?:REQUISITO\s*:?\s*)?(PROCESSO)\s*[:\-–]/im);
   return m ? m[1].toUpperCase() : null;
 }
 
@@ -216,7 +247,8 @@ function getReqSectionBounds(ds, reqId) {
   // v35.11.5: \*?\s* em todas as alts + (?:h\d+\.\s*)? na 2ª alt pra alinhar com split
   // v35.11.6: \d+ → (?:\d+|X+\d*|Y+\d*) em todas as 4 alts
   // v35.11.8: + REQ[A-Z0-9]+ em todas as 4 alts
-  const nextM = afterStart.match(/(?:\n\s*h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*h3\.\s*#{1,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*#(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–])/i);
+  // v35.13:   + 5ª alt para PROCESSO (sem # exigido, separador [:\-–] obrigatório)
+  const nextM = afterStart.match(/(?:\n\s*h3\.\s*Requisito[\s:]*(?:Requisito\s+)?(?:Funcional\s+)?\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*(?:h\d+\.\s*)?REQUISITO\s*:?\s*\*?\s*#{0,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*h3\.\s*#{1,2}\s*(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)|\n\s*#(?:\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–]|\n\s*h\d+\.\s*(?:REQUISITO\s*:?\s*)?PROCESSO\s*[:\-–])/i);
   const end = nextM ? start + startM[0].length + nextM.index : ds.length;
   return { start: start, end: end };
 }
@@ -230,7 +262,11 @@ function buildPlaceholderMap(ds) {
       // v35.11.6: (\d+) → (\d+|X+\d*|Y+\d*) + flag /i + .toUpperCase() pra normalizar case
       // v35.11.8: + REQ[A-Z0-9]+ aceita placeholders REQxx, REQyy, etc
       const m = line.match(/^#{0,2}\s*(\d+|X+\d*|Y+\d*|REQ[A-Z0-9]+)\s*[-–]\s*(.+)/i);
-      if (m) map.push({ id: m[1].toUpperCase(), title: m[2].trim().toLowerCase() });
+      if (m) { map.push({ id: m[1].toUpperCase(), title: m[2].trim().toLowerCase() }); return; }
+      // v35.13: aceita "h3. PROCESSO - <título>" no sumário — ID literal 'PROCESSO',
+      // auto-numbering vira PROCESSO1/2/3 no pipeline analyze()
+      const mP = line.match(/^h\d+\.\s*PROCESSO\s*[-–]\s*(.+)/i);
+      if (mP) map.push({ id: 'PROCESSO', title: mP[1].trim().toLowerCase() });
     });
   });
   return map;
@@ -238,12 +274,14 @@ function buildPlaceholderMap(ds) {
 
 // v35.11.6: detecta se id é placeholder provisório
 // v35.11.8: + check pra REQ[A-Z0-9]+ (REQxx, REQyy, REQzz, REQ001, etc)
+// v35.13:   + check pra PROCESSO + sufixo numérico (PROCESSO, PROCESSO1, PROCESSO2, ...)
 function isProvisionalId(id) {
   if (id === '99999') return true;
   if (/^0\d*$/.test(id)) return true;          // 0, 00, 01, 02, ...
   if (/^X+\d*$/i.test(id)) return true;        // X, XX, XXX, X1, XX2, XXX3, X42, ...
   if (/^Y+\d*$/i.test(id)) return true;        // Y, YY, YYY, Y1, YY2, ...
   if (/^REQ[A-Z0-9]+$/i.test(id)) return true; // REQXX, REQYY, REQZZ, REQ001, ...
+  if (/^PROCESSO\d*$/i.test(id)) return true;  // PROCESSO, PROCESSO1, PROCESSO2, ... (v35.13)
   return false;
 }
 
@@ -251,8 +289,14 @@ function isProvisionalId(id) {
 function analyze(ds) {
   const secs = splitSections(ds);
   const reqs = [];
+  // v35.13: contador pra auto-numerar IDs 'PROCESSO' na ordem de aparição
+  let procCount = 0;
   secs.forEach(function (sec) {
-    const id = getReqIdFromSection(sec);
+    let id = getReqIdFromSection(sec);
+    if (id === 'PROCESSO') {
+      procCount++;
+      id = 'PROCESSO' + procCount;
+    }
     if (id) {
       const rules = extractRules(sec).map(function (r) { return r.title; });
       reqs.push({ id: id, rules: rules });
@@ -261,12 +305,27 @@ function analyze(ds) {
   return reqs;
 }
 
+// v35.13: variante do buildPlaceholderMap que auto-numera PROCESSOs (pra uso no
+// bookmarklet, onde a UI precisa diferenciar PROCESSO1/2/3 na exibição).
+function buildPlaceholderMapNumbered(ds) {
+  const raw = buildPlaceholderMap(ds);
+  let procCount = 0;
+  return raw.map(function (e) {
+    if (e.id === 'PROCESSO') {
+      procCount++;
+      return { id: 'PROCESSO' + procCount, title: e.title };
+    }
+    return e;
+  });
+}
+
 module.exports = {
   extractRules: extractRules,
   splitSections: splitSections,
   getReqIdFromSection: getReqIdFromSection,
   getReqSectionBounds: getReqSectionBounds,
   buildPlaceholderMap: buildPlaceholderMap,
+  buildPlaceholderMapNumbered: buildPlaceholderMapNumbered,
   isProvisionalId: isProvisionalId,
   getDescriptionArea: getDescriptionArea,
   analyze: analyze
