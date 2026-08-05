@@ -18,7 +18,7 @@
 const GITHUB_RAW_URL =
   "https://raw.githubusercontent.com/Gabiel-hue/sisloc-master/main/sisloc_master.js";
 
-const REDMINE_URL_PATTERN = /^http:\/\/net1\/redmine\/issues\/\d+/;
+const REDMINE_URL_PATTERN = /^https?:\/\/[^\/]+\/redmine\/issues\/\d+/;
 
 // Chaves no chrome.storage.local
 const CACHE_KEY = "sisloc_cached_body";
