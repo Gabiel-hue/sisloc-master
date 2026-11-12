@@ -1,0 +1,51 @@
+h1. REGRAS DE NEGÓCIOS
+
+h3. RN1
+
+(#79269)
+Para as notas fiscais eletrônicas parametrizadas como NF-e Conjugada, o Sisloc exibirá a aba *Retenção de Impostos*.
+
+h3. RN2
+
+(#80636)
+A aba ISSQN só estará disponível quando a série da Nota Fiscal configurado for +*Nota Fiscal Eletrônica conjugada.*+
+
+h3. RN3
+
+(#80636)
+Os seguintes campos são de preenchimento +obrigatório+ para esta a aba *ISSQN* e quando a nota fiscal for conjugada:
+* Valor da base de cálculo;
+* Alíquota;
+* Lista de Serviço;
+* UF;
+* Município de Ocorrência;
+* Valor do ISSQN;
+* Exigibilidade do ISS;
+* Incentivo Fiscal;
+
+h3. RN4 – Valores IBS/CBS
+
+(#204561)
+Na importação dos valores calculados de IBS/CBS do XML referente a nota emitida, os valores de IBS/CBS que estiverem informados no Sisloc serão sobrescritos.
+
+{{toc}}
+ 
+*Atenção:*
+Este requisito foi migrado para o ReqSearch e pode estar desatualizado. Confira a versão oficial clicando no campo 'ReqSearch'.
+ 
+{{collapse(Última versão Redmine)
+ 
+(Requisito)
+}}
+
+
+h2. CHANGELOG
+
+Demanda: #204561
+Implementado retorno de IBS/CBS na NFSE-e nacional.
+
+Demanda #80636
+Melhoria na Nota Fiscal eletrônica - acrescentando os campos que o Sisloc não possui.
+
+Demanda #79269
+Geração do grupo <retTrib> da NF-e conjugada

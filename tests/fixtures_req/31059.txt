@@ -1,0 +1,1761 @@
+h1. Documentação
+
+Na versão corrente, o SISLOC considera uma NF-e, como aprovada pela sefaz, caso o status da mesma, no XML de retorno, esteja com a tag cStat = 100. De acordo com a nova norma técnica, além do status 100 deverá também ser considerado o 150(NF-e aprovada em contingência).
+>>>→ XML.cStat = 100 e 150
+
+h1. Regra de negócio
+
+h3. RN1
+
+Ao emitir uma NF-e/NFS-e, antes de finalizar o processo, ou seja, mostrar a mensagem "Nota fiscal enviada com Sucesso.", verificar o certificado digital informado na série da nota em questão e sua data de expiração.
+
+Caso nfserie.dt_cert_expiracao = nulo da série vinculado na emissão da nota, o sistema deverá apresentar o seguinte aviso: "Data de expiração do certificado digital não informada no cadastro de série. Favor cadastrá-la".         
+
+Se nfserie.dt_cert_expiracao subtraído da data corrente for menor ou igual a 30 dias apresentar a seguinte mensagem: 
+'O certificado digital expira em <data expiração>, tendo <quantidade de dias> restantes'.
+
+Caso o certificado esteja vencido apresentar:
+'Certificado digital expirado.'
+
+Caso o certificado expire na data de execução da emissão apresentar:
+Certificado digital irá expirar hoje às <data de expiração completa data/hora>
+
+Caso o Certificado expirará no dia posterior apresentar:
+O certificado digital expira em <data expiração>, tendo <1 dia> restante'
+
+Obs.: Para uma NF-e algumas destas validações não ocorrerá, pois já existe uma validação no momento da impressão, porém para um NFS-e todas as validações ocorrerá.
+
+h3. RN2
+
+Para exportar o arquivo de integração com cupom fiscal e, realizar o processo de sincronização SISLOC x Cupom Fiscal é necessário que o modelo de nota fiscal esteja com com o campo [NFMODELO.CUPOM_DLL] preenchido com o tipo de integração ("CFSimilar.dll" ou "magalhaes") e campo [NFMODELO.CUPOM_CAMINHO] preenchido com o local onde deve ser gerado o arquivo de integração.
+
+h3. RN3 
+
+Se modelo de documento configurado para integração cupom fiscal [NFMODELO.CUPOM_DLL] = "magalhaes" e campo [NFMODELO.CUPOM_CAMINHO] preenchido, 
+CST[NFMERC.NFE_CST] <> (10,30,40,41,50,60 e 70) e Alíquota de ICMS <> (07,12,17,18,25,27) ou
+CST[NFMERC.NFE_CST] = (10,30,40,41,50,60 e 70) e Alíquota de ICMS <> (0) ou 
+CST[NFMERC.NFE_CST] = (90) e Alíquota de ICMS <> (0,07,12,17,18,25,27)
+então levantar exceção com a seguinte mensagem:
+
+"Para integração com cupom fiscal são aceitos:
+
+Para CST 90 as alíquotas 00,07,12,17,18,25,27
+Para CST 10,30,40,41,50,60 e 70 a alíquota 00.
+Para demais CST's as alíquotas 07,12,17,18,25,27."
+
+h3. RN4
+
+Ao Imprimir a Nota Fiscal o sistema realiza a validação do parâmetro 'Compactar arquivos' (#31168) e aplica o comportamento ditado por este ao anexar os arquivos a serem enviados ao cliente. 
+
+h3. RN5
+
+Ao imprimir uma nota fiscal de cupom fiscal, o próximo número existente na série, será atualizado pela tag "COO" existente no arquivo SYSPMOV. Este arquivo é gerado pelo PDV Casa Magalhães.
+Caso o processo de impressão não encontre o arquivo SYSPMOV ou nenhuma tag "COO" dentro deste, o sistema apresentará o número conforme versão corrente.
+O Sisloc deverá, antes de apresentar o número a ser impresso, validar o arquivo SYSPMOV e verificar os seguintes registros:
+• 3 - Redução Z campo “COO”
+• 18 - Pagamento campo “Sequencial COO”
+• 19 - Sangria campo “Sequencial COO”
+• 20 - Reforço de caixa campo “Sequencial COO”
+Dentre esses registros citados, o sistema utilizará o maior “COO” identificado, como o número da NF na tela “Número e Data de Emissão da NF”. 
+
+
+h3. RN6
+
+(#91255)
+
+Ao clicar no processo "Impressão" validar a regra:
+
+* Aba Dados da NF
+
+No endereço do destinatário/remetente, os seguintes campos serão obrigatórios:
+Nome, Logradouro, Número, Bairro, Cidade, UF e CEP
+Obs.: A UF deverá aceitar a sigla EX pois, este termo se trata de um endereço do exterior.
+
+No endereço de entrega, caso algum campo venha ser preenchido, será obrigatório o preenchimento de todos os campos, exceto o campo Complemento.
+
+
+-No endereço do destinatário/remetente, os seguintes campos serão obrigatórios:-
+-Nome, Logradouro, Bairro, Cidade, UF e CEP-
+-Obs.: A UF deverá aceitar a sigla EX pois, este termo se trata de um endereço do exterior.-
+
+-No endereço de entrega, caso algum campo venha ser preenchido, será obrigatório o preenchimento de todos os campos.-
+
+* Aba Cobrança da NF
+
+Caso o campo cidade da seção "Enviar fatura para o endereço" venha ser preenchido, o campo UF será obrigatório.
+
+Caso o campo cidade da seção "Enviar cobrança para o endereço" venha ser preenchido, o campo UF será obrigatório.
+
+Em ambas as abas, validar para que não seja possível inserir uma UF inválida.
+Exemplo: Belo Horizonte - BR
+
+h3. RN7
+
+Ao clicar no processo "Impressão" de um NFS-e o sistema valida:
+
+O valor Total dos Serviços é menor do que a soma dos valores de 'Base de Calculo' do ISS + Descontos. Caso seja o sistema apresenta uma mensagem de erro: "Valor dos serviços não pode ser menor que a soma da Base de Cálculo do ISS mais seu Descontos. Verifique se houve alteração de valores e totalize a nota fiscal".
+
+h3. RN8
+
+Ao emitir uma Nota fiscal de débito (ND) padrão do sistema o Sisloc deve avaliar, no cadastro do modelo da Nota fiscal, se o campo 'Título Nota de Débito' esta preenchido. Caso esteja o sistema deverá sobrepor o título padrão (Nota de Débito) pelo que esta descrito no campo. Esta configuração no modelo sobrepõe o que por ventura esteja definido nos parâmetros gerais.   
+Obs.: Assim como o parâmetro geral, a configuração do título utilizará o artifício "*" para imprimir o fundo branco e ";" para quebrar a linha.
+
+Neste mesmo contexto também avalia se o campo 'Cabeçalho Sintético' no modelo de Nota Fiscal esta marcado, se sim, imprimi a ND padrão com cabeçalho sem as informações de IE (Inscriçao Estadual) e CNPJ. 
+
+h3. RN9
+
+Se importação de nota eletrônica assíncrona, gerar CAR provisório.
+Se geração de duplicata/boleto estiver automático, não alimentar a tabela faturacar no momento da geração do CAR.
+
+h3. RN10
+
+(#59762) 
+
+*Somente executar esta regra se em Iniciar > Opções > Configuração > Modelo nota fiscal > aba 1-dados, campo "Imprimir tot. aprox. tributos" estiver diferente de NÃO.*
+
+Ao imprimir uma nota fiscal, sendo ela de mercadoria ou serviço, o sistema calcula o valor aproximado dos impostos através dos percentuais informados no cadastro do ESTADO. O cálculo é:
+*Obs: a nota é de mercadoria quando preenchido aba 2-Mercadoria; e Serviço quando preenchido a aba 3-Serviço; e conjugada quando estas duas abas estão preenchidas.*
+
+
+*Legenda:*
+
+_Valor final_ = iniciar > Nota fiscal > aba 5-Impostos e Valores, campos "Total Mercadorias" + "Total Serviços".
+
+* Federal:  <percentual federal nacional ou importado> * <Valor final>
+* Estadual: <percentual estadual>   * <Valor final>
+* Municipal: <percentual municipal> * <valor final>
+
+Ex. supondo ser NBS = 117012700, o valor de 30,00 o valor final, item nacional, vigência fim para "30/06/2015" ficaria:
+
+* Federal:  13,45% * 30,00 = 4,03
+* Estadual: 25,00% * 30,00 = 7,50
+* Municipal: 2,00% * 30,00 = 0,60
+
+_Obs.: A carga tributária federal de produtos, mercadorias e serviços importados é utilizada quando o primeiro caractere que identifica a Origem da Mercadoria ou Serviço, utilizado em conjunto com a CST – Código de Situação Tributária, do cadastro do produto for diferente de: 0, 3, 4, 5._
+
+Ao imprimir a nota fiscal deve verificar o estado do emitente da nota com o informado no cadastro do ESTADO, NCM e/ou NBS. 
+Para pesquisar NCM utilizar o campo “NCM” informado na aba 2-Mercadoria.
+Para pesquisar NBS utilizar o serviço informado na aba 3-Serviço.
+          
+Exceção: 
+Ao imprimir a nota fiscal e não for encontrado NCM ou NBS com seu respectivo percentual, será levantado a seguinte mensagem de confirmação:
+
+“ATENÇÂO
+ 
+De acordo com a lei de transparência Nº 12.741/2012 , foram encontradas algumas divergências:
+A alíquota, do NCM da mercadoria, necessária para o cálculo aproximado dos impostos, não foi encontrada.
+Seguem abaixo os NCMs não encontrados : 
+[Lista os NCMs]
+Soluções :
+1 - Verifique se o NCM foi digitado corretamente.
+2 - Baixe a versão atualizada da tabela IBPTax, disponível no endereço "https://deolhonoimposto.ibpt.org.br",  e realize a importação para o SISLOC através do caminho INICIAR > NOTA FISCAL > IMPORTAR TABELA IBPT.'
+3 - Caso deseje continuar com a impressão, os impostos municipais, estaduais e federais serão impressos com zero.
+Deseja continuar com a emissão da NF?"
+
+ou
+ 
+"ATENÇÂO
+ 
+De acordo com a lei de transparência Nº 12.741/2012 , foram encontradas algumas divergências:
+A alíquota, do NBS presente no grupo, necessária para o cálculo aproximado dos impostos, não foi encontrada.
+Seguem abaixo os códigos de serviço não encontrados :
+[Lista os serviços]
+Soluções :
+1 - Verifique se o código de serviço informado no Grupo foi digitado corretamente.
+2 - Baixe a versão atualizada da tabela IBPTax, disponível no endereço "https://deolhonoimposto.ibpt.org.br",  e realize a importação para o SISLOC através do caminho INICIAR > NOTA FISCAL > IMPORTAR TABELA IBPT.'
+3 - Caso deseje continuar com a impressão, os impostos municipais, estaduais e federais serão impressos com zero.
+Deseja continuar com a emissão da NF ?”
+
+#59762 - 03/04/2015
+
+-(#48004) Ao imprimir uma nota fiscal, sendo ela de mercadoria ou serviço, o sistema calcula o valor aproximado dos
+-impostos sendo assim, a rotina deverá olhar para os respectivos percentuais informados nos cadastros de Grupo e NCM -(Campos da 
+-lei de transparência).
+
+-Obs.: Para os CFOPs começados em 5 ou 6, será utilizado, para o cálculo aproximado dos impostos, o valor da 
+-alíquota nacional senão, será utilizado o valor da alíquota importação.
+       
+-Exceção: 
+-Ao imprimir uma nota fiscal, caso a rotina encontre, na nota, algum NCM ou código de serviço que não possua o 
+-respectivo percentual nos cadastros, será levantado a seguinte mensagem de confirmação:
+
+-“ATENÇÂO
+-De acordo com a lei de transparência Nº 12.741/2012 , foram encontradas algumas divergências:
+-A alíquota, do NCM da mercadoria, necessária para o cálculo aproximado dos impostos, não foi encontrada.
+-Seguem abaixo os NCMs não encontrados : 
+-[Lista os NCMs]
+-Soluções :
+-1 - Verifique se o NCM foi digitado corretamente.
+-2 - Baixe a versão atualizada da tabela IBPTax, disponivel no endereço "https://www.ibpt.org.br",  e realize a 
+-importação para o SISLOC atraves do caminho INICIAR > NOTA FISCAL > IMPORTAR TABELA IBPT.'
+-3 - Caso deseje continuar com a impressão, os valores calculados ("Total de tributos") serão impressos com zero.
+-Deseja continuar com a emissão da NF ?"
+-ou
+-"ATENÇÂO
+-De acordo com a lei de transparência Nº 12.741/2012 , foram encontradas algumas divergências:
+-A alíquota, do código do serviço presente no grupo, necessária para o cálculo aproximado dos impostos, não foi 
+-encontrada.
+-Seguem abaixo os códigos de serviço não encontrados :
+-[Lista os serviços]
+-Soluções :
+-1 - Verifique se o código de serviço informado no Grupo foi digitado corretamente.
+-2 - Baixe a versão atualizada da tabela IBPTax, disponivel no endereço "https://www.ibpt.org.br",  e realize a 
+-importação para o SISLOC através do caminho INICIAR > NOTA FISCAL > IMPORTAR TABELA IBPT.
+-3 - Caso deseje continuar com a impressão, os valores calculados ("Total de tributos") serão impressos com zero.
+-Deseja continuar com a emissão da NF ?”
+
+
+
+>-Ao imprimir uma nota fiscal, sendo ela de venda ou locação, o sistema calcula o valor aproximado dos impostos sendo assim, a rotina- >-deverá olhar para os respectivos percentuais informados nos cadastros de Serviço e NCM (Campos da lei de transparência).-
+>
+>-Obs.: Para os CFOPs começados em 5 ou 6, será utilizado, para o cálculo aproximado dos impostos, o valor da alíquota nacional senão- >-será utilizado o valor da alíquota importação.-
+>          
+>-Exceção:- 
+>-Ao imprimir uma nota fiscal, caso a rotina encontre, na nota, algum NCM ou código de serviço que não possua o respectivo percentual- >-nos cadastros, será levantado a seguinte mensagem de confirmação:-
+>
+>-“ATENÇÂO-
+> 
+>-De acordo com a lei de transparência Nº 12.741/2012 , foram encontradas algumas divergências:-
+>-A alíquota, do NCM da mercadoria, necessária para o cálculo aproximado dos impostos, não foi encontrada.-
+>-Seguem abaixo os NCMs não >encontrados :- 
+>-[Lista os NCMs]-
+>-Soluções :-
+>-1 - Verifique se o NCM foi digitado corretamente.-
+>-2 - Baixe a versão atualizada da tabela IBPTax, disponivel no endereço "https://www.ibpt.org.br",  e realize a importação para o-
+>-SISLOC atraves do caminho INICIAR > NOTA FISCAL > IMPORTAR TABELA IBPT.'-
+>-3 - Caso deseje continuar com a impressão, os valores calculados ("Total de tributos") serão impressos com zero.-
+>-Deseja continuar com a emissão da NF ?"-
+>
+>-ou-
+> 
+>-"ATENÇÂO-
+> 
+>-De acordo com a lei de transparência Nº 12.741/2012 , foram encontradas algumas divergências:-
+>-A alíquota, do código do serviço, necessária para o cálculo aproximado dos impostos, não foi encontrada.-
+>-Seguem abaixo os códigos de serviço não encontrados :-
+>-[Lista os serviços]-
+>-Soluções :-
+>-1 - Verifique se o codigo de serviço foi digitado corretamente.-
+>-2 - Baixe a versão atualizada da tabela IBPTax, disponivel no endereço "https://www.ibpt.org.br",  e realize a importação para o-
+>-SISLOC atraves do caminho INICIAR > NOTA FISCAL > IMPORTAR TABELA IBPT.-
+>-3 - Caso deseje continuar com a impressão, os valores calculados ("Total de tributos") serão impressos com zero.-
+>-Deseja continuar com a emissão da NF ?”-
+
+h3. RN11
+
+Ao enviar uma NF por e-mail e esta estiver configurado para ser via SMTP deverá aplicar todas as regras dos campos de parametrização deste tipo de envio para a montagem do e-mail. 
+Deve aplicar as condições de cópia e solicitação de confirmação de leitura para esta montagem.
+Obs.: As configurações de SMTP podem ser dos parâmetros gerais ou do Cadastro de empresa. Isso dependerá do que está definido no parâmetro "Considerar configurações SMTP do(a)".
+
+h3. RN12
+
+Quando for emissão de uma NF-e para Brasília e a série da NF estiver marcada como Conjugada então os impostos sobre serviço que forem retidos serão destacados conforme o exemplo abaixo:
+
+Retenção de INSS 11% sobre 3150,00 =  R$345,50
+Retenção de IR 11% sobre 3150,00 =  R$345,50
+Retenção de PIS/COFINS/CSLL 11% sobre 3150,00 =  R$345,50
+Retenção de ISS 11% sobre 3150,00 =  R$345,50
+
+Estes dados serão impressos nos dados adicionais da NF ao imprimir o DANFE seja na pré-impressão ou na impressão após enviar, sempre utilizando os dados já calculados na aba de impostos.
+
+h3. RN13
+
+
+(#55568) Ao emitir a nota fiscal e gerar o CAR os valores devem ser lançados para suas respectivas Contas Contábeis, conforme classificação automática. Isso se o parâmetro 'Preço de Locação composto' estiver marcado.
+
+-<CL>*Alteração em 13/01/2015*(#48127) Ao emitir a nota fiscal e gerar o CAR os valores devem ser lançados para suas respectivas naturezas financeiras.<CL>-
+
+h3. RN14
+
+(#48185) Quando a nota fiscal for cancelada esse CAR relacionado a ela deve ficar no status cancelado e não deverá ser possível alterar nenhuma informação desse CAR. Nos relatórios que acessam a informação do CAR e nos processos de exportação de dados fiscais o documento com status de cancelado não pode ser listado.
+
+h3. RN15
+
+(#48206) Ao emitir uma nota fiscal se a classificação automática estiver correta, deve abrir a tela para o Usuário conferir e dar ok sem deixar o mesmo alterar a classificação.
+
+h3. RN16
+
+(#48229) Quando novo parâmetro geral "Mostrar aviso de contas a Receber" aba Nota Fiscal estiver desmarcado, a tela de aviso de contas a receber vencidas e a vencer não deve ser exibida.
+
+h3. RN17
+
+(#46674) Ao mandar imprimir será realizada a validação para não permitir que tenha sido informado 2 itens de lista diferentes, além da exigência de ter sido informado um único CNAE e item da lista e uma única alíquota para todos os itens que foram informados na aba de serviços, estes três campos têm por exigência que ser os mesmos em todos os serviços que estiverem informados.
+
+Ao tentar imprimir caso exista dois CNAE’s, dois itens de lista ou alíquota diferentes será apresentada a seguinte mensagem:
+
+“Não será possível emitir esta nota fiscal pois para sua nota eletrônica de serviço só é permitido a utilização do mesmo CNAE/Item da lista de serviço/Alíquota ISS, o que não está informado corretamente. Opções para solução:
+
+- Verifique os itens informados na aba de serviço se todos possuem CNAE e Item de lista de serviço informados.
+- Verifique se a alíquota utilizada para os serviços informados é única, pois só é permitido uma alíquota por nota.
+- Só poderá haver um ITEM LISTA SERVIÇO NFSE para um único CNAE com uma mesma alíquota em cada nota, caso possua diferentes valores para os serviços informados desmembre a nota para que seja possível emitir a nota sem rejeição pela prefeitura conforme padrão ABRASF aderido pela sua prefeitura. ”
+
+Esta validação será realizada somente quando a série estiver configurada para emitir NFS-e para:
+Os municípios atendidos pela ABRASF hoje são:
+•	BH-MG
+•	Salvador-BA
+•	CUIABÁ-MT
+•	Sabará-MG
+•	Contagem-MG
+•	Guarulhos-SP 
+•	APARECIDA-GO 
+•	Lagoa Santa-MG
+•	João Pessoa-PB 
+•	Goiânia-GO
+•	Juiz de Fora-MG
+•	Patos de Minas-MG
+
+Além do tipo de nota eletrônica existente:
+•	Integração NFS-e
+
+h3. RN18
+
+(#49448) Quando for utilizado uma série com tipo de nota eletrônica como "INTEGRAÇÃO NFSE" e com a flag "Exportar RPS assinado" marcada e for do município de cabedelo, será chamado a DLL da Benefix e passado o txt conforme é feito no envio de RPS, mas nestes casos será realizada a mesma validação feita no enviar RPS assim a Benefix irá retornar o XML assinado, este xml deve ser salvo na nf_eletronica no campo do RPS e seguir o fluxo normal de uma NFS-e.
+
+h3. RN19
+
+(#55568) Ao emitir uma nota fiscal originada da locação o Sisloc deverá observar se os dados de classificação financeira estão presentes e aplica-la automaticamente. Estas informações estarão presentes quando se trabalha com a definição da classificação a nível de Grupo, utilizado para serviços e produtos e possui o parâmetro 'Preço de Locação composto' marcado.
+
+-<CL>*Alterador em 13/01/2015* (#51403) Ao emitir uma nota fiscal originada da locação o Sisloc deverá observar se os dados de classificação financeira estão presentes e aplica-la automaticamente. Estas informações estarão presentes quando se trabalha com a definição da classificação financeira a nível de Grupo (Grupo utilizado para serviços e produtos).<CL>-  
+
+h3. RN20
+
+(#53886) Ao gerar o CAR, caso exista informação no campo "informações da origem" (Campo interno da tabela NF - Não visível ao usuário), esta será apresentada no campo Inf. Origem, existente no CAR.
+
+h3. RN21
+
+Na tela de conta bancária e modelo de nota fiscal, existe um campo chamado Centro de Resultado. Caso esses dois campos possuam um valor em comum, ao imprimir a nota fiscal, a tela que solicita o número conta, já virá com este campo preenchido. O valor deste será a conta que possui o mesmo centro de resultado do modelo.
+
+Caso o centro de resultado informado no modelo da nota esteja vinculado a mais de uma conta bancária, a impressão da nota deverá trazer o campo "Conta" vazio, para que o usuário selecione a desejada. 
+Obs.: O campo Conta irá listar apenas aquelas contas cujo o campo centro de resultado esteja com o mesmo valor informado no centro de resultado do modelo de nota fiscal.
+
+h3. RN22
+
+Ao imprimir o RPS a rotina o Sisloc deverá validar o campo Máscara RPS, existente na aba Nota fiscal do cadastro de empresa.
+Este campo será levado em consideração tanto para notas fiscais impressas através da Benefix quanto através do Sisloc.
+Caso este campo esteja preenchido, o Sisloc irá substituir as tags pelas informações correspondentes.
+
+A observação da nota deverá sair apenas uma vez pois, trata-se de uma observação da nota e não do serviço.
+
+A observação do cfop, deverá sair uma única vez. Caso exista cfops diferentes, a observação deverá ser concatenada.
+
+h3. RN23
+
+(#57253) 
+- _Quando for utilizada uma série com tipo de nota eletrônica 'Integração NFSe' (Benefix), as seguintes informações devem ser exibidas no layout de impressão da Nota/RPS:_
+
+• Descrição Item Serviço: Deve ser considerada a informação preenchida no novo campo "Descrição Item do Serviço", aba ‘Serviços’ da Nota Fiscal. Essa informação deve ser concatenada com seu referente código (código serviço) já existente no layout de impressão. A descrição será impressa somente se o campo "Descrição Item do Serviço" do primeiro Item de Serviço informado na nota for preenchido.
+
+• Descrição Natureza de Operação: Deve ser considerada a informação preenchida no campo "Natureza da Operação NFS-e", aba ‘Impostos e Valores’ da Nota Fiscal. Essa informação deve ser concatenada com seu referente código (natureza operação) já existente no layout de impressão.
+
+• CNAE: Para o código, deve ser considerada a informação preenchida no campo "CNAE", aba 'Serviços' da Nota Fiscal e para descrição deve ser considerada a informação preenchida no novo campo 'Descrição CNAE', aba 'Serviços' da Nota Fiscal. A descrição será impressa somente se o campo 'Descrição CNAE' do primeiro Item de Serviço informado na nota for preenchido. As informações do CNAE (Código e Descrição) serão exibidas no bloco abaixo da 'Discriminação dos Serviços'.
+
+• E-mail e CEP Prestador: Devem ser consideradas as informações preenchidas no campo 'E-mail' e 'CEP', aba ‘Dados’ do cadastro de Empresa. Essas informações devem ser exibidas nos campos 'E-mail' e 'Cep' dos dados do Prestador já existentes no layout de impressão.
+
+- _Quando for NFS-e emitida pelo Sisloc ou Benefix (Série com tipo de nota eletrônica 'Integração NFSe'), a seguinte informação deve ser exibida no layout de impressão da Nota/RPS:_
+
+• Matricula CEI: Deve ser considerada a nova tag [MATRICULA_CEI] criada no campo "Máscara RPS" do cadastro de Empresa. Essa informação deve ser exibida na discriminação dos serviços da nota/RPS. 
+
+h3. RN24
+
+(#57253) No momento da criação do RPS, essa nova tag [MATRICULA_CEI] deve ser substituída pelo respectivo valor do campo "Matricula CEI" da Nota Fiscal, aba Dados.
+
+A Matricula CEI da nota deverá sair apenas uma vez pois, trata-se de uma informação da nota e não do serviço.
+
+Caso o campo Máscara RPS não esteja preenchido, o Sisloc irá seguir a forma de impressão habitual ou seja, se for Benefix irá imprimir apenas a descrição do serviço, se não for Benefix deverá ser avaliado qual a prefeitura pois, na versão corrente, dependendo da prefeitura é impresso uma informação diferente junto à descrição da prefeitura.
+
+Caso o campo Máscara RPS esteja preenchido, tanto para Benefix quanto para notas emitidas diretamente pelo Sisloc, deverá seguir as configurações do campo "Máscara RPS".
+
+h3. RN25
+
+No layout de impressão da NFS-e será exibido o "Município de Prestação" onde deve ser considerada a informação do campo Cidade/UF da seção 'Local de entrega' da Nota Fiscal. Caso este campo esteja vazio, deve ser considerada a informação do campo Cidade/UF da seção 'Destinatário/Remetente'.
+
+h3. RN26
+
+(#55804)
+Se status = EMITIDA POR TERCEIRO, não permitir executar o processo.
+
+h3. RN28
+
+(#55808)
+Somente executar esta regra, se ao finalizar o processo de impressão, verificar:
+> se a origem da nota é de uma Remessa ou Devolução da Ficha de Locação com operação igual a “Comodato”, deve-se gerar a nota fiscal de entrada na empresa informada como destinatário.
+
+Exemplo: a empresa A (comodante) esta realizando o comodato com a empresa B (comodatário).
+Na empresa A ao imprimir/emitir a nota de remessa, automaticamente deve-se entrar com esta emitida na empresa B, sendo neste caso uma entrada. 
+Na empresa A ao imprimir/emitir a nota de devolução, automaticamente deve-se entrar com esta emitida na empresa B, sendo neste caso uma saída.
+
+A nota deverá ser gerada:
+
+|\2=.*Aba 1-Dados, cabeçalho*|
+|.Status|.Emitido por terceiro|
+|.Origem|.COM + <número da remessa>|
+|/2.Entrada / Saída|.Se imprimindo nota de Remessa, gerar como Entrada na comodatária;|
+|.Se imprimindo nota de Devolução, gerar como Saída na comodatária;|
+|.Emitido|.Terceiro|
+|.Categoria|.Não totalizar|
+|.Modelo|.Nulo|
+|.Vendedor|.Utilizar o mesmo Vendedor da ficha de locação|
+|.Projeto|.Nulo|
+|||
+|\2=.*Aba 1-Dados*|
+|.Seção Destinatário / Remetente|.Preencher com os dados do emitente da nota fiscal de saída  (COMODANTE).|
+|.Seção Local de entrega|.O mesmo da nota da remessa ou devolução.|
+|.Seção Dados da emissão|.O mesmo da nota da remessa ou devolução.|
+|||
+|\2=.*Aba 2-Mercadorias*||
+|.Equipamento, NCM, código para impressão, descrição para impressão, unidade, quantidade, valor unitário, situação tributária, alíquota ICMS, %redução ICMS, %IPI, tanque cheio e demais impostos como PIS/COFINS.|.O mesmo da nota da remessa ou devolução.|
+|.CFOP|. Utilizar a “Família de CFOP” correspondente para encontrar o CFOP contrário, tanto de saída como o de entrada. *Observação abaixo desta tabela de como localizar o CFOP contrário.*|
+|.Somar item no valor fat.|.Configurar como NÃO|
+|||
+|.*Aba 3-Servicos*|Vazio|
+|||
+|\2=.*Aba 4-Complemento*||
+|Observação|.Constar o texto: “NF gerada automaticamente pelo COMODATO”.|
+|Seção Exportação|.Copiar o mesmo da nota de remessa ou devolução.|
+|Seção Volume|.Copiar o mesmo da nota de remessa ou devolução.|
+|Seção Transportador/Veículo|.Copiar o mesmo da nota de remessa ou devolução.|
+|Seção Exportação fiscal|.Campo “Tipo” deve ser AMBOS;|
+|||
+|*Aba 5-Impostos e Valores*|Nenhuma particularidade, processo normal de totalização|
+|*Aba 6-Parcelas*|Vazio|
+|*Aba 7-Cobrança*|Vazio|
+|*Aba 8-Comissão*|Vazio|
+|*Aba 9-Notas referenciadas*|Finalidade de emissão = Normal|
+
+*Observação*
+
+O processo para localizar o CFOP de saída ou entrada a fim de gerar a nota fiscal na empresa comodatária é:
+>a. Utilizar o CFOP usado na nota fiscal de comodato, localizando sua respectiva família ativa;
+>b. Nesta família, tem o campo "Família de CFOP de entrada correspondente";
+>c. Para saber qual campo utilizar da família correspondente:
+>>i.	Interno (UF Empresa comodante = UF comodatária), 
+>>ii.	Interestadual para Contr (UF Empresa comodante <> UF Empresa comodatária. Neste ponto, há dois campos que podem ser utilizados para interestadual. Entretanto, independe se contribuinte ou não pois comodato não incide impostos.) 
+>>iii.	Exterior (informando na NF-e como “EX”);
+
+h3. RN29
+
+(#55543)
+
+Este processo disponibilizará ao usuário a lista de adiantamentos, com status ‘Pendente’ com saldo negativo (empresa deve à pessoa) e com a mesma pessoa do destinatário. O usuário escolhe contra qual ou quais adiantamentos deseja liquidar os valores da Nota Fiscal. 
+
+Ao concluir o processo o sistema deverá adaptar a criação dos títulos, referentes as parcelas, conforme cenário exigido pela escolha dos adiantamentos. Deve cria-los e liquida-los conforme a possibilidade de conciliação dos adiantamentos, exemplo:
+>	Cenário 1
+>>	Nota fiscal de 1000,00 em 2 parcelas de 500,00.
+>>	Escolhido dois adiantamentos, um com valor de saldo com -300,00 e outro de -200,00. (Considerar valor absoluto).
+>>	O sistema criará dois títulos com a primeira parcela dividindo a liquidação entre os dois adiantamentos. 
+>>	Criará outro título com a segunda parcela de 500,00 que ficará em aberto. 
+>	Cenário 2
+>>	Nota fiscal de 1000,00 em 2 parcelas de 500,00.
+>>	Escolhido dois adiantamentos, um com valor de saldo com -600,00 e outro de -200,00. (Considerar valor absoluto)
+>>	O sistema criará um título valor de 500,00, referente a primeira parcela e o liquidará contra o adiantamento de -600,00 (que agora ficará com saldo de -100,00)
+>>	Criará outros três títulos referente a segunda parcela, um de 100,00 que também liquidará contra o primeiro adiantamento, zerando o saldo do adiantamento. Outro com valor de 200,00 para liquida-lo contra a segundo adiantamento, também zerando seu saldo. O terceiro de 200,00 restantes, ao qual não será liquidado contra um adiantamento, permanecendo aberto como uma dívida do cliente.
+
+h3. RN30
+
+(#59762)
+
+*Somente executar esta regra se em Iniciar > Opções > Configuração > Modelo nota fiscal > aba 1-dados, campo "Imprimir tot. aprox. tributos" estiver diferente de NÃO.*
+
+Quando faltar 10 dias para que chegue a Data Vigência Fim, do cadastro ESTADO, iniciar o seguinte alerta:
+“Faltam <número de dias> para expirar as alíquotas da Lei da Transparência. Favor realizar o download em https://deolhonoimposto.ibpt.org.br. Em caso de dúvidas no procedimento, verificar no manual da SISLOC”;
+
+h3. RN31
+
+(#59762)
+
+*Somente executar esta regra se em Iniciar > Opções > Configuração > Modelo nota fiscal > aba 1-dados, campo "Imprimir tot. aprox. tributos" estiver diferente de NÃO.*
+
+Quando a data de vigência fim menor que a data atual, emitir o aviso e permitir ao usuário prosseguir caso responda SIM: 
+“As alíquotas da Lei da Transparência estão desatualizadas e não serão calculadas. Favor realizar o download em https://deolhonoimposto.ibpt.org.br. Em caso de dúvidas no procedimento, verificar no manual da SISLOC. Continuar sim ou não?”;
+
+h3. RN32
+
+(#59762)
+*Somente executar esta regra se em Iniciar > Opções > Configuração > Modelo nota fiscal > aba 1-dados, campo "Imprimir tot. aprox. tributos" estiver diferente de NÃO.*
+
+Caso o usuário informe que deseja continuar a impressão quando ocorre a exceção:
+
+* não tendo as alíquotas de NCM ou NBS de serviço ou mercadoria de qualquer um dos itens existentes; 
+* ou que esteja com a data de vigência vencida.
+
+Deve gravar no campo "Lei de transparência" como NÃO e não gerar o texto com os tributos aproximados na observação; caso não ocorra estas exceções gravar SIM.
+
+h3. RN33
+
+(#54833)
+Ao imprimir uma Nota Fiscal que possua um pré-lançamento relacionado o sistema deve alterar de pré-lançamento para um lançamento válido. (Flag do cadastro de lançamento).
+
+h3. RN34
+
+(#59762)
+*Somente executar esta regra se em Iniciar > Opções > Configuração > Modelo nota fiscal > aba 1-dados, campo "Imprimir tot. aprox. tributos" estiver diferente de NÃO.*
+
+Ao imprimir, somente mostrar esta mensagem se estiver com o status menor que NF EMITIDA.
+
+h3. RN35
+
+(#63186) Ao enviar a nota para a Sefaz o CAR criado será gerado como provisório. Durante o processo do retorno da SEFAZ, se a nota foi processada com sucesso, o CAR será alterado para definitivo.
+
+h3. RN36 
+
+(#63186) Caso a flag "Gera duplicata/boleto", no cadastro de série, esteja igual a Sim, a rotina não alimentará a tabela faturacar (tabela responsável pelas informações da duplicata). Ao buscar o retorno da nota na Sefaz, se a nota foi processada com sucesso,a rotina alimentará a tabela faturacar.
+
+h3. RN37
+
+(#68138)
+Caso o parâmetro "CAR - Sugerir dia útil na Data Prevista" esteja marcado, ao gerar uma fatura de CAR onde a data de vencimento seja em fim de semana ou feriado
+o Sisloc atualiza a "Data Prevista" com o próximo dia útil.
+Para definição dos feriados é utilizado o caastro de feriados do sistema.
+
+h3. RN38
+
+(#65175)
+A partir do ano de 2016, o sistema irá gerar *+para as notas fiscais eletrônicas modelo 55+*, no arquivo XML e dentro do subgrupo _*ICMSTot*_ as seguintes _tagss_ _*vFCPUFDest, vICMSUFDest, vICMSUFRemet*_. Caso a operação não seja interestadual e não necessite informar valores nestas 3 _tags_ criadas, o Sisloc irá gerá-las mas com valores iguais a zero.
+
+h3. RN39
+
+(#68631)
+Caso o usuário estiver gerando uma NFC-e, o Sisloc deverá validar o parãmetro geral *Consumidor Final* do subgrupo *NFC-e*. Caso o cliente for o mesmo do parâmetro, o Sisloc não irá validar a obrigatoriedade do preenchimento dos campos de Endereço do Cliente/Endereço de Cobrança, CPF/CNPJ. Esta parametrização também se aplica para a validação da obrigatoriedade da Transportadora.
+Se o usuário selecionar um cliente diferente do parâmetro geral *Consumidor Final*, o sistema irá aplicar as validações normalmente.
+
+h3. RN40
+
+(#68631)
+Caso a NFC-e estiver em ambiente de contingência, o Sisloc irá validar o parâmetro *_Segunda Via - Contigência_*. Caso o parâmetro estiver configurado como *SIM*, o sistema irá emitir duas DANFE em contingência, sendo uma descrita como *_Via Consumidor_* e outra DANFE com a descrição *_Via Estabelecimento_*.
+Caso a opções estiver configurada como *NÃO*, será impresso apenas uma via sem nenhuma descrição.
+
+h3. RN41
+
+(#70727)
+Caso o parâmetro *_Pessoa Aut. Download XML_* estiver configurado deverá enviar o CPF/CNPJ desta pessoa cadastrada para o *_Grupo Autorizador do XML_* na emissão da Nota Fiscal Eletrônica.
+Caso o mesmo parâmetro *NÃO* estiver configurado, o Sisloc não deverá gerar nenhuma informação automática do *_Grupo Autorizador do XML_* na emissão da Nota Fiscal Eletrônica.
+
+h3. RN42
+
+(#70423)
+Caso o usuário esteja emitindo uma NF de Devolução de Venda o Sisloc não deverá mostrar ao imprimir o DANFE o campo "Fatura/Duplicata" nenhum dado em relação à parcela gerada para a Devolução de Venda.
+
+h3. RN43
+
+(#70423)
+Caso o usuário esteja emitindo uma NF de Devolução de Venda o Sisloc deverá exibir para o usuário a tela de classificação financeira, onde ele deverá informar qual será a classificação financeira deste CAP referente à Devolução de Venda.
+Após a confirmação desta classificação financeira, o Sisloc irá gerar um CAP com a classificação selecionada anteriormente.
+
+h3. RN44 
+
+(#70424)
+Caso o usuário esteja emitindo uma NF de Devolução de Compra o Sisloc não deverá mostrar ao imprimir o DANFE o campo "Fatura/Duplicata" nenhum dado em relação à parcela gerada para a Devolução de Compra.
+
+h3. RN45
+
+(#70424) 
+Caso o usuário esteja emitindo uma NF de Devolução de Compra o Sisloc deverá exibir para o usuário a tela de classificação financeira, onde ele deverá informar qual será a classificação financeira deste CAR referente à Devolução de Compra.
+Após a confirmação desta classificação financeira, o Sisloc irá gerar um CAR com a classificação selecionada anteriormente.
+
+h3. RN46
+
+(#71302)
+Caso os módulos de *NF-e* ou *NFC-e* estiver desabilitado, o Sisloc não conseguirá emitir a Nota Fiscal eletrônica ou Nota Fiscal de Consumidor eletrônica, mostrando mensagem de falta de permissão no(s) módulo(s).
+Se a NF já tenha sido emitida e o usuário não possua permissão, o sistema conseguirá imprimir normalmente. 
+
+h3. RN47
+
+(#72001)
+Se a nota fiscal a ser emitida for eletrônica e tiver produtos que possuem cadastro de numeração FCI, o Sisloc deverá enviar para a descrição do produto no DANFE a concatenação da mensagem abaixo com a descrição do produto:
+
+h3. RN48
+
+(#71626)
+Na emissão de uma nota fiscal de consumidor eletrônica (NFC-e) o Sisloc irá enviar a informação preenchida no campo *tipo de cobrança* para o campo _Forma de Pagamento_ da DANFE da NFC-e.
+
+
+h3. RN49
+
+(#74064)
+Quando o usuário necessitar emitir uma nota fiscal referente a uma emissão de um cupom fiscal através de uma ECF (emissor de cupom fiscal), o Sisloc irá buscar os dados cadastrados no processo #74076 e enviá-las na tag _<refECF>_ e tags filhas correspondentes, conforme exemplo abaixo:
+<pre><code class="xml">
+	<NFref>
+		<refECF>
+			<mod>2D</mod>
+			<nECF>1</nECF>
+			<nCOO>3334</nCOO>
+		</refECF>
+	</NFref>
+</code></pre>
+
+
+*DESCRIÇÃO DO PRODUTO* - RESOLUÇÃO DO SENADO FEDERAL 13/12, FCI Nº *XXXX*
+
+h3. RN50
+
+* Se for ND padrão e o parâmetro geral 'Nota de Débito: Imprimir' (Geral > Nota Fiscal > Parâmetros 2) estiver marcado como 'Descontos e Despesas' então será impresso na nota de débito padrão do Sisloc uma seção chamada 'Descontos e Despesas' e nesta serão impressas as mesmas informações contidas na aba Impostos e valores da NF
+
+* Se for ND padrão e o parâmetro geral 'Nota de Débito: Imprimir' (Geral > Nota Fiscal > Parâmetros 2) estiver marcado como 'Impostos NFS-e' então será impresso na nota de débito padrão do Sisloc uma seção semelhante à NFS-e, onde serão impressos os valores de impostos retidos e valor do ISS/Deduções.
+
+h3. RN51
+
+Ao imprimir uma NF-e, se for verificado que o layout da nota está apontando para o modelo 2.0 (cadastro de empresa > aba tributação > campo Versão NF-e). Se for verdade, levantar exceção.
+
+Mensagem: "Conforme a nota técnica 2013/005, a partir do mês de março de 2015, a NF-e não poderá ser impressa utilizando o layout 2.0. Acesse o cadastro de empresa, aba tributação, e altere o campo Versão NF-e para 3.10.
+Caso não tenha acesso solicite ao administrador do sistema." 
+
+Ao imprimir a NF-e o processo deverá validar o campo IE. Se este possuir apenas letras e a palavra for diferente de 'ISENTO' (Maiúsculo e no Masculino) levantar exceção.
+Mensagem: 
+
+'Não foi possível efetuar a impressão da NF-e. Erro detectado:
+Não foi possível executar o processo.
+Ocorreu um erro ao carregar as informações da NF-e.
+
+Erro: Não foi possível imprimir a nota fiscal. 
+Inscrição estadual inválida, para informar a isenção da inscrição estadual, preencha o campo “Inscrição Estadual” aba “Dados” do cadastro de pessoa com o valor 'ISENTO' (Em maiúsculo e no masculino).
+
+
+
+Ao imprimir a NF-e/NFS-e remover, caso exista, os espaços iniciais e finais dos campos Cidade e UF. Isso porque ao enviar esses espaços a SEFAZ rejeita o XML.
+
+h3. RN52
+
+Para imprimir a expressão 'Contra Apresentação' no lugar da data de vencimento da fatura deve-se:
+Obs.: Essa regra aplica-se apenas à NFS-e, e existindo mais de uma parcela, a expressão 'Contra Apresentação' será impressa somente uma vez.
+
+* Configurar no cadastro de empresa, aba Nota Fiscal, a máscara do RPS incluindo a tag [DT_VENCIMENTO].
+* Informar no campo ‘Vencimento Contra Apresentação’, localizado na aba Cobrança da NF, a opção Sim.
+
+h3. RN53 - Lançamentos contábeis da venda/NF
+
+Proceder conforme regra de negócio "RN1 - Contabilização automática da venda -> Imprimir NF":http://net1/redmine/issues/76924#RN1-Contabilização-automática-da-venda-Imprimir-NF do requisito #76924.
+
+h3. RN54
+
+(#76595)
+Durante a emissão de uma NF-e, o Sisloc irá verificar se os valores preenchidos nos campos *_Valores de ICMS Destino_* , *_Valores de ICMS Origem_*, *_Valores de ICMS _* para a nota fiscal, são o somatório do seu respectivo campo nos itens da nota fiscal. Caso os valores sejam diferentes, o Sisloc irá avisar ao usuário que existe uma divergência de valores entre a NF e somatório dos produtos.
+
+h3. RN55
+
+(#77399) Ao imprimir a NF-e (modelo 55), o Sisloc deverá validar a flag 'Imprimir NF-e sem data de Entrada/Saída' (Cadastro de Empresa > Aba Parâmetros por empresa). Se esta flag estiver igual a sim, então *não* será obrigatório a informação da data na tela *Número e Data de Emissão da NF*.
+
+h3. RN56
+
+Ao imprimir uma nota fiscal de origem em locação, cujo a serie possua o campo 'Gera duplicata/boleto' igual a Sim e o tipo de cobrança possua o campo 'Boleto' igual a Sim deverá olhar para o parâmetro 'Considerar endereço de cobrança do/a' (Geral > Duplicata). Se este estiver com a opção igual 'Cadastro de Pessoa' então criará o boleto considerando o endereço do pagador como sendo o endereço de cobrança do cadastro do cliente senão, criará o boleto considerando o endereço do pagador como sendo o endereço de cobrança da ficha de locação.
+
+Exceção: Se a duplicata estiver fazendo referência a mais de um título então o endereço utilizado será proveniente do cadastro de pessoa.
+
+h3. RN57
+
+(#79269)
+Para as notas fiscais eletrônicas parametrizadas como NF-e Conjugada, o Sisloc irá verificar quais tributos estão configurados para reter e assim calcular a retenção. Após calculada, deverá gerar o arquivo XML com o grupo <retTrib> e com as retenções parametrizadas em seus respectivas campos no XML.
+
+h3. RN58
+
+(#79519)
+Para as notas fiscais de Devolução de Compra, o Sisloc verificará se existe valores de IPI informados nos produtos dentro do processo Abrir Dados NF-e, o Sisloc somará estes valores de IPI que serão devolvidos e mostrará este valor somado nos *_Dados Adicionais_* da Nota Fiscal eletrônica.
+
+h3. RN59
+
+(#79519)
+Nas notas fiscais de Devolução de Compra, o Sisloc não gerará +automaticamente+ as informações do valor devolvido no campo de *_Dados Adicionais_* da Nota Fiscal eletrônica.
+
+h3. RN60
+
+Se o parâmetro 'Imprimir canhoto de assinatura na ND' estiver marcado, será impresso na nota de débito padrão, na parte superior, um canhoto para confirmação de recebimento. 
+
+h3. RN61
+
+Se nota de serviço e possuir mais de um registro de serviço então no momento da impressão da nota, o valor unitário será impresso junto à descrição do serviço.
+
+h3. RN63
+
+(#80922) Não é possível imprimir uma NF de devolução de venda, cujo o valor total das parcelas seja maior que o valor total dos títulos a receber liquidados e que estão vinculados à venda.
+
+
+h3. RN64
+
+(#81963)
+
+Ao emitir uma nota fiscal que esteja zerada sistema deverá verificar a opção preenchida no parâmetro “Emitir NF zerada” e executar conforme especificado abaixo: 
+
+
+* *Pedir confirmação*: deverá exibir uma mensagem de confirmação, conforme já ocorre.
+* *Não permitir emissão*: não será permitida a emissão da nota fiscal gerada e deverá exibir uma mensagem: “Não é possível emitir, nota fiscal "XXX" está zerada.”.
+
+h3. RN65
+
+(#83915)
+Será impresso no campos "Dados Adicionais" do DANFE as informações referentes as _tags_ pré-configuradas no campo _*Máscara NF-e*_ do cadastro da empresa. Este campo só será exibido na impressão do DANFE e não será salvo na tag do XML dos dados adicionais
+
+h3. RN66
+
+(#88674)
+Ao imprimir uma Nota de Débito avulsa, o Sisloc buscará nos serviços cadastrados, a +menor data+ do período e a +maior data+ do período destes serviços, sendo exibidos no campo *_Período de Referência_* na impressão da nota.
+
+h3. RN67
+
+O Campo do CEST deverá ser enviado quando o CST estiver preenchido com os seguintes valores:
+x10, x30, x60, x70, x90 (para empresas configuradas como Regime Normal) e caso o CSOSN estiver preenchido com os seguintes valores: x201, x202, x203, x500 e x900 (para empresas configuradas como Simples Nacional).
+
+h3. RN68
+
+Caso a série da Nota Fiscal estiver configurada como *_NFS-e de São Paulo_*, o Sisloc buscará os dados que estiver preenchido no campo *Código do Serviço NF-e SP* para enviar as informações do Código de Serviço, uma vez que a nota fiscal de serviço do município de São Paulo possui um código específico para seus serviços.
+
+h3. RN69
+
+(#90515)
+Na emissão de uma +Nota de Débito+, caso o campo Modelo (Cadastro de Modelo - Aba Locação) esteja configurado como *_Modelo 3_* ou *_Modelo 4_* e o serviço da Nota for zerado (sem valor), os campos de Valor Unitário e Valor Total deste serviço não serão exibidos.
+
+h3. RN70
+
+(#91108)
+Na emissão da nota fiscal eletrônica, verificar se a +Série+ configurada possui parametrização de proxy e utilizar a parametrização de acordo com a configuração realizada através do processo "91109 - Configurar Proxy para Nota Fiscal (Serie)":http://net1/redmine/issues/91109
+
+h3. RN71 - Observação da natureza de operação
+
+(#92429)
+Ao realizar a impressão de nota fiscal, verificar se a empresa possui o módulo "Multiempresa/Multiestoque" habilitado para montagem da observação da natureza de operação:
+- Módulo desabilitado: manter regra atual;
+- Módulo habilitado: será verificado qual o regime tributário da empresa em Iniciar > Opções > Configuração > Empresa > aba 7 Tributação, campo "Regime tributário".
+- Regime Normal: a função calculaObNatOperacao() pegará a informação inserida no campo "Observação Regime Normal" no cadastro de CFOP.
+- Simples Nacional: a função calculaObNatOperacao() pegará a informação inserida no campo "Observação Simples Nacional" no cadastro de CFOP.
+- Simples Nacional - excesso de sublimite da receita bruta: a função calculaObNatOperacao() pegará a informação inserida no campo "Observação Simples Nacional - excesso" no cadastro de CFOP.
+
+h3. RN72
+
+(#94999)
+* Na geração da Nota Fiscal eletrônica (Modelo 55) não permitir a geração da tag <cNF> com os seguintes dados:
+** 00000000, 11111111, 22222222, 33333333, 44444444, 55555555, 66666666, 77777777, 88888888, 99999999, 12345678, 23456789, 34567890, 45678901, 56789012, 67890123, 78901234, 89012345, 90123456, 01234567;
+** Também não permitir que a tag <cNF> seja igual a <nNF> no XML da NFe;
+
+h3. RN73 - Ordenação dos serviços":http://net1/redmine/issues/31059#RN73
+
+(#94980)
+Os serviços serão ordenados na impressão de nota fiscal conforme o parâmetro "Ordenação dos serviços na junção de nota":
+- Pedido/Origem: os serviços serão ordenados de acordo com a origem (nfserv.nr_pedido, nfserv.cd_nf, nfserv.cd_nfserv)
+Ex: junção de notas de dois contratos de locação A e B: primeiro serão exibidos todos os serviços do contrato A e em seguida exibidos os serviços do contrato B.
+- Serviço: os serviços serão ordenados de acordo com o código da nota fiscal (nfserv.cd_nf, nfserv.cd_nfserv)
+Ex: junção das notas 23 e 19: primeiro serão exibidos os serviços da nota 19 e depois serão exibidos os serviços da nota 23.
+
+h3. RN74
+
+(#96222)
+Na geração de títulos da nota, as contas bancárias serão exibidas de acordo com o parâmetro "Uso de contas bancárias na emissão de Nota Fiscal" (Opções > Parâmetro > Geral > Nota Fiscal > Parâmetros 2):
+- Não restringir contas por usuário: serão exibidas todas as contas bancárias, mesmo se o usuário não tiver permissão de acesso à todas; 
+- Restringir contas por usuário: serão exibidas somente as contas em que o usuário possui permissão de acesso; 
+- Restringir contas por usuário se tipo de cobrança gera liquidado: se o tipo de cobrança escolhido
+tiver o campo "Gera liquidado" preenchido com "Sim", serão exibidas apenas as contas em que o usuário possui permissão de acesso.
+
+h3. RN75
+
+(#98152)
+Quando a nota a ser impressa:
+- For NFS-e;
+- Sua série estiver configurada como "Integração NFS-e";
+- Cidade do emissor for Santo André:
+Usuário poderá realizar a substituição da NFS-e, selecionando o RPS a ser substituído.
+
+h3. RN76
+
+(#98512)
+Na geração da Nota Fiscal eletrônica ou Nota Fiscal de Consumidor eletrônica (Modelos 55 / 65) o Sisloc deverá validar o processo "98945 - Inserir Grupo de Pagamento - NOTA FISCAL":http://net1/redmine/issues/98945 e caso tenha informações digitados pelo usuário, deverão ser enviadas no bloco da _tag_ *<pag>* e seus respectivos registros filhos.
+
+h3. RN77
+
+(#98512)
+Caso não tenha nenhuma informação preenchida no processo "98945 - Inserir Grupo de Pagamento - NOTA FISCAL":http://net1/redmine/issues/98945 o Sisloc deverá enviar no bloco da _tag_ *<pag>* as seguintes informações:
+
+<pre><code class="xml">
+	<pag>
+		<detPag>
+			<tPag>99</tPag>
+			<vPag>100.00</vPag> <!-- Valor da Nota Fiscal -->
+		</detPag>
+	</pag></code>
+</pre> 
+
+h3. RN78
+
+(#100039)
+Será validado o parâmetro "Bloquear a emissão de NF com valor divergente do valor de origem" na impressão de NF com origem:
+
+• Parâmetro desabilitado: a emissão da nota será realizada sem validação de valores atuais com valores de origem, mantendo a regra atual do sistema.
+
+• Parâmetro habilitado: será validado se o valor total atual da nota é igual ao valor de origem. Será comparada a soma do valor bruto (vl_bruto) das parcelas, representando o valor original, com o valor total das parcelas (vl_total_parcelas), representando o valor atual.
+
+Se o valor for igual a operação poderá ser realizada, caso contrário será exibida a mensagem ao usuário:
+
+<pre>
+"Valor total da nota está diferente do valor original.
+Para que a operação seja realizada o valor atual deve ser igual ao valor de origem ou deve ser liberada a emissão da nota com valor divergente através do processo "Liberar emissão NF"."
+</pre>
+
+A impressão da nota poderá ser realizada com o valor diferente do valor original se o processo "Liberar Emissão" tiver sido executado.
+
+h3. RN79
+
+(#97681)
+Na geração do CAP o  status "Liquidado" só será aplicado caso o campo "Liquidar títulos na geração" esteja marcado como "CAP OU CAR/CAP". O campo a ser verificado está no tipo de cobrança no acesso "Iniciar -> Cadastros -> Tipo de Cobrança"
+
+h3. RN80
+
+(#100857)
+Na emissão da Nota Fiscal, será validado o campo *Somar Val. Trib.* no Modelo da Nota Fiscal e de acordo com a sua configuração, será impresso na Nota Fiscal as informações da Lei da Transparência.
+
+* Opção: Somar os valores dos tributos num único campo:
+
+<pre>Total aproximado dos tributos dos serviços: R$ X,XX (Fonte: IBPT)</pre>
+
+* Opção: Detalhar os valores entre Fed., Est. e Mun.:
+
+<pre>Total aproximado dos tributos dos serviços: Fed = R$ X,XX  Est = R$ X,XX  Mun = R$ X,XX (Fonte: IBPT) </pre>
+
+h3. RN81
+
+(#100858)
+O processo "Desbloquear Emissão" será exibido apenas quando a série vinculada ao modelo da nota fiscal estiver com o campo "Emissão bloqueada por" preenchido.
+
+h3. RN82 - Verificação do bloqueio da NF
+
+(#100858)
+* Caso esteja sendo emitida a nota com o mesmo cd_nf em que o bloqueio foi realizado, permitir que o usuário continue a emissão, mesmo se a emissão estiver bloqueada;
+* Caso esteja sendo emitida nota com outro código de cd_nf:
+> _se_ for o mesmo usuário, alertar se ele deseja continuar;
+> _senão_ impedir a emissão da nota.
+
+h3. RN83 - CPF/CNPJ informado no campo *CPF/CNPJ SAT*
+
+(#117864)
+Informado o CPF ou o CNPJ no campo *CPF/CNPJ SAT*, é impresso no cupom fiscal de consumidor final sem a necessidade do cadastro do cliente no sistema.
+
+h3. RN84
+
+(#105160)
+Caso o módulo de movimentações contábeis estiver habilitado, o Sisloc deverá na execução do processo de Emissão de Nota Fiscal verificar se uma Fatura de Locação está sendo impressa e assim gerar os lançamentos contábeis usando a regra de contabilização *_Locação: Estorno da Provisão_*.
+
+h3. RN85 – Contabilização faturamento, regra de contabilização finalidade Nota Fiscal Serviço
+
+(#143910)
+Na emissão da nota fiscal de faturamento de locação/serviços, o lançamento contábil gerado através da regra de contabilização com finalidade NF Serviço, deve ter o seguinte comportamento:
+• Caso o parâmetro do cadastro de empresa esteja marcado como "Sim", o lançamento contábil busca o centro de resultado informado no campo “Centro de resultado” do cadastro de empresa.
+• Caso o parâmetro do cadastro de empresa esteja marcado como "Não", o lançamento contábil busca o centro de resultado definido no Grupo contábil que está vinculado ao Serviço informado no cadastro do CFOP utilizado na nota fiscal ou definido na regra de contabilização.
+
+-(#137134)-
+-Na emissão da nota fiscal de faturamento de locação, o lançamento contábil gerado através da regra de contabilização Nota Fiscal Serviço, caso na definição esteja usando a variável NAT_FIN busca o centro de resultado conforme a configuração do parâmetro “CR fatura de locação” no cadastro de empresa:
+•	Caso o parâmetro do cadastro de empresa esteja marcado, o lançamento contábil busca o centro de resultado informado no campo “Centro de resultado” do cadastro de empresa.
+•	Caso o parâmetro do cadastro de empresa esteja desmarcado, o lançamento contábil busca o centro de resultado definido no Grupo contábil que está vinculado ao Serviço informado no cadastro do CFOP utilizado na nota fiscal.-
+
+h3. - RN86 – Preenchimento automático do Histórico no CAR
+
+(#132138)
+No processo de emissão da nota fiscal, o CAR gerado referente as parcelas da NF, terá replicado o conteúdo do campo Observação da Nota Fiscal para o campo Histórico do grupo Observação da aba Dados no CAR.
+
+h3. RN87 – Classificação financeira de nota com 2 ou mais CFOPs
+
+(#132835)
+Na emissão de notas fiscais que possuírem 2 ou mais CFOPs, ao realizar a configuração financeira deve fazer as seguintes checagens:
+
+• Se os CFOPs utilizados possuírem a mesma parametrização de conta financeira e centro de resultado informados em seu cadastro, esta parametrização será utilizada para fazer a classificação financeira automaticamente. Esta regra não se aplica se a conta financeira estiver em branco.
+• Se os CFOPs utilizados possuírem parametrização de conta financeira e centro de resultado diferentes em seu cadastro, deve ser verificado a rotina de cadastro de Combinação de CFOP:
+o Se os CFOPs utilizados na nota fiscal estiverem cadastrados na rotina de Combinação de CFOP e possuírem conta financeira e centro de resultado definidos, esta conta e este centro de resultado serão utilizados para fazer a classificação financeira automaticamente.
+o Se os CFOPs utilizados na nota fiscal estiverem cadastrados na rotina de Combinação de CFOP e não possuírem conta financeira e centro de resultado definidos ou se os CFOPs utilizados na nota não estiverem cadastrados na rotina de Combinação de CFOP, ao emitir a nota deve abrir o processo de Classificação financeira para que seja feito de forma manual.
+
+h1. Refactoring Pendentes
+
+Alterar a mensagem informativa exibida quando não há data de expiração do certificado digital cadastrada.Regra 1.
+A mensagem atual está da seguinte maneira:
+Data de expiração do certificado digital não informada no cadastro de série. Favor cadastrá-la.
+A mensagem está boa para quem conhece bastante do Sisloc. No entanto, ela poderia estar explicando por exemplo, onde fica o cadastro de série e qual o nome do campo deve ser alterado.
+
+h3. RN88 - Inscrição Estadual ST:
+
+(#143496)
+Ao gerar a Nota fiscal de venda para as *operações interestaduais* (UF do Emitente <> da UF do Destinatário) onde o destinatário é *Contribuinte do ICMS (PESSOA.FL_CONTRIBUINTE_ICMS = S)* onde a venda tenha cálculo do *DIFAL ST*, deverá ser avaliado no cadastro da empresa emitente da NF-e, está preenchido com a *Inscrição Estadual ST*:
+
+> Caso tenha, validar a UF do destinatário com a UF preenchida no cadastro da empresa emitente e gerar a informação no campo proprio da NF-e 
+>> TAG XML da NFE - <IEST>
+
+h3. RN89
+
+(#146964)
+O boleto deve ser gerado no momento em que a nota fiscal for emitida.
+
+h3. RN90 - Envio de boleto A Geradora
+
+(#162884)
+Ao enviar uma nota por e-mail, essa tiver configurada para envia boleto, a validação IsGeradora seja verdadeira e o modelo da nota seja diferente da nota de débito padrão, o boleto será enviado com senha, a qual será os 4 primeiros digitos do CPF/CNPJ do destinatário.
+
+h1. INTEGRAÇÃO SISLOC X PROTHEUS (#76260)
+
+* Somente se o módulo mdl_Integração_Protheus Habilitadoe TVariante (config) = 'TVarianteAGeradora'.
+
+>> Este processo dispara a integração do Sisloc x Protheus registrado para notas fiscais de entrada e saída (#79). 
+>> A Estrutura de integração de Notas Fiscais esta registrada no requisito #76260. 
+
+* Condições
+
+>> Quando a integração estiver habilitada a impressão da nota deve gerar o CAR, se for o caso, com uma observação que identifique que aquela CAR foi gerado por uma nota já integrada. 
+
+h3. RN91 - Condição de montagem do nome do arquivo de notas NÂO eletrônicas.
+
+(#161177)
+Quando a nota a ser enviada possuir o campo “Tipo nota fiscal eletrônica” definido como “Não”, o nome do arquivo da nota em questão é definido pela junção dos campos “Série” e “Número”, da tela da Nota Fiscal no Sisloc.
+
+h3. RN92 - Contabilização "ICMS Difal para não contribuinte na emissão da NF.
+
+(#146502)
+
+Se o módulo Movimentação Contábil estiver habilitado , o Sisloc ao executar o processo de Emissão de Nota Fiscal deve verificar a nota fiscal com origem venda que está sendo impressa,  e assim gerar os lançamentos contábeis usando a regra de contabilização com finalidade "Nota fiscal produto", deve validar também se a operação é interestadual destinada a consumidor final com cálculo de Valor ICMS UF destino + Valor ICMS - FCP, desta forma gerar os lançamentos contábeis referente ao ICMS Difal, contabilizando-os nas contas definidas no valor a contabilizar "ICMS Difal para não contribuinte".
+
+
+h3. RN93 - Cancelar nota fiscal com CAP referente ao "ICMS Difal" gerado.
+
+(#146502)
+
+Se o CAP referente ao "ICMS Difal" estiver gerado e for necessário cancelar a nota, deve ser exibida a seguinte mensagem:
+
+|Esta operação não pode ser executada!
+Existe CAP do ICMS Difal gerado, realize o estorno do CAP para depois cancelar a nota.|
+
+h3. RN94
+
+(#170002)
+Na emissão da nota fiscal eletrônica modelo 55, Sisloc deverá converter para a tag <indDeduzDeson> do XML:
+* 0 - quando a opção selecionada no campo Deduzir valor desonerado do total da NF-e estiver como Não.
+* 1 - quando a opção selecionada no campo Deduzir valor desonerado do total da NF-e estiver como Sim.
+
+h3. RN95 - Limite de acréscimo/desconto na Emissão
+
+(#155274)
+Ao executar o processo, se a opção 'Verifica limite' na seção 'Nota Fiscal' e a opção 'Limite de acréscimo/desconto' na aba '2 Limites/Acréscimo/Desconto' do cadastro de usuário estiverem marcadas como 'Sim', o Sisloc impedirá o prosseguimento caso o valor acrescido ou descontado ultrapasse o percentual máximo permitido.
+
+h3. RN96 - Natureza financeira padrão para emissão de nota fiscal que se refere a faturamento
+
+(#141451)
+Se o módulo "Classificação Financeira" estiver desabilitado, e o campo "Classificação Financeira CAR" não estiver configurado no parâmetro 3 do parâmetro geral, ao emitir a NF ( que se refere ao faturamento), Sisloc aborta o processo e exibe a mensagem: 
+
+*Operação não pode ser executada!
+A natureza financeira não foi configurada para o campo "Classificação Financeira CAR".
+Acesse o caminho: Opções\ Parâmetro| Geral\Parâmetro 3 e configure a natureza financeira para o campo "Classificação CAR"*
+
+h3. RN97 - Centro de resultado padrão não configurado para emissão de nota de faturamento
+
+(#141451)
+Se o módulo "Classificação Financeira" estiver desabilitado, e o "Centro de resultado financeiro" não estiver configurado em Opções\ Configuração\ Empresa, ao emitir uma nota que se refere a faturamento ( geração de CAR), Sisloc aborta o processo e exibe a mensagem:
+
+*Operação não pode ser executada!
+O centro de resultado financeiro não foi configurado para o campo "Centro de Resultado".
+Acesse o caminho: Opções\ Configuração| Empresa e configure o campo "Centro de Resultado".*
+
+h3. RN98 - Enviar ND/NF por Whatsapp
+
+(#146904)
+Após emissão da ND, se configurado para envio via Whatsapp, comunicar com o Serviço de envio via Whatsapp e o Sisloc Messenger para processar o envio da ND ao cliente via Whatsapp.
+O contato para envio da mensagem será o cliente da ficha de locação, buscando em seu cadastro o número no campo “Celular ou telefone 2”, localizado na aba 5 – Contato.
+
+
+h3. RN99 - Cliente configurado como Junção NF
+
+(#169944)
+Ao executar o processo 'Emitir NF', caso o campo *'Junção NF'* do cadastro de pessoa do destinatário da nota, esteja marcado com a opção "sim" e caso o cliente possua mais de uma nota registrada no sistema, a tela de junção de notas será aberta automaticamente, com todas as notas disponíveis já selecionadas para a combinação. Após efetuar junção e o sistema redirecionar para nota JUNÇÃO, o sistema seguirá para emissão dessa.
+* OBS: Caso o cliente possua apenas uma nota cadastrada, ou o campo *'Junção NF'* do cadastro de pessoa esteja marcado com a opção "Não", o sistema seguirá normalmente para a emissão da nota.
+
+
+h3. RN100 - Cliente configurado como Junção NF, NF JUNÇÃO
+
+(#169944)
+Caso o cliente configurado como Junção NF e a NF já seja JUNÇÃO, a tela de junção não é aberta.
+
+
+h3. RN101 - Cliente configurado como Junção NF, cancelar junção
+
+(#169944)
+Caso o cliente configurado como Junção NF, o processo 'Emitir NF' seja executado e o cliente opte por não efetuar a junção, e clicar em cancelar, o Sisloc prosseguirá para próxima tela de impressão, apenas para nota aberta.
+
+h3. RN102
+
+(#129220)
+Quando o módulo de *_Integração Contábil_* estiver +Habilitado+ e for gerado uma Nota Fiscal de Devolução de Venda de Imobilizado (_Origem_ VENDA LOC (Ficha de Locação) > *Processo _Gerar Nota de Devolução_*), o Sisloc deverá verificar se o(s) Equipamento(s) que está(ão) sendo devolvido(s) possui(em) um Registro de Controle de Ativo Baixado. Após a geração dos lançamentos contábeis a partir da Regra de Contabilização parametrizada (*Nota Fiscal produto*), deverá ser executado o processo "R01 - Readicionar Ativo - CONTROLE DE ATIVO":http://net1/redmine/issues/R01" para que seja recriado o registro do Controle de Ativo deste equipamento devolvido.
+
+
+h3. RN103 - Nomenclatura "Fl" no envio do e-mail
+
+(#161177)
+Quando a nota a ser enviada possuir o campo “Tipo nota fiscal eletrônica” definido como “Não”, o nome do arquivo da nota em questão é definido pela junção dos campos “Série” e “Número”, da tela da Nota Fiscal no Sisloc.
+
+
+h3. RN104 - Emissão NF para Cliente Inativo
+
+(#164700)
+Se o cliente estiver inativo ou com o cadastro vencido, o Sisloc não permite a emissão de nota fiscal para esse cliente.
+
+h3. RN105 - Natureza Financeira desabilitada e emissão da NF de devolução de venda
+
+(#176621)
+Se o módulo de Classificação Financeira estiver desabilitado e o usuário emitir uma NF de devolução de venda, ao gerar os CAP´s da devolução, gera a classificação financeira de forma automática, de acordo com a conta configurada no campo "Classificação Financeira CAP", do grupo de Classificações Financeiras Padrões, no parâmetro Geral, aba Geral e sub aba Parêmetros 3.
+
+Se o parâmetro não estiver configurado ou a conta informada no parâmetro não for encontrada, o sistema emite uma mensagem de aviso do erro e orientação de onde se configura o parâmetro.
+
+h3. RN106 - Natureza Financeira desabilitada e emissão da NF de devolução de compra
+
+(#176621)
+Se o módulo de Classificação Financeira estiver desabilitado e o usuário emitir uma NF de devolução de compra, ao gerar o CAR da devolução, o sistema gera a classificação financeira de forma automática, de acordo com a conta configurada no campo "Classificação Financeira CAR", do grupo de Classificações Financeiras Padrões, no parâmetro Geral, aba Geral e sub aba Parêmetros 3.
+
+Se o parâmetro não estiver configurado ou a conta informada no parâmetro não for encontrada, o sistema emite uma mensagem de aviso do erro e orientação de onde se configura o parâmetro.
+
+h3. RN107 - Geração do hashCSRT
+
+(#183247)
+Este hash é gerado a partir da concatenação do CSRT da empresa com a chave de acesso da NF-e/NFC-e, utilizado o algoritmo SHA-1 para a geração do hash.
+
+Passos para a geração do hashCSRT:
+Passo 1: Concatenar o CSRT com a chave de acesso da NF-e/NFC-e que está sendo emitida.
+Passo 2: Aplicar o algoritmo SHA-1 sobre o resultado da concatenação do passo 1, resultando em um string de 20 bytes hexadecimais.
+Passo 3: Converter o resultado do passo anterior para Base64, resultando em uma string de 28 caracteres.
+Passo 4: Montar o grupo de identificação da empresa desenvolvedora do software (tag: infRespTec), com a tag “idCSRT” o identificador do CSRT utilizado para a geração do hash e a tag hashCSRT o resultado do passo 3.
+
+h3. RN108 –  Emissão conforma parâmetro “Enviar boleto e ND no mesmo arquivo”:
+
+(#180695)
+Na emissão da nota modelo 99-Nota de débito, se configurado para enviar e-mail, será gerado conforme parâmetro “Enviar boleto e ND no mesmo arquivo”
+    • marcado Sim, a nota de débito e o boleto são geradas no mesmo arquivo.
+        ◦ Verifica também o parâmetro “Anexar o e-mail de ND”,
+            ▪ Se o mesmo estiver como Sim, gera 2 arquivos (um só com o boleto, outro com boleto e ND).
+            ▪ Se o mesmo estiver como Não, gera 1 arquivo, (boleto e ND junto).
+    • marcado Não, a nota de débito e o boleto são gerados em arquivos separados.
+        ◦ Verifica também o parâmetro “Anexar o e-mail de ND”,
+            ▪ Se o mesmo estiver como Sim, gera 2 arquivos (um só o boleto, e outro só ND).
+            ▪ Se o mesmo estiver como Não, gera 2 arquivos (um só o boleto, e outro só ND).
+
+h3. RN109 - envio de email na emissão
+
+(#160573)
+Se os parâmetros de configuração para o envio de notas fiscais por e-mail estiverem ativados e a opção "E-mail" estiver selecionada no campo 'Enviar ND/NF por:' da nota, ela será enviada para os endereços de e-mail especificados no campo 'E-mail de cobrança', independentemente de sua origem.
+* Caso nenhum e-mail esteja informado em 'E-mail de cobrança', ao emitir a nota, o gerenciador de e-mail padrão do usuário deverá ser aberto contendo pdf da nota.
+
+
+h3. RN110 – Contabilização “Frete avulso” e “IPI devolução”
+
+(#153290)
+Contabiliza na emissão da nota fiscal de devolução, o valor do campo “Frete devolução de compra” na aba 5-Impostos e Valores da Nota Fiscal de devolução da compra. E o valor do campo “Valor total IPI devolvido” na aba 5-Impostos e Valores da Nota Fiscal de devolução da compra.
+
+h3. RN111 - Contatos que recebem NF
+
+(#186046)
+A NF deve ser enviada, por Whatsapp, somente para os contatos (da aba contatos do cadastro de pessoa) cujo campo "Recebe NF/Boleto por Whatsapp" estiver marcado (igual a "Sim")
+
+h3. RN112 - Obrigatoriedade de Resposta Síncrona para Lotes com 1 NF-e
+
+(#191230)
+A partir de 01/09/2025, ao enviar lote com apenas uma NF-e (modelo 55), este será transmitido obrigatoriamente com resposta síncrona, conforme definido na Nota Técnica 2025.001 – versão 1.00.
+
+h3. RN113 - *Regras para envio da TAG <OutrasRetencoes> no XML da NFS-e*
+
+*IMPORTANTE*
+Essa regra também se aplica ao requisito #32389 Regra RN55  
+
+(#195147)
+Esta TAG será utilizada apenas em prefeituras que exigem ou permitem o envio de "Outras retenções". O comportamento do sistema depende das seguintes configurações:
+*Parâmetros na Série da Nota Fiscal:*
+* Usa regra outras retenções 
+* Enviar outras retenções zerada  
+* Informar valor manualmente 
+
+*Comportamento:*
+
+*Quando parâmetro Usa regra outras retenções = SIM:*
+
+Se opção Enviar outras retenções zerada = SIM
+* A TAG <OutrasRetencoes> será enviada com valor 0.00.
+* O campo "Informar valor manualmente" ficará desabilitado.
+
+Se opção Enviar outras retenções zerada = NÃO e Informar valor manualmente = SIM
+* A TAG <OutrasRetencoes> será enviada com o valor informado no campo "Valor outras retenções" na aba Impostos e Valores da nota fiscal.
+
+Se opção Enviar outras retenções zerada = NÃO e Informar valor manualmente = NÃO
+* Se a Natureza da Operação = 2 e (Se Reter ISS = SIM e Valor ISS > 0.00)
+* será enviado o valor do ISS.
+
+*Se nenhuma das condições acima for atendida:*
+Verifica se o município é ELDORADO DO SUL, SANTO ANDRÉ, IBITINGA, BÁLSAMO, SÃO BERNARDO DO CAMPO ou JACAREÍ.
+* Se for, envia valor 0.00.
+* Se não for, envia a TAG vazia.
+
+h3. RN114 - "Local de Retirada no XML e DANFE":https://app-dev.sisloc.com.br/USR400GRRegradeNegocioScreen_DEV/RegradeNegocioCRUD.aspx?RegradeNegocioId=3159
+
+(#152876)
+* No XML da nota somente serão impressos campos com dados preenchidos.
+* A sessão local de retirada somente será impressa quando os campos da sessão "Local de retirada", do cadastro da nota, possuirem dados.
+* A sessão local de retirada somente será impressa quando em "Opções\Configuração\Modelo Nota Fiscal\(aba) 2 Configuração Visual" o campo 'Exibir endereço de retirada no DANFE' estiver salvo com "Sim".
+
+h3. RN115 – Inclusão do campo "NCM" no relatório do tipo Tabela Dinâmica
+
+(#199236)
+* O campo está disponível somente para o relatório gerado no formato Tabela Dinâmica.
+* Caso o item da NF não possua NCM cadastrado, o campo é exibido em branco.
+
+h3. RN116 - Inclusão do campo "Transportadora" no relatório do tipo Tabela Dinâmica
+
+(#199236)
+* O campo está disponível somente para o relatório gerado no formato Tabela Dinâmica.
+* Caso a NF não possua transportadora, o campo é exibido em branco.
+
+h3. RN117 - Modelo de transmissão da NFS-e Modelo Nacional
+
+(#197698)
+Para a emissão de NFS-e no ambiente do Modelo Nacional, a transmissão será obrigatoriamente realizada de forma síncrona, sendo esta uma condição fixa implementada no código do sistema.
+
+h3. RN118 - Campo "Perc. margem de valor adicionado ICMS ST"
+
+(#202657)
+
+Na NFe, a Margem de Valor Agregado (MVA) pode ser maior que 100% (campo "Perc. margem de valor adicionado ICMS ST") na Aba ICMS.
+
+h3. RN119 - Assunto e Corpo padrão enviados quando o Sisloc está configurado para gerar PDF do boleto com senha
+
+(#168464)
+
+Quando a nota fiscal deve ser enviada junto com o boleto e o parâmetro *Emitir PDF do boleto com senha* está habilitado, mas no modelo da nota fiscal o 'Assunto' e o 'Corpo' não estão preenchidos são enviados o 'Assunto' e 'Corpo' padrão:
+
++Assunto+
+Documentos da Nota Fiscal
+
++Corpo+
+Anexo os documentos referentes a solicitação feita em nossa locadora.
+Para acessá-los, é necessário informar os quatro primeiros dígitos do CPF ou CNPJ cadastrados no momento da solicitação.
+Ficamos à disposição para quaisquer esclarecimentos.
+Atenciosamente,
+<Empresa><Nome Fantasia>
+
+h3. RN120 - Informar Cerfificado Digital - Emissão NF
+
+(#184316)
+Ao emitir uma NF-e ou NFS-e, o sistema verifica, primeiramente, se foi informado o certificado digital no campo 'Certificado Digital' da série da NF que está sendo emitida. Caso tenha sido informado, busque os dados do certificado digital no cadastro de certificados, por meio do certificado informado.
+
+Se o certificado não for informado, o sistema exibe o aviso 'Na série da nota fiscal não foi informado o Certificado Digital. Favor informar antes de prosseguir' e interrompe o processo.
+
+h3. RN121 - NF-e e boleto híbrido
+
+(#205476)
+Na emissão de uma NF-e que gere CAR e boleto híbrido a geração do boleto é disparada junto com a emissão da NF-e. Caso a nota seja rejeitada pela Sefaz é feita a baixa do boleto gerado no banco.
+
+h3. RN122 - TAG '[SOLICIT TERCEIRO]' Fich Loc>Remessa
+
+(#191063)
+Ao ser configurada, imprime o número da solicitação de terceiro registrado no campo “Solicitação de terceiro” da Remessa, na seção de “Observação” da Nota fiscal da Remessa.
+
+h2. RN123 - Comportamento da geração do DANFS-e pelo Sisloc
+
+(#208288)
+1 - A geração do DANFS-e via ACBr ocorre somente quando:
+* A NFS-e for do Modelo Nacional
+* Houver XML válido armazenado
+
+2 - Mesmo que o parâmetro Gerar PDF Benefix esteja habilitado, para notas do Modelo Nacional, o sistema irá sempre gerar o DANFS-e via ACBr
+3 - Caso não exista XML, O sistema não irá gerar o DANFS-e via ACBr, e irá emitir a seguinte mensagem de erro: " Não foi possível gerar o PDF. Motivo: Não foi possível encontrar o XML da nota".
+4 - O layout do DANFS-e irá seguir integralmente as especificações da NT 008/2026 vigente.
+
+h2. RN124 – Regra de Prioridade de Layout do PDF da NFS-e
+
+A geração do PDF da NFS-e irá obedecer à seguinte ordem de decisão:
+1 - Se a NFS-e for do Modelo Nacional e houver XML armazenado:
+* Item da listaGerar o PDF obrigatoriamente via ACBr, conforme layout da NT 008/2026
+* Item da listaIgnorar o parâmetro “Gerar PDF Benefix”, mesmo que esteja habilitado
+
+2 - Se a NFS-e não for do Modelo Nacional:
+* Item da listaAplicar o comportamento atual do sistema
+* Item da listaConsiderar o parâmetro Gerar PDF Benefix, quando aplicável à integração
+
+h2. RN125 - Comportamento de Envio de PIS/COFINS na Integração NFS-e (Conforme parâmetro(série da nota): Modelo de Retenção PCC)
+
+(#208821)
+
+h2. *Se Modelo de Retenção PCC = Legado*  
+
+| *Integração* |	*Regra* |
+|Benefix| Utiliza os grupos GN460 e GN461|
+|TecnoSpeed|Gera somente a Tag Retenção|
+|ACBRNão| se aplica|
+
+*Regra de Preenchimento*
+| *Situação* |	*Origem das Informações* |
+|Existe retenção|Aba Impostos e Valores|
+|Não existe retenção|	Processo Abrir Dados da NFS-e|
+
+
+h2. *Se Modelo de Retenção PCC = NT007*
+ 
+| *Integração* |	*Apuração Própria (PIS/COFINS)* |	*Retenções* |	*Observações* |
+| *Benefix* | Sempre obtida do processo *Abrir Dados da NFS-e* (CST, Base de Cálculo, Alíquotas, Valor PIS e Valor COFINS)|	Sempre obtida da aba Impostos e Valores|GN460 = Apuração Própria / GN461 = Retenções|
+| *TecnoSpeed* |Tag Apuração Própria gerada com dados da NFS-e (CST, Base, Alíquota e Valor de PIS/COFINS)|Tag Retenção gerada com dados da aba Impostos e Valores|Permite envio detalhado das retenções. Versão Esquema = Vazio ou RTC|
+| *ACBR* |	vPis e vCofins obtidos dos Dados da NFS-e|	vRetCP, vRetIRRF e vRetCSLL obtidos da aba Impostos e Valores|	Modelo aderente ao Emissor Nacional|
+
+
+h2. *Se Modelo de Retenção PCC = RTC007*
+
+Este Modelo é exclusivo da integração com a *TecnSpedd* 
+
+| *Integração* |	*Comportamento* |
+|TecnoSpeed|	Exclusivo desta integração|
+
+| *Item* |	*Comportamento* |
+|PIS|	Enviado separadamente em valores próprios e retidos|
+|COFINS|	Enviado separadamente em valores próprios e retidos|
+|CSLL|	Enviado separadamente em valores próprios e retidos|
+|tipoRetencaoPisCofinsCSLL|	Gerado automaticamente pela API TecnoSpeed|
+|Versão Esquema|Sempre "RTC007"|
+ 
+h3. Resumo Geral
+
+| *Modelo PCC* |	Benefix|	TecnoSpeed|	ACBR|
+| *Legado* |	GN460/GN461 seguindo regra de existência de retenção|	Apenas Tag Retenção|	Não se aplica|
+| *NT007* |	Apuração Própria (Dados da NFS-e) + Retenções (Impostos e Valores)|	Apuração Própria + Retenção em grupos distintos| Emissor Nacional|
+| *RTC007* |Não disponível|	Envio detalhado por imposto (próprio e retido)|	Não disponível|
+
+h2. RN126 - Tratamento de envio do campo Situação Tributária IPM
+
+Este campo somente é enviado quando a Integração da NFS-e for Versão de Integração 2.0, ou seja, integração via TecnoSpeed.
+Caso não informado pelo usuário, o sistema irá assumir automaticamente o valor padrão (0).
+
+h3. RN127 - Validação de Contas por Série
+
+* Durante a geração de títulos da emissão da Nota Fiscal, o sistema verifica se no processo de Contas no cadastro de Série da Nota Fiscal possui contas bancárias vinculadas.
+** Caso existam contas vinculadas à série, o sistema considera essas contas como critério adicional de filtragem, em conjunto com as demais regras de validação existentes para definição das contas elegíveis para seleção.
+** Caso não existam contas vinculadas à série, o sistema considera todas as contas elegíveis conforme as demais regras de validação já existentes, sem aplicação de filtro por série.
+
+h3. RN128 - Tratamento do indicador de pendência no envio do e-mail da Nota Fiscal
+
+(#209210)
+
+* O campo fl_status_envio_pdf será atualizado para "Sim" exclusivamente quando o envio automático do e-mail não for realizado devido ao retorno de PDF em processamento na integração com a TecnoSpeed.
+* Caso o e-mail seja enviado com sucesso, o campo fl_status_envio_pdf irá permanecer com o valor "Não".
+
+h3. RN129 - Preenchimento do indicador de retenção do ISSQN (tpRetISSQN) - ACBr
+
+(#214799)
+Na montagem da DPS Nacional a partir dos dados do RPS, o sistema preenche a tag <tpRetISSQN> conforme o valor recebido no campo IssRetido do RPS, seguindo o mapeamento abaixo:
+* Quando IssRetido = 1 (Sim), a tag <tpRetISSQN> é preenchida com o valor 2 (Retido pelo tomador).
+* Quando IssRetido = 2 (Não), a tag <tpRetISSQN> é preenchida com o valor 1 (Não retido).
+
+h3. RN130 - Envio da retenção do INSS na DPS (vRetCP) - ACBr
+
+(#214799)
+Na montagem do bloco *<tribFed>* da DPS Nacional, o sistema mapeia o valor recebido no campo ValorInss do RPS para a tag *<vRetCP>* (Valor Retido de Contribuição Previdenciária), preenchendo-a com o mesmo valor monetário informado.
+* Quando *ValorInss* for maior que zero, a tag *<vRetCP>* é gerada dentro de *<tribFed>* com o respectivo valor.
+* Quando *ValorInss* for igual a zero (ou não informado), a tag *<vRetCP>* não é gerada, mantendo o comportamento padrão de omissão de tags de valor zero no XML da DPS.
+
+h3. RN131 - Exibir os boletos de todas as parcelas do faturamento - Processamento via API
+
+(#213568)
+*Se* a integração bancária estiver configurada como *API com Boleto Híbrido* *e* o faturamento(NF) possuir mais de uma parcela, *então* para cada parcela criada via o sistema deverá executar uma chamada individual ao endpoint 'Buscar Boleto' (segunda-via), fazendo com que todas as parcelas sejam exibidas.
+* Se houver somente 1 parcela: Sistema gera e ja abre o boleto pelo aplicatrivo padrão de leitura do sistema.
+* Se houver mais de 1 parcela, o sistema gera todos os boletos como uma copia local para o cliente em uma pasta, dentro pasta de download.
+
+h3. RN132 - Tratamento para operação com obrigatoriedade de informação do Grupo Imóvel na NFS-e
+
+(#214322)
+* Quando o Indicador de Operação da NFS-e pertencer a um dos grupos relacionados a imóvel (020101, 020201 ou 020301), o sistema irá gerar e enviar no XML da DPS o Grupo Imóvel, conforme previsto no leiaute RTC versão 1.04.
+* As informações do Grupo Imóvel serão obtidas, prioritariamente, a partir dos dados do Endereço de Entrega carregados na aba Dados da tela de Emissão de Notas Fiscais.
+* Caso não exista Endereço de Entrega informado, o sistema irá utilizar os dados do endereço do Tomador do Serviço (Destinatário da NF) para composição das informações do Grupo Imóvel.
+
+---
+
+h1. CHANGELOG
+
+Demanda: #212039
+RT0 - Criar campos de FUST e FUNTTEL na NFCom (OUT / 2026)
+
+
+Demanda: #214322
+Tratamento para NFS-e de grupos relacionados a imóvel (Indicador de Operação 020101, 020201 ou 020301)
+
+Demanda: #213568
+9. Emissão de fatura parcelada por boleto - Exibir os boletos de todas as parcelas e não somente a primeira
+
+
+Manutenção: #214799
+Ajuste na emissão NFSe ACBR (tpRetISSQN) e (vRetCP)
+
+
+Demanda: #209210
+Tratamendo do envio de email com NFS-e quando o pdf não está pronto para ser anexado - Integração TecnoSpeed
+
+Demanda #209676
+As contas bancárias vinculadas a série são validadas durante a geração de títulos na emissão da Nota Fiscal.
+
+Demanda #209626
+- Inclusão do campo Situação Tributária IPM (Exclusivo TecnoSpeed)
+
+Demanda #208821
+- Adequação do processo de retenção Pis, Cofins e CSLL na integração NFS-e conforme NT007
+
+Demanda: #208288
+- Feito uma Adequação na impressão do PEF do DANFS-e conforme NT008
+
+Demanda: #188634
+- Implementado adequação nas notas fiscais para IBS/CBS em atendimento a Reforma Tributária.
+
+Demanda: #200699
+- Implementado geração da NFS-e pela TecnoSpeed.
+
+Demanda: #191063
+Campo Numero do Pedido de compra na ficha de locação
+
+
+Demanda: #207207
+implementações para atender NFS-e.
+
+Demanda: #205476
+Gerar boleto híbrido para NF-e
+
+Demanda: #190357
+Validações da emissão da NFCom
+
+Demanda: #202136
+Remoção da mensagem de confirmação sobre Item da lista de serviço ao emitir NFS-e.
+
+Demanda: #184316
+Criação da tela de cadastro de certificados
+
+Demanda: #168464
+Remover restrição do parâmetro *Emitir PDF do boleto com senha* e disponibilizá-lo para todos os clientes
+
+Demanda: #202657
+Alteração da Margem de Valor Agregado (MVA) do ICMS
+
+Demanda: #197698
+Adequação da Integração NFS-e Benefix - Modelo Nacional
+
+Demanda: #199236
+Inclusão de extensões NCM e Transportadora no Relatório de Notas Fiscais Emitidas (Tipo: Tabela Dinâmica)
+
+Demanda: #195147
+Implementar tratamento Outras Retenções NFS-e de Cuiabá
+
+Demanda: #160630
+Ajuste NT 2023.001 - Novos CSTs de tributação monofásica de combustíveis
+
+Demanda: #182386
+Estender a Opção 'Sem ST' para Operações Interestaduais de Industrialização e Aplicação Final
+
+Demada #180619
+Atualizadas as configurações de layout no cadastro do modelo da nota fiscal, aba Configuração Visual, permitindo a personalização de mensagens mais elaboradas.
+
+Demanda: #178440
+Melhorar o processo de emissão de NF-e em contingência.
+
+Demanda: #191228
+Ajuste NT2025.001 v1.00 - Adaptar a NFC-e ao novo leiaute do QR-Code versão 3
+
+Demanda: #191230
+Ajuste NT2025.001 v1.00 - Resposta Síncrona para Lote com 1 (uma) NF-e
+
+Demanda: #184316
+Ajuste no processo para que os dados do certificado digital sejam obtidos a partir do cadastro de certificados, em vez de diretamente do cadastro da série da nota fiscal
+
+Demanda: #180697
+Validar Transposição Revenda para Uso e Consumo no processo Emitir NF
+
+Demanda: #186046
+- Na emissão da NF, no envio da nota, verificar o campo "Recebe NF/Boleto por Whatsapp" (aba contatos do cadastro de pessoa), em vez do campo "Opções" (aba contatos do cadastro de pessoa), para saber para quais contatos a NF deve ser enviada por Whatsapp.
+
+Demanda: #153290
+Implementado na contabilização de nota fiscal produto, variáveis para devolução de compras.
+
+
+Demanda: #160573
+Enviar nota fiscal por e-mail, independente da origem
+
+Demanda #180695:
+Implementado parâmetro  “Enviar boleto e ND no mesmo arquivo” no modelo nota fiscal
+
+##183247
+Ao emitir uma NF-e seja enviada as informações referente ao CSRT do responsável técnico, conforme orientação da NT2018.005-v.1.40.
+
+##176621
+- Na emissão da NF de devolução de venda, quando for gerar o CAP referente à devolução, se o módulo Classificação Finacneira estiver desabilitado, a classificação financeira é automática.
+- Na emissão da NF de Devolução de Compra, quando for gerar o CAR referente à devolução, se o módulo Classificação Finacneira estiver desabilitado, a classificação financeira é automática.
+
+##164700
+Não permitir a emissão de NF para clientes inativos ou com cadastro vencido.
+
+Demanda: #161177
+Novo padrão para nomenclatura dos arquivos de faturamento de locação. Nomes serem de acordo com a Série da Nota Fiscal gerada.
+
+Demanda: #129220
+Movimentação Contábil - Devolução de Venda de Ativo
+
+##146904
+Ao concluir, sem falha, o processo de Emissão de Nota Fiscal, ao checar a configuração para envio de ND, caso estiver configurado como whatsapp, processar o envio conforme o serviço de envio de Whtasapp e o Sisloc Messenger.
+O contato para envio da mensagem será o cliente da ficha de locação, buscando em seu cadastro o número no campo “Celular ou telefone 2”, localizado na aba 5 – Contato 
+
+##141451
+Validar se o módulo "Classificação Financeira" está desabilitado, se sim, será adotado a natureza financeira definida no campo "Classificação financeira CAR" para emissão da NF.
+
+Demanda: #155274
+Implementar limite de acréscimo e desconto na emissão da nota.
+
+Demanda: #170002
+NT2023.004 (a partir de 01/04) Implementar o campo indDeduzDeson - Opção 0 ( Valor não deduz do total da NFe)
+
+Demanda: #137134
+Implementado configuração de Centro de Resultado por empresa na contabilizção do faturamento de locação.
+
+Demanda: #132138
+Implementado para replicar o conteúdo do campo Observação da NF, para o campo Histórico do CAR.
+
+Demanda: #146502
+Contabilizar ICMS Difal para não contribuinte na emissão da NF.
+
+Demanda: #161177
+reformulação na forma de nomenclatura dos arquivos de notas fiscais que não são do tipo eletrônico.
+
+Demanda: #162884
+Ao emitir nota, enviar PDF de boleto com senha para A Geradora
+
+Demanda: #152523
+Implementado tag NATUREZA_FINANCEIRA, Parâmetros Gerais > aba Nota Fiscal > sub aba Parâmetros 1, no campo “Máscara para geração das informações sobre”, especificamente na aba Observação -> NF
+
+Demanda: #146964
+Implementado para incluir o número do código de barras no campo "Código Barra" ao gerar a nota fiscal.
+
+Demanda: #147086
+Implementado parâmetro Replicar Observação da NF para Histórico do CAR/CAP
+
+Demanda: 143910
+Centro de resultado contábil padrão para Regra de contabilização com finalidade nota fiscal serviço.
+
+Demanda: #143136
+Implementado NFS-e Bom Jardim.
+
+Demanda: #143767
+Emissão de NFS-e do Distrito Federal
+
+Demanda: #143496
+Emitir NF-e quando tem Inscrição Estadual de Substituição Tributária
+
+Demanda: #132134
+Alteração do cálculo do DIFAL não contribuinte - SP (Lei 17470/21)
+
+Demanda #105160
+Provisão de faturamento de locação
+
+Demanda: #117864
+Validação do campo CPF/CNPJ no qual é impresso no CF-e.
+
+Demanda: #122863
+Cálculo do DIFAL ICMS para produtos no Convênio 52/91
+
+Demanda: #99661
+Nota Fiscal Consumidor Eletrônico - Impressão em Cupom
+
+Demanda: #100858
+Melhoria no processo de bloqueio de emissão de NF
+
+Demanda: #100857
+Informação corpo nota fiscal - Lei da Transparência
+
+Demanda: #97681
+Geração do CAP como liquidado dependendo do tipo de cobrança escolhido.
+
+Demanda: #100039
+Impedir emissão de NF com valor total diferente do valor de origem
+
+Demanda: #98512
+Informações de Forma de Pagamento NF-e 4.0
+
+Demanda: #98152
+Substituição de NFS-s para "Santo André" - Benefix
+
+Manutenção: #96222
+Parâmetro "Uso de contas bancárias na emissão de Nota Fiscal" - RN74
+
+Demanda: #94980
+Criar parâmetro geral para definir a ordenação dos serviços na junção de NF
+
+Demanda: #94999
+Nota Técnica 2019 / 001 (NFe)
+
+Manutenção: #94653
+Código CEST passa a ser enviado em todas as NF-e.
+
+Demanda: #94579
+Alterar o campo 'sigla' da unidade de medida de 2 para 6 caracteres.
+Tratar as tag´s: uCom e uTrib de 2 para 6 caracteres.
+
+Demanda: #92429
+Criação de campo de observação para separar Observação Regime Normal, Observação Simples Nacional e Observação Simples Nacional - excesso de sublimite da receita bruta.
+
+Demanda: #91255
+Separar o campo 'Logradouro' da tela da nota fiscal em logradouro, número e complemento
+
+Demanda: #91108
+Configuração de Proxy na Emissão de documentos fiscais eletrônicos (NFe, CTe, MDFe e DFe) 
+
+Demanda: #90515
+Suprimir a exibição de valores zerados na Nota de Débito
+
+Demanda: #88674
+Período de Referência nas Notas de Débito Avulsas
+
+Demanda: #84453
+Melhoria na mensagem de tratamento quando há isenção da pessoa.
+
+Demanda #83915
+Criação de campo Máscara NFe para impressão de DANFE
+
+Demanda: #81003
+Respeitar a nova estrutura em que a tabela IBPT é salva.
+
+Demanda: #81963
+Validação do parâmetro "Emitir NF zerada" 
+Ver RN64
+
+Demanda: #80922
+Não é possível imprimir uma NF de devolução de venda, cujo o valor total das parcelas seja maior que o valor total dos títulos a receber liquidados e que estão vinculados à venda.
+Ver RN63
+
+Demanda: #81594
+Inclusão da observação na emissão do recibo da NF.
+
+Demanda: #81289
+Criar canhoto de assinatura de recebimento.
+Ver RN60
+
+Demanda: #78800
+Melhorias da funcionalidade e usabilidade contábil.
+
+Demanda: #79799
+Alterar o processo de impressão da nota fiscal para considerar a máscara [VL_TOTAL_ITEM].
+
+Demanda: #79519
+Destaque dos impostos na NF de Devolução de Compra
+
+Demanda: #79269
+Geração do grupo <retTrib> da NF-e conjugada
+
+Demanda: #78694
+Adequação da devolução de venda de imobilizado.
+
+Demanda: #77893
+Considerar o parâmetro 'Considerar endereço de cobrança do/a'.
+Ver RN56
+
+Demanda: #77399
+Remover obrigatoriedade de data de entrada/saída quando NF-e.
+Ver RN55
+
+Demanda #76812: 
+Adicionada informação sobre lançamentos contábeis gerados na impressão da NF.
+
+Demanda: #76367
+Considerar a tag [Cliente] durante o envio da Nota Fiscal por e-mail.
+
+Demanda: #75893
+Imprimir a expressão 'Contra Apresentação' no lugar da data de vencimento da fatura.
+Ver RN52
+
+Demanda: #74957
+Ver RN51
+
+Demanda: #74549
+Imprimir informações de *Descontos e Despesas* ou *Impostos NFS-e* conforme marcação do parâmetro geral 'Nota de Débito: Imprimir'.
+Ver RN50
+
+Demanda: #71626
+Criação do campo Tipo de Cobrança para destaque no DANFE da NFC-e
+
+Demanda: (#132835)
+mplementar sugestão de classificação financeira na emissão de notas fiscais, quando possuir CFOPs diferentes com definição de conta financeira e centro de resultado iguais.
+
+project:melhorias_0216 / Demandas: #72380
+Habilitar para o Sisloc Start a classificação financeira no processo de impressão de NF.
+Remove a consistência de peso quando Sisloc Start.
+Remover validação da lei transparência.
+Ocultar campo Lei da transparência do CRUD Nota fiscal.
+Remover processo de importar tabela IBPT localizado na nota fiscal.
+
+project: / Demanda: #71302
+Efetuar o tratamento para permissões nos módulos de NF-e e NFC-e
+
+project:melhorias0116 / Demandas: #70847
+Alterar o processo de impressão de nota fiscal eletrônica (Nota Fiscal > Impressão (Processo)) para, caso o envio e o retorno não seja síncrono (exemplo NFS-e), o Sisloc gerará o CAR como provisório e por sua vez, se o campo Gera duplicata/boleto, no cadastro de série, estiver igual a sim, o sistema não alimentará a tabela faturacar (tabela responsável pelas informações da duplicata).
+
+project: / Demanda: #70424
+Geração de parcela para CAR para Devolução de Compra
+
+project: / Demanda: #70423
+Geração de parcela para CAP para Devolução de Venda
+
+project:melhorias0116 / Demanda: #70727
+Criar campo para envia do grupo autorizador do XML
+
+project:customizacoes_tecnobre / Demanda: #68631
+Implementar a emissão da NFC-e
+
+project: / Demanda: #65175
+Atender a demanda da NT 2015/003
+
+project: / Demanda: #68138
+Criação do parâmetro “CAR – Sugerir dia útil na data prevista”.
+
+project:resfiscal / Demanda: #55802
+Adequar o tratamento para o campo "Emissão" da Nota Fiscal > aba 9-Notas referenciadas com o novo formato que foi adicionado o dia na data.
+Copiar os campos da aba 4-Complemento, seção "Exportação": "UF de embarque","Local de embarque" e "Local de despacho".
+
+project: / Demanda: #60102
+Considerar o novo parâmetro "Bloquear alteração do Num e Data Entrada/Saída da NF ao emitir" da Nota Fiscal onde será possível bloquear a alteração dos campos “Número da NF” e “Data Entrada/Saída” da tela 'Número e Data de Emissão da NF'.
+
+project:resfincont / Demanda: #54833
+Adaptação do processo. 
+Passa a tratar as condições para gerar a contabilização.
+
+project:bma2015 / Demanda: #59762
+Alterado regra 10 e inserida 30 a 32.
+Ao imprimir a nota fiscal deve utilizar o estado da empresa ativa (empresa > aba 1-Dados, campo UF) verificando com o informado no cadastro do ESTADO, NCM e/ou NBS. 
+Para pesquisar NCM utilizar o campo “NCM” informado na aba 2-Mercadoria.
+Para pesquisar NBS utilizar o serviço informado na aba 3-Serviço.
+Encontrando o registro, deve imprimir no campo “Observação” da nota fiscal:
+Trib. Aprox. R$: 4,45 Fed, 5,40 Est e 0,60 Mun
+Fonte: IBPT/FECOMERCIO <uf> - <chave>
+
+Neste exemplo acima o cálculo foi considerado que o total da nota foi de 30,00. Então:
+* Federal:  14,84% * 30,00 = 4,45
+* Estadual: 18,00% * 30,00 = 5,40
+* Municipal: 2,00% * 30,00 = 0,60
+
+project:resfiscal / Demanda: #55808
+Regra 28
+
+project:resfiscal / Demanda: #55804
+Regra 26
+
+project:bma2015 / Demanda: #57253
+Alterar o layout de impressão da NFS-e. Validar RN23 e RN24.
+
+project:bfev2015 / Demanda: #57445
+Tratar impressão ao utilizar a integração com o sistema Benefix quando modelo da NFS-e for 'DSF'.
+
+project:jan2015 / Demanda: #57197
+Considerar, na saída, o campo Código do IBGE ao invés do cd_municipío
+
+project:pdfinanfisc / Demanda: #55568
+A classificação automática passa a considerar as Contas Contábeis ao invés de Natureza Financeira.
+
+project:bnov2014 / Demanda: #54952
+Ao imprimir o RPS considerar o campo Máscara RPS para montar a descrição do serviço.
+
+project:bout2014 / Demanda: #53886
+Ao gerar o CAR, caso exista informação no campo informações da origem (Campo não visível ao usuário), esta informação será replicada ao campo Inf. Origem do CAR.
+Ver RN20
+
+project:bset2014 / Demanda: #51403
+Ao emitir uma nota fiscal validar a geração da classificação financeira do CAR gerado. Deverá considerar a classificação financeira gravada no processo de geração da fatura (Classificação automática configurada).
+
+project:b1411 / Demanda: #50900
+Considerar as tags [VALOR_MULTAD] e [VALOR_MULTAB] na emissão do boleto
+
+project:b1410 / Demanda: #49448
+Utilizar Benefix na impressão para gravar o XML assinado para municipio de Cabedelo.
+
+project:b / Demanda: #46674
+Realizar validação exigida pelo manual da ABRASF que é não permitir um RPS com 2 itens de lista de serviço, alíquota e CNAE.
+
+project:b1310i1000 / Demanda: #48229
+Adicionar regra para exibição de tela de aviso de contas a receber vencidas e a vencer. Validar RN16.
+
+project:b1310i1000 / Demanda: #48239
+Ao emitir a nota fiscal, retirar a tela de aviso de títulos vencidos.
+
+project:b1310i1000 / Demanda: #48206
+Exibir a classificação financeira na tela de Emissão de NF mesmo se a classificação estiver correta. Validar RN15.
+
+project:b1310i1000 / Demanda: #48185
+Criar status de cancelado para o CAR. Validar RN14.
+
+project:b1310i1000 / Demanda: #48127
+Regra ao emitir nota fiscal. Validar RN13.
+
+project:b1408 / Demanda: #48004
+Tratar rotina para considerar Lei de transparência do cadastro de NCM e do Grupo.
+
+project:b  / Demanda: #47641
+Implementar a impressão de retenção dos impostos para a nota conjugada de Brasilia. 
+
+project:b1406 / Demanda: #46009
+A montagem do envio de e-mail com as NF passa a observar novas configurações de SMTP nos parâmetros gerais ou cadastro de empresa. 
+
+project:b1404 / Demanda: #43104
+Adequar DANFE para imprimir dados de ISS conforme leiaute para atender a emissão de NF-e conjugada em Brasília.
+
+project:b1403 / Demanda: #42492
+Criar o campo contrato na ND quando flag Gera duplicata/boleto, do cadastro de série, esteja igual a Não.
+
+project:b1402 / Demanda: #42098
+Utilizar a tag [Numero da ficha].
+
+project:b1402 / Demanda: #35229
+Alterar a rotina para que as mensagens de erros provenientes de validações do XSD, sejam traduzidas de uma forma compreensível ao usuário final.
+
+project:b1402 / Demanda: #37279 / #37480
+Criar campo para receber código do município 
+>-Tratar a rotina de impressão e reimpressão para considerar este novo campo, para saber qual o XML será utilizado.-
+
+Criar as a chamada do processo #41237 Importar tabela IBPT
+
+project:b1401 / Demanda: #40373
+Utilizar campo criado na tabela faturacar para incluir o valor do "Nosso Número".
+
+project:b1401 / Demanda: #40679
+Quando nota eletrônica assíncrona, gerar o car provisório.
+Não alimentar a tabela faturacar quando a geração do boleto estiver automática.
+
+Project:b1312 / Demanda: #39865
+Ao enviar a NF-e utilizar o campo Assunto E-mail do cadastro de modelo de NF. 
+O conversor deverá salvar o assunto enviado na rotina atualmente, como valor default para o modelo de nota fiscal eletrônica (NF-e).
+
+project:b1309 / Demanda #36195 / SM: #39634
+Incluir marca d'água cancelada nas notas fiscais não eletrônicas.
+
+project:b1311 / Demanda: #36722
+Buscar o valor do campo Origem da NF para imprimir Nota de Débito. 
+
+project:b1311 / Demanda: #37784
+Novo tratamento para impressão da ND padrão conforme parametrização do modelo de nota fiscal. 
+
+project:b1310 / Demanda: #36225
+Para um modelo de boleto com a flag “Modelo Padrão” marcado, a impressão das informações do Sacado deverá respeitar os campos “Margem Esquerda” e “Margem Direita”. 
+
+Project:b1310 / Demanda: #34245
+Alteração no layout de impressão da NFS-e (inseridos campos de desconto e deduções na apresentação dos serviços).
+Tratamento para inibir a informações de base de calculo do ISS divergente os valores e serviços (considerando também descontos e deduções) 
+
+project:b1309 / Demanda: #35355
+Ao mandar imprimir uma nota fiscal, o sistema deverá validar se essa possui valor de faturamento e não possui parcelas geradas. Em caso afirmativo levantar exceção.
+
+project:b1309 / Demanda: #37650
+Incluir os campos Tabela A e Código Exceção NCM no arquivo exportado, de pré-venda, para o sistema Casa Magalhães.
+
+project:b1309 / Demanda #37017
+Cria a tag vTotTrib para os itens e para a capa da nota (NF-e).
+
+project:b1309 / Demanda #36195
+Incluir marca d'água nas notas modelo NF-e, NFS-e e ND.
+
+project:b1308 / Demanda #34778
+Atualizar o número da nota fiscal através da tag COO existente no arquivo SYSPMOV.
+Contemplar regra de negócio 5.
+
+project:b1307 / Demanda #34077
+Levar em consideração o parâmetro 'Compactar arquivos' para saber se os XML's das notas deverão ser enviados compactados ou não.
+
+Demanda: #102478
+Configuração dos Protocolos de Emissão DF-e no Sisloc.
+
+project:b1304 / project:b1304i3 - Demanda #32473 / #33381
+Exportar arquivo texto para integração com cupom fiscal.
+
+project:b1301 / project:b1301i1 / SM: #32379
+Regra de negócio: 1 
+
+project:b1301 / project:b1301i1 / Demanda: #32117 
+Regra de negócio: 1
+
+project:versao1210  / project:b1203p1210i5 / Demanda: #31024
+Acrescentar o status 150(Aprovada em contingência) à NFe aprovada pela sefaz .

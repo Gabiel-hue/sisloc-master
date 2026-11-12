@@ -1,0 +1,1378 @@
+h2. Documentação
+
+Armazena as notas fiscais emitidas, recebidas, avulsas, eletrônicas de serviço ou mercadoria.
+
+
+h3. Regra de negócio geral
+
+h3. RN1
+
+Havendo mais de um endereço eletrônico, no campo "E-mail de cobrança", estes deverão ser separados por ponto e vírgula(;).
+
+h3. RN3
+
+Utilizar o campo “Obs. E-mail” do cadastro de modelo de nota fiscal como mensagem de corpo do e-mail.
+
+h3. RN4 
+
+* Aba Dados
+
+(Alterada em 18/09/2018)
+No endereço do destinatário/remetente, os seguintes campos serão obrigatórios:
+Nome, Logradouro, Número, Bairro, Cidade, UF e CEP
+Obs.: A UF deverá aceitar a sigla EX pois, este termo se trata de um endereço do exterior.
+
+No endereço de entrega, caso algum campo venha ser preenchido, será obrigatório o preenchimento de todos os campos, exceto o complemento.
+
+* Aba Cobrança
+
+Caso o campo cidade da seção "Enviar fatura para o endereço" venha ser preenchido, o campo UF será obrigatório.
+
+Caso o campo cidade da seção "Enviar cobrança para o endereço" venha ser preenchido, o campo UF será obrigatório.
+
+Em ambas as abas, validar para que não seja possível inserir uma UF inválida.
+Exemplo: Belo Horizonte - BR
+
+
+h3. RN5
+
+O "Valor ISS" da Nota Fiscal considera o valor 'Base de Calculo' de ISS E o valor de 'Desconto'.
+>> Base de Calculo = Valor dos serviços - Descontos
+>> Valor ISS  = Base de Calculo * Alíquota s/ serviço (%)
+
+h3. RN6
+
+Se empresa for simples nacional então, o campo situação tributária só aceitará o valor: Origem do equipamento + Situação da operação.
+>Origem do equipamento: Campo origem do cadastro de produto. Valores aceitos: 0,1,2,3,4,5,6 e 7
+>Situação da operação: Campo situação da operação do processo Dados NFe (aba tributos > ICMS). Valores aceitos: 101,102,103,201,202,203,300,400,500 e 900
+
+Se empresa for regime normal então, o campo situação tributária só aceitará o valor: Origem do equipamento + Situação tributária.
+>Origem do equipamento: Campo origem do cadastro de produto. Valores aceitos: 0,1,2,3,4,5,6 e 7
+>Situação tributária: Campo situação tributária do processo Dados NFe (aba tributos > ICMS). Valores aceitos: 00,10,20,30,40,41,50,51,60,70 e 90.
+
+Caso o usuário informe uma valor diferente do descrito nas regras acima, levantar exceção:
+ Mensagem: 
+“Valor de situação tributárias inválida. 
+Situação tributária é composta por: Origem do produto + [Situação da Operação/ Situação tributária]”. 
+
+Obs.: A mensagem deve respeitar o regime da empresa - Situação da Operação ou Situação tributária
+
+h3. RN7
+
+
+(#85736) Ao informar a finalidade de emissão da nota como ajuste, complemento, devolução ou normal na aba 'Notas Referenciadas' habilitar campos conforme o modelo da nota referenciada, sendo "NF" deverá ser informado Série, Número, UF, Mês e ano de Emissão, CNPJ, e sendo uma NF-e irá habilitar e exigir apenas a Chave de acesso desabilitando as demais informações, caso a finalidade seja devolução preencher um grid com as notas que forem inseridas podendo ser informados quantas notas o usuário quiser devolver.
+
+-(#43439) Ao informar a finalidade de emissão da nota como ajuste, complemento ou devolução na aba 'Notas Referenciadas' habilitar campos conforme o modelo da nota referenciada, sendo "NF" deverá ser informado Série, Número, UF, Mês e ano de Emissão, CNPJ, e sendo uma NF-e irá habilitar e exigir apenas a Chave de acesso desabilitando as demais informações, caso a finalidade seja devolução preencher um grid com as notas que forem inseridas podendo ser informados quantas notas o usuário quiser devolver.-
+
+h3. RN8
+
+O campo natureza da operação NFS-e terá as opções (Conforme as regras abaixo).
+
+Obs.: Será enviado ao XML os código na frente das opções. No combobox será apresentado os códigos e as descrições.
+
+Código de natureza da operação 
+
+<pre>
+Se (Município Prestador = "Santa Cruz Sul") e (Município Prestador = Município Tomador) então
+Início  
+  Se (Retem ISS = "S") então
+    5.1 - Imposto devido em Santa Cruz do Sul, com obrigação de retenção na fonte 	         
+  Senão 5.2 - Imposto devido em Santa Cruz do Sul, sem obrigação de retenção na fonte 
+		  
+  Se (Valor do ISS = 0) então
+    5.8 - Não tributável 
+	
+  Se (Empresa.Regime tributário = Simples Nacional) então 	
+    5.9 - Imposto recolhido pelo regime único de arrecadação Simples Nacional 
+Fim
+		
+Se (Município Prestador = "Santa Cruz Sul") e (Município Prestador <> Município Tomador) então
+Início		   
+  Se (Retem ISS = "S") então
+    6.3 - Imposto devido fora de Santa Cruz do Sul, com obrigação de retenção na fonte
+	  
+  Se (Retem ISS = "N") então
+    6.4 - Imposto devido fora de Santa Cruz do Sul, sem obrigação de retenção na fonte  
+	  
+  Se (Valor do ISS = 0) então 
+    6.8 - Não tributável
+		 
+  Se (Empresa.Regime tributário = Simples Nacional) então
+   6.9 - Imposto recolhido pelo regime único de arrecadação Simples Nacional 		 
+Fim		
+
+//Casos específicos que o usuário deverá alterar à mão no campo Natureza da Operação NFSe:
+
+6.1 - Imposto devido em Santa Cruz do Sul, com obrigação de retenção na fonte
+6.2 - Imposto devido em Santa Cruz do Sul, sem obrigação de retenção na fonte		 
+7.9 - Imposto recolhido pelo regime único de arrecadação
+
+</pre>
+
+h3. RN9
+
+(#48088) Deve ser criado o campo "Empresa Gestora"(cd_empresa_gestora) nas tabelas de NF e de CAR, esse campo deve ser obrigatório e não pode ser nulo. Quando a nota fiscal for gerada pela empresa filial (Ex ao gerar a fatura de locação, fazer um pedido de venda, gerar uma nota de OM, fazer nota de devolução, etc. ...) o código da empresa do documento de origem deve ser gravado automaticamente no novo campo (esse campo deve ser visível na tela de NF/CAR mais não pode ser alterado e só deve ser visível para quem usa o recurso de multiempresa). Ao imprimir a NF essa informação de empresa gestora deve ser propagada para a tabela de CAR. Na tela de NF deve criar o campo para visualização da empresa pois hoje não existe essa informação visual na tela.
+
+Quando uma NF ou um CAR for incluído de forma avulsa (sem origem), o campo de empresa gestora deve ser preenchido com o código da empresa logada. Atentar para os impactos nos processos de cancelamento de NF, junção de NF e desmembramento de NF.
+
+h3. RN10
+
+(#48094) Ao acionar o processo "Envio de BM" na tela de Controle de Boletim de Medição, o sistema deve atualizar o campo "Data Envio BM" na tela de Nota Fiscal. 
+
+h3. RN11
+
+(#48101) O sistema só deve possibilitar imprimir a nota se a mesma estiver no status “A imprimir”, quando a nota estiver com status de “A Enviar BM” ou “Aguardando Aprovação de BM” o sistema não deve permitir a impressão da nota.
+
+Não devem ser listadas as notas com status “A Enviar BM” e “Aguardando Aprovação de BM” essas notas só devem estar visíveis na nova tela de controle de BM.
+
+h3. RN12
+
+O campo "Cód.serviço NFS-e" deve ser apresentado independente do módulo de NFS-e estar ou não habilitado, pois é ele quem faz o vinculo com o grupo para buscar o percentual de imposto que deve ser aplicado e impresso para atender a lei de transparência. 
+
+h3. RN13
+
+(#47581) Ao informar um código EAN diretamente na inclusão de mercadorias, este deve ser identificado caso exista uma mercadoria com este código preenchido no cadastro.
+
+h3. RN14
+
+(#50601) Caso Anotações e Anexos estiver cadastrada com status 'Lembrete' ou 'Pendência aberta' o sistema deve exibir uma mensagem de alerta conforme com data prevista adicionada no cadastro.
+
+h3. RN15
+
+(#43439) O campo "Finalidade de emissão" na aba 'Notas Referenciadas' deve ser sempre preenchido automaticamente como "Normal". Apenas no caso da Geração de NF na compra, caso seja de devolução de venda o campo "Finalidade de emissão" deve ser gerado com o tipo "Devolução/Retorno" ao invés de "Normal".
+
+h3. RN16
+
+(#43439) Os novos campos devem ser obrigatórios quando se utilizar NF-e. 'Forma de Contato' (Não se aplica, Operação presencial, pela Internet, Teleatendimento ou Outros) e 'Finalidade' (Consumidor final ou não).
+
+O campo "Finalidade" na aba 'Dados' onde informa a finalidade do cliente deve ser sempre preenchido automaticamente como "Aplicação final". Apenas no caso da Geração da NF na compra, caso seja de devolução de venda deve ser transportado para o campo "Finalidade" a opção escolhida na venda de origem. Essa informação para a emissão deve ser utilizada apenas se é consumidor final ou não, caso esteja preenchido como “Aplicação final”, então deve ser preenchido como “1” que significa consumidor final, do contrário deve ser preenchido como “0” que significa que não é o consumidor final. 
+
+O campo 'Forma de contato' serve para demonstrar qual a forma do contato do cliente para a venda que está sendo efetuada e deve ser preenchido com "Não se aplica" como valor padrão.
+
+h3. RN17
+
+(20/08/2014)Os processos totalizar, imprimir, estornar impressão, cancelar, cancelar adm., efetuar junção, desmembramento nf, imprimir envelope, abrir obs. lanç. fiscal, só estarão visíveis caso o usuário logado tenha acesso ao modelo de nota fiscal vinculado à nota fiscal.
+
+h3. RN18
+
+Alterada em (10/03/2015)
+
+<pre>
+
+Se (Município Prestador = "Santa Cruz Sul") e (Município Prestador = Município Tomador) ou
+Se (Município Prestador = "Santa Cruz Sul") e (Município Prestador <> Município Tomador) então 
+
+    Se (Natureza da operação NFS-e = 5.8) ou (Natureza da operação NFS-e = 6.8) então
+       Valor do ISS = 0,00
+   Fim
+Fim
+
+</pre>
+
+-<CL>(09/03/2015) ticket 106333-
+
+-Criada em (27/08/2014)-
+
+
+-Se (Município Prestador = "Santa Cruz Sul") e (Município Prestador = Município Tomador) ou-
+-Se (Município Prestador = "Santa Cruz Sul") e (Município Prestador <> Município Tomador) então- 
+
+    -Se (Natureza da operação NFS-e = 5.9) ou (Natureza da operação NFS-e = 6.9) então-
+       -Valor do ISS = 0,00-
+   -Fim-
+-Fim-
+
+
+h3. RN19
+
+(#43439) A data da emissão da nota fiscal inserida no campo "Emissão" da aba Dados deve ser considerada como a data da prestação do serviço.
+
+h3. RN20
+
+Notas avulsas e provenientes de junção, não terão o campo de informações da origem preenchido. Este campo não é visível ao usuário.
+
+h3. RN21
+
+(#57445) Como o sistema considera a dedução por 'valor', deve ser criado o campo "Tipo Dedução" contendo as opções 'Despesas com materiais' e 'Despesas com sub-empreitada', sendo valor default 'Despesas com materiais'. 
+
+O novo campo "Tipo Dedução" deve ser exibido somente se modelo de NFS-e for ‘DSF' e se o valor de Deduções do RPS for superior à zero. O preenchimento do campo deve ser obrigatório.
+
+Caso o valor de Deduções no RPS for igual a zero, a linha N11 (Deduções) do txt não deve ser gerada.
+
+h3. RN22
+
+(#55799)
+Campo "%Comissão Vendedor" que recebe o percentual praticado na venda do Vendedor através do Pedido de Venda > aba 1-Dados, campo "% Comissão". 
+Este campo também é utilizado quando houver devolução desta venda, que deve ser utilizado o mesmo percentual de comissão praticado na época da venda.
+
+(#80166) Na aba *"8 Comissão"* da nota os registros lançados para vendedor e captador terão os percentuais de comissão preenchidos individualmente de acordo a rotina de origem (Pedido de Venda ou Ficha de Locação por exemplo).
+
+>Se desejar, antes de emitir a nota o usuário poderá "alterar os valores de comissão":http://net1/redmine/issues/31516.
+
+h3. RN23
+
+(#57445) O campo “Operação” deve ser criado com as opções ‘Sem dedução’, 'Com dedução/materiais', 'Imune/Isenta de ISSQN', 'Devolução simples remessa', 'Intermediação', sendo valor default 'Sem dedução'.
+
+O novo campo "Operação" deve ser exibido na tela somente se modelo de NFS-e for ‘DSF’ e o preenchimento deve ser obrigatório.
+
+h3. RN24
+
+(#57445) Para o preenchimento da Tributação devem ser considerados os valores da Natureza da Operação NFSe, porém as opções ‘Tributável Fixo’, ‘Tributável SN’ e ‘Micro Empreendedor Individual (MEI)’ devem ser criadas no campo "Natureza da Operação NFSe", conforme relação abaixo:
+
+|~.*Tributação - Manual DSF*|=~.*Natureza da Operação NFSe - Sisloc*|
+|~.'C' Isenta de ISS|~.Isenta|
+|~.'E' Não Incidência no Município|~.Tributação fora do Município|
+|~.'F' Imune|~.Imune|
+|~.'K' Exigibilidade Susp.Dec.J/Proc.A|~.Exigibilidade suspensa|
+|~.'N' Não tributável|~.Não Incidência|
+|~.'T' Tributável|~.Tributação no Município|
+|~.'G' Tributável Fixo|~.(Opção deve ser criada)|
+|~.'H' Tributável S.N.|~.(Opção deve ser criada)|
+|~.'M' Micro Emp. Individual (MEI)|~.(Opção deve ser criada)|
+|
+
+As novas opções somente devem exibidas no campo se modelo de NFS-e for ‘DSF’ e o preenchimento do campo deve ser obrigatório.
+
+Para os itens 'Não Tributáveis' devem ser consideradas as opções 'Imune', 'Isenta' e 'Não Incidência'.
+
+Tributável Fixo: opção apresentada somente para contribuintes enquadrados em regime de recolhimento fixo mediante cadastro na prefeitura, com isso a empresa não terá ISS gerado e o recolhimento será por guia específica no sistema ou por indicação de método de pagamento pela prefeitura.
+
+Tributável S.N.: opção apresentada somente para contribuintes optantes pelo regime simples nacional, cadastrados na receita federal, obedecendo o período de vigência do enquadramento. É importante realizar a indicação da alíquota na configuração de configuração de prestador.
+
+h3. RN25
+
+(#54833)
+Se o módulo de contabilização estiver habilitado (mdl_MContábil) e o parâmetro ‘Data para ativação da Movimentação Contábil’ possuir uma data igual ou menor que a data do contexto, a manipulação dos valores da Nota Fiscal deve aplicar a validação com relação ao lançamentos contábeis. Se existir um pré-lançamento contábil ou lançamento contábil relacionado a Nota Fiscal qualquer campo de valor de itens, serviços ou impostos não pode ser alterado. 
+
+h3. RN26
+
+(#68631)
+Caso o usuário esteja emitindo uma NFC-e (Nota Fiscal de Consumidor Eletrônica), se o parâmetro geral *Consumidor Final* do subgrupo *NFC-e* estiver configurado e o cliente selecionado for o mesmo do parâmetro acima citado, o Sisloc deixará de efetuar as validações de +obrigatoriedade+ de CNPJ/CPF, email, telefone, endereço (logradouro, bairro, cidade/UF). 
+
+h3. RN27
+
+(#70423 / #70424)
+*	Caso a nota fiscal seja de uma operação de +Saída+ na guia *Parcelas* o label deverá mostrar como *_Contas a Receber_*;
+*	Caso a nota fiscal seja de uma operação de +Entrada+ na guia *Parcelas* o label deverá mostrar como *_Contas a Pagar_*;
+
+
+h3. RN28 -  Não exibir projetos inativos
+
+(#75402) O campo *Projeto* não listará projetos que estejam marcados como inativo em seu cadastro.
+
+
+
+h3. RN29 - Filtrar registros pelo código/nome do cliente
+
+(#75383) Os campos *Cliente (código)* e *Cliente (nome)* permitem que o usuário faça a filtragem dos registros informando diretamente o código ou o nome de um determinado cliente.
+
+Estes campos estão presente na seleção dos campos a serem exibidos na pesquisa avançada e também na impressão dos registros listados no grid.
+
+
+h3. RN30
+
+(#73190)
+
+Estes campos de Almoxarifado de Origem e Almoxarifado de Destino irão aparecer para o usuário apenas se estiver realizando uma operação de transferência entre almoxarifados. Estes campos também estarão configurados apenas para visualização e não poderão ser alterados.
+
+h3. RN31
+
+(#74957)
+Se o parâmetro "Permitir a alteração da pré-nota" (Geral>aba Nota Fiscal> subaba Parâmetros1) estiver desmarcado, ao tentar realizar alguma alteração na pré-nota, sistema deve exibir mensagem de exceção.
+
+Mensagem:
+'Nota fiscal não está autorizada para alterações.
+Execute o processo 'Autorizar Alteração' ou solicite ao administrador do sistema que marque o parâmetro geral 'Permitir a alteração da pré-nota'.
+
+h3. RN32
+
+(#74378)
+O processo de *_Vincular Nota Fiscal - MDF-e_* só estará disponível para execução quando o _status_ da Nota Fiscal for *_EMITIDA_*.
+
+h3. RN33
+
+(#79237)
+O campo *_% Mão-de-obra_* deverá aceitar 5 casas decimais.
+
+---
+
+h3. RN34 - Utilização da NF-e no Sisloc START
+
+(#80631) Para os usuários do "Sisloc START":http://net1/redmine/issues/34728 o recurso de emissão de NF-e estará disponível com as seguintes ressalvas:
+
+* *Série de Nota Fiscal:* O cadastro de série será disponibilizado ao usuário com acesso de consulta e alteração somente, ou seja, não será permitido incluir novas séries e nem excluir as existentes, mas alguns campos das séries padrão do Sisloc poderão ser alterados por usuários diferente de PERFIL.
+
+* *Modelo de Nota Fiscal:* Para a emissão de NF-e os usuários do "Sisloc START":http://net1/redmine/issues/34728 deverão, obrigatoriamente, utilizar um modelo que esteja vinculado a uma série cujo campo *"Tipo nota fiscal eletrônica"* esteja configurado com a opção *"NF-e Estadual"*.
+
+* *Notas Referenciadas:* Quando for selecionado um modelo cuja série vinculada ao mesmo esteja configurada como *"NF-e Estadual"*, na tela da nota fiscal a aba *"Notas Referenciadas"* ficará visível/disponível para uso.
+
+* *Tabela IBPT:* O processo "Importar Tabela IBPT":http://net1/redmine/issues/41237 ficará disponível dentro da nota fiscal independente do modelo selecionado na mesma.
+
+* *Nº NF-e:* Na seção *"Dados da emissão"*, quando o modelo selecionado estiver vinculado a uma série configurada como *"NF-e Estadual"*, será visível o campo *"NF-e"*.
+
+* *Carta de correção:* Para *"NF-e's"* emitidas no status *"Impressa"* será disponibilizado para uso o processo "Abrir Carta Correção":http://net1/redmine/issues/31001#RN01-Abrir-Carta-Correção. Consequentemente, para o uso correto da carta de correção, será liberado aos usuários do "Sisloc START":http://net1/redmine/issues/34728 o acesso à rotina "Itens Carta Correção":http://net1/redmine/issues/60750#RN01-CC-e-no-Sisloc-START.
+
+* *Abrir Dados NF-e:* Na aba *"Mercadorias"* será disponibilizado para uso o processo "Abrir Dados NFe":http://net1/redmine/issues/46026.
+
+* *Imprimir NF:* Quando a série vinculada ao modelo selecionado na nota fiscal estiver configurada com a opção *"NF-e Estadual"* em seu cadastro, o processo "Imprimir NF":http://net1/redmine/issues/31059 fará a impressão/emissão de uma nota fiscal eletrônica.
+
+---
+
+h3. RN35
+
+(#80636)
+O Sisloc validará o preenchimento dos campos Identificação da Balsa, Identificação do Vagão e a Placa/UF/RNTC. O usuário poderá preencher apenas 1 dentre as três opções ditas:
+* Identificação da Balsa;
+* Identificação do Vagão;
+* Placa/UF/RNTC;
+
+
+h3. RN36
+
+(#81619)
+Ao gerar a nota fiscal será validado a parametrização de quantidade de casas decimais configurado no modelo da nota fiscal gerado. Desta forma, o Sisloc irá validar a quantidade de casas decimais para o valor unitário a partir da configuração do Modelo da Nota Fiscal.
+
+h3. RN37
+
+(#80922) Não será permitido excluir parcelas de uma nota fiscal de devolução de venda, quando essa gerada pelo processo de devolução.
+
+h3. RN38
+
+(#80922) Caso seja uma nova fiscal de venda, existindo uma nota de devolução vinculada, será permitido existir um registro de comissão repetido para o mesmo atendente, desde que um destes esteja com a coluna devolução preenchida.
+
+
+h3. RN39
+
+Para que os campos de Exportação (UF de Embarque, Local de Embarque, Local de Despacho) sejam enviados para o XML, a NF-e a ser emitida deverá ser de *Saída*, *CFOP* iniciar com *7* e o destinatário ser *estrangeiro*.
+
+h3. RN40
+
+(#86377)
+Ao abrir o registro de Ordem de Produção, será exibido um alerta com as anotações vinculadas. Dentro das anotações cadastradas serão exibidas as anotações do tipo *_Lembrete_* e *_Pendência Aberta_*, mostrando os dados de _Data de Cadastro, Tipo, Assunto, Mensagem e Data Previsa (Caso possua)_.
+
+
+h3. RN41
+
+(#87209)
+Para as notas fiscais que são parametrizadas como Nota Fiscal Eletrônica (Modelo 55), Notas de Serviço ou Fatura de Locação, o processo de Vincular NF SUBSTITUIÇÃO aparecerá na aba *_9 - Notas Referenciadas_*.
+
+
+h3. RN42
+
+(#88093)
+O Campo *Operação* só aparecerá no CRUD quando a série da Nota Fiscal for parametrizada como "NFS-e de Campinas".
+
+h3. RN43
+
+(#88093)
+O campo *Operação* irá alterar o conteúdo da tag *_<Operacao>_* no XML que será gerado e enviado para a prefeitura. Desta forma a opção escolhida pelo usuário, deverá ser enviada para o XML, apenas as letras A / B / C.
+
+h3. RN44
+
+(#89037)
+Ao marcar o campo *_Exportar NF para Reinf_* como SIM, o Sisloc irá enviar para os dados da nota para os Eventos R-2010 (Serviços Tomados) / R-2020 (Serviços Prestados).
+
+h3. RN45
+
+(#89037)
+Para o usuário alterar a opção *_Exportar NF para Reinf_* naquelas notas que já foram emitidas, ele deverá executar o processo (raio) para realizar esta mudança, pois o campo ficará indisponível para edição manual.
+
+h3. RN46
+
+(#94092)
+Ao marcar o campo *Cartão* como SIM, os títulos que estiverem com esse tipo de cobrança será obrigatório informar o número de autorização do cartão de débito e/ou crédito na emissão da nota fiscal.
+Ao marcar o campo *Liquidar títulos na geração de títulos* como SIM, os títulos que estiverem com esse tipo de cobrança serão gerados quitados no Sisloc. 
+
+h3. RN47
+
+(#98613)
+O sistema deve permitir a alteração do código da mercadoria na nota para até 60 caracteres
+
+h3. RN48
+
+(#100039)
+Os processos "Liberar emissão NF" e "Estornar liberação" estarão disponíveis quando o parâmetro "Bloquear a emissão de NF com valor divergente do valor de origem" estiver habilitado e quando a NF estiver no status "À emitir". Caso contrário eles não serão exibidos.
+
+h3. RN49 - Anular Emissão
+
+(#93633)
+O processo "Anular Emissão" será exibido quando a nota estiver no status "Emitida" e se a NF possuir uma origem (Ficha de Locação, Ordem de Manutenção, etc).
+
+h3. RN50 - Anular Emissão
+
+(#93633)
+O campo "Data anulação" será exibido quando a nota estiver no status "Emitida (Anulada)".
+
+h3. RN51 - Visualizar notas de todas as empresas
+
+(#95631)
+As notas fiscais serão exibidas de acordo com a permissão de acesso à empresa de cada usuário.
+
+NFS-e
+Quando a NFS-e aberta for de uma empresa diferente da empresa ativa o RPS somente poderá ser enviado/retornado direto na tela da NF.
+As telas de envio e retorno de RPS continuarão exibindo apenas as notas da empresa ativa.
+
+h3. RN52 
+
+(#105436)
+Com o devido acesso por configuração de níveis, o processo "Alterar Categoria" será exibido em todos os status da NF-e.
+
+
+h3. RN53
+
+(#108339)
+Caso o campo *Forma de Contato* estiver com as opções 
+* -1=Operação presencial-;
+* 2=Operação não presencial, pela Internet; 
+* 3=Operação não presencial, Teleatendimento; 
+* 4=NFC-e em operação com entrega a domicílio;
+* 9=Operação não presencial, outros;
+
+O sisloc deverá +exigir+ o preenchimento do campo *Indicador de Intermediador/Marketplace*;
+
+h3. RN54
+
+(#108339)
+O Campo *Descrição do Meio de Pagamento* será um campo de texto livre e só poderá ser preenchido quando a opção do Tipo de Cobrança for igual a *_99 - Outros_*. Este campo é referente à nova tag <xPag> (Descrição do Meio de Pagamento);
+
+
+h3. RN55
+
+(#117316)
+O processo "Estornar Emissão" não é exibido quando a nota fiscal estiver no status *Emitida (Anulada)*.
+
+h3. RN56 - Envio NFC-e Contingência:
+
+(#116751)
+Ao clicar na opção Envio Contingência vai executar o processo de envio das NFC-e com status "envio e recepção pendente"
+
+h3. RN57 - Processo no campo *CPF/CNPJ SAT*
+
+(#117864)
+O processo do campo *CPF/CNPJ SAT* recebe o CPF/CNPJ do cliente no qual é impresso no cupom fiscal de consumidor final sem a necessidade de cadastro no Sisloc. O campo é exibido somente quando a série está relacionada com *SAT CF-e* e o cliente é do tipo *Consumidor Final*.
+
+
+h3. RN58  - Processo de realizar os recálculos:
+
+(#110199)
+No caso de Nota Fiscal eletrônica (Modelo 55), o Sisloc deverá no processo de junção realizar o recálculo dos campos :
+* 1. Atualizar o campo Valor Total Bruto (NFMERC.NFE_VPROD) com a Qtd. Comercial (NFMERC.QT_NFMERC) x Valor Unit. Comercial (NFMERC.VL_UNI_NFMERC);
+* 2. Atualizar o campo Valor Unit. Trib. (NFMERC.NFE_VUNTRIB) com o valor do campo Valor Unit. Comercial (NFMERC.VL_UNI_NFMERC);
+* 3. Atualizar o campo Valor da Base de Cálculo de ICMS (NFMERC.NFE_VBCICMS) com o Valor Total Bruto do Produto (NFMERC.NFE_VPROD) - Percentual de Redução da BC ICMS (NFMERC.NFE_PREDBC);
+** 3.1 Se o campo de Percentual de Redução da BC de ICMS estiver zerado ou nulo, deverá utilizar apenas o Valor Total Bruto do Produto (NFMERC.NFE_VPROD);
+Caso alguma destas informações estiverem diferentes, deverão ser gerados 2 ou mais registros do produto que está repetido no processo de junção de Nota Fiscal;
+
+
+h3. RN59 Regra de preenchimento do Grupo Obs. de uso livre Contribuinte
+
+(#128544)
+o Identificação do campo: campo para ser preenchido a identificação da observação, limite de 20 caracteres.
+o Conteúdo do campo: campo para ser preenchido com o detalhamento da observação do item,
+limite do campo 60 caracteres.
+O preenchimento destes campos não será obrigatório, mas se um dos campos for preenchido o outro passa a ser obrigatório.
+
+h3. RN60 - Validação grupo Transportador
+
+(#128544)
+Não deve permitir preencher o grupo Transportador (campos Transportadora, CNPJ, Inscr. Estadual, endereço e Cidade/UF.), quando o tipo do frete selecionado for igual a 'Sem frete,' deve limpar os campos.
+
+h3. RN61 - Campo Solicit. Compra.
+
+(#132609)
+O campo *Solicit. Compra* permite que o usuário informe a solicitação de compra de terceiro. O campo permite somente caracteres alfanuméricos, não sendo permitido caracteres especiais. O campo é limite em 15 caracteres, conforme normas técnicas da nota fiscal eletrônica. O campo *Solicit. Compra* recebe solicitações de compras de terceiro de outras telas automaticamente, porém pode ser alterada pelo usuário quando o status da nota fiscal está *_À EMITIR_*. Diferente deste status, o sistema bloqueia o campo e não permite que o usuário faça alteração.
+
+h3. RN62 - Atualização do campo *Pedido de compra* no processo Abrir Dados NFe com o campo Solicit. Compra.
+
+(#132609)
+Com o campo *Solicit. Compra* preenchido, automaticamente o campo *Pedido de compra* é atualizado. O mesmo ocorre quando remove as informações do campo *Solicit. Compras*, logo o campo *Pedido de compra* é atualizado deixando-o em branco.
+
+h3. RN63 - Valores dos Impostos de Importação:
+
+(#136760)
+Esses campos ficarão visíveis somente quando tiver origem de um pedido de compra e algum produto tiver CFOP de entrada, iniciado com 3
+
+h3. RN64 -Inclusão da coluna CNPJ/CPF na tela de nota fiscal.
+
+(#141452)
+Ao buscar o Destinatário/Remetente o campo CNPJ/CPF deve ser preenchido automaticamente.
+
+h3. RN65 - Tipo de Cancelamento
+
+(#157433)
+Campo motivo cancelamento no cadastro da nota, será exibido apenas para notas fiscais com status 'CANCELADA'
+
+h3. RN66 - Valor Faturamento Bruto 
+
+(#172558)
+O valor de Faturamento Bruto deve ser carregado atráves de uma coluna computada e será composto pelo somatório do valor de faturamento líquido mais os valores de retenção observando-se a seguinte regra:
+* O valor de retenção de ISS somente deverá fazer parte do cálculo se estiver configurado para reter ISS (fl_retencao_iss = 'S').
+
+Campos a serem considerados no somatório:
+* vl_faturamento = Valor do faturamento líquido;
+* vl_iss_nf = Valor retenção ISS;
+* vl_inss_nf = Valor retenção INSS;
+* vl_irr_nf = Valor retenção IRRF;
+* vl_ret_cofins = Valor retenção COFINS;
+* vl_ret_pis = Valor retenção PIS;
+* vl_ret_csll = Valor retenção Contribuição Social Lucro Líquido;
+
+
+h3. RN67 - Configuração do Parâmetro Campos Customizados em Consulta - Processos Habilitados
+
+(#157440)
+Se no Parâmetro Campos Customizados em Consulta - Processos Habilitados esse processo estiver habilitado:
+Os campos customizados criados para esse processo aparecem como opções de colunas na listagem.
+
+Os tipos de campos customizados:
+
+* Texto Longo
+* Imagem/Arquivo
+* Foto Carrossel
+
+Não são disponibilizados como opções de colunas na listagem.
+
+
+h3. RN68 - Campo "Valor dedução ISS"
+
+(#165366)
+Para "Serra/ES" o valor é calculado automaticamente conforme regras existentes. Para demais cenários, o operador precisará preencher conforme necessidade.
+
+h3. RN69 – Campo Frete devolução de compra
+
+(#153290)
+Na nota fiscal de devolução de compra, este campo é preenchido automaticamente com o “Valor Conhecimento de Transporte” do pedido de compras, se houver. E é contabilização pelo valor a contabilizar Frete avulso da regra de contabilização com finalidade igual a Nota Fiscal produto.
+
+h3. RN70 - Filtro 'Inscrição Estadual'
+
+(#188505)
+Exibe/filtra todos os registros vinculados a Inscrição Estadual buscada.
+
+h3. RN71 - Tratamento do Indicativo de tipo de emissão da serie da NF-e (campo Situação Contigência série)
+
+(#178440)
+*O campo Situação Contigência série somente ficará visível se:*
+* A série da nota for do tipo eletrônica. Campo Tipo Nota fiscal eletrônica diferente de não.
+* O status da nota estiver À emitir ou À enviar .
+
+h3. RN72 - Comportamento da cor da fonte da grid de listagem da pesquisa de notas fiscais
+
+(#178440)
+Ao mostrar uma nota fiscal com status a emitir o texto da linha da grid deverá considerar a configuração de contingência da série da nota como segue:
+* Se a série estiver em contingência exibir o texto em vermelho
+* Se a série não estiver em contingência exibir texto na cor padrão.
+
+h3. RN73 - Comportamento do campo do rodapé da tela de pesquisas da nota fiscal
+
+(#178440)
+Este campo irá mostrar o tipo de emissão da série da nota fiscal se:
+* A nota for eletronica, ou seja, campo Tipo nota fiscal eletrônica na série da nota for diferente de Não.
+* A nota ainda não foi enviada a Sefaz. Staus A emitir / A enviar / Aguardando Sincronismo
+
+h3. RN74 - Comportamento do campo Vl. Outras Retenções NFS-e
+
+(#195147)
+Este campo somente irá ficar habilitado quando a opção Informar Valor Manualmente do parâmetro Usar Outras Retenções, da Série da Nota Fiscal estiver definido como Sim.
+
+h3. RN75 - "Local de Retirada":https://app-dev.sisloc.com.br/USR400GRRegradeNegocioScreen_DEV/RegradeNegocioCRUD.aspx?RegradeNegocioId=3153
+
+(#152876)
+O local de retirada será exibido somente para notas fiscais de remessa emitidas para serviços de terceiros da OM e nota de remessa de remessa de locação.
+
+h3. RN76 - "NF de remessa a partir da aba “6 Serviços de terceiros”":https://app-dev.sisloc.com.br/USR400GRRegradeNegocioScreen_DEV/RegradeNegocioCRUD.aspx?RegradeNegocioId=3154
+
+(#152876)
+Dada emissão da NF de remessa a partir da aba “6 Serviços de terceiros”
+* Campo 'Local de Entrega': Será preenchido automaticamente com o endereço padrão do cadastro de pessoa do fornecedor inserido no serviço de terceiro.
+* Campo 'Local de Retirada': Será preenchido automaticamente com o endereço cadastrado em 'Local entrega/retirada' da aba '2 Complemento' da OM.
+
+h3. RN77 - "Envio de Notificações via Azpost":https://internos.app.sisloc.com/sisloc.reqsearch/regradenegocio/form?id=5a071b20-1d8f-11f1-80da-6f40338893ef
+
+(#162223)
+
+Formatação do número de telefone para envios via Azpost é [+DDI] + [DDD] + [Número do Telefone] , sem mascara
+O numero é passado na URL, então, se faz necessário o uso do componente "encodeURIComponent" para envio ao Azpost.
+
+h3. RN78 - Restrição de Cancelamento para NF-e com Status 'Emitida contingência EPEC'
+
+(#205418)
+Se a nota fiscal estiver no status "Emitida contingência EPEC"(fl_Status = 200), o status "Cancelado" do processo 'Atualizar status NF-e' não é exibido
+
+h3. RN79 – Comportamento do Campo Reter ISS
+
+(#206575)
+Ao alterar o valor do campo *Reter ISS* na aba *Impostos e Valores*, o sistema irá apresentar o seguinte comportamento:
+
+*Reter ISS = Sim*
+* O campo *Responsável pela Retenção* será preenchido automaticamente com a opção *“Tomador”* .
+* O campo *Responsável pela Retenção* será de preenchimento obrigatório.
+
+*Reter ISS = Não*
+* O campo *Responsável pela Retenção* será limpo automaticamente, sem apresentar valor padrão.
+* O campo *Responsável pela Retenção* não será de preenchimento obrigatório.
+
+h3. RN80 – Exigibilidade ISS, aba 3 – Serviços
+
+(#200699)
+O campo Exigibilidade do ISS, que carrega para série TecnoSpeed as opções:
+    • 1-Exigível
+    • 2-Não Incidência
+    • 3-Isenção
+    • 4-Exportação
+    • 5-munidade
+    • 6-Supenso por Ação Judicial
+    • 7-Suspenso por Ação Administrativa
+      Para série Benefix, o campo tem o nome Tipo de Suspensão da Exigibilidade, e carrega as opções:
+    • 1- Exigibilidade do ISSQN Supensa por Ação Judicial
+    • 2- Exigibilidade do ISSQN Suspensa por Ação Administrativa
+Se informado para TecnoSpeed 6-Supenso por Ação Judicial ou 7-Suspenso por Ação Administrativa, e Benefix 1- Exigibilidade do ISSQN Supensa por Ação Judicial
+2- Exigibilidade do ISSQN Suspensa por Ação Administrativa, o campo Número do Processo é habilitado e é obrigatório o preenchimento.
+
+h3. RN81 - Base de cálculo
+
+(#188634)
+A base de cálculo para IBS e para CBS é única, calculada conforme fórmula:
+	( + ) vProd
+	( + ) vServ 
+	( + ) vFrete 
+	( + ) vSeg 
+	( + ) vOutro 
+	( + ) vII 
+	( - ) vDesc
+	( - ) vPIS 
+	( - ) vCOFINS 
+	( - ) vICMS 
+	( - ) vICMSUFDest
+	( - ) vFCP 
+	( - ) vFCPUFDest 
+	( - ) vICMSMono 
+	( - ) vISSQN 
+	( + ) vIS
+
+h3. RN82 - Alíquota IBS
+
+(#188634)
+Busca alíquota IBS definida no cadastro de empresa.
+
+h3. RN83 - Valor IBS
+
+(#188634)
+O valor total do IBS, compreende o somatório do valor de IBS de cada produto.
+
+h3. RN84 - Alíquota CBS
+
+(#188634)
+Busca alíquota CBS definida no cadastro de empresa.
+
+h3. RN85 - Valor CBS
+
+(#188634)
+O valor total do CBS, compreende o somatório do valor de CBS de cada produto.
+
+h3. RN86 - Valor total geral
+
+(#188634)
+O valor total geral, compreende o somatório do valor total de cada produto.
+
+h3. RN87 - Preenchimento dos campos Finalidade, Forma de contato e Frete
+
+(#171042)
+Buscar as informações de Finalidade, Forma de contato e Frete, para os campos Finalidade (Aba Dados), Forma de contato (Aba Dados) e Frete (Aba Complemento) da Nota fiscal, quando concluído o processo Gerar NF das seguintes origens:
+
+* Remessa de equipamentos
+* Devolução de locação
+* Ordem de manutenção
+* Venda indenização de locado
+* Venda balcão
+
+
+h3. RN88 - Tratamento para os campos do grupo de Beneficio Municipal
+
+(#209330)
+
+*Sobre os campos de Redução da Base de Cálculo* 
+
+O sistema permite ao usuário informar os dois campos de redução, apenas um deles ou nenhum dos campos: valor monetário (vRedBCBM) e valor percentual (pRedBCBM).
+
+No momento da geração da NFS-e, será considerada a seguinte ordem de prioridade:
+
+# Se houver valor informado no campo de percentual (pRedBCBM), somente este campo será enviado na nota, mesmo que exista valor informado no campo de valor monetário (vRedBCBM);
+# Se não houver valor informado no campo de percentual (pRedBCBM), mas houver valor informado no campo monetário (vRedBCBM), será enviado apenas o valor monetário;
+# Se nenhum dos dois campos estiver informado, o sistema não enviará informações de redução, sendo enviado apenas o Número do Benefício Municipal, caso este tenha sido informado.
+
+*Sobre o campo Número do Benefício Municipal*
+O campo Número do Benefício Municipal pode ser informado independentemente do preenchimento dos campos de redução (vRedBCBM e pRedBCBM). Dessa forma, é permitido informar apenas o número do benefício, sem a necessidade de informar valores de redução.
+
+h3. RN89 - Tratamento para exibição do processo "Atualizar Status NF-e"
+
+(#213838)
+
+#  O processo *"Atualizar Status NF-e"* somente é habilitado para o usuário, quando a nota fiscal estiver em um dos seguintes status:
+## Item da lista DANFE à Imprimir
+## Aguardando Sincronismo
+## Enviado
+## RPS Inválido
+## Emitida
+# O processo *"Atualizar Status NF-e"* estará disponível para o usuário mesmo quando a série vinculada ao documento possuir o campo "Tipo Nota Fiscal Eletrônica" configurado como "Não". Respeitando a restrição de status, conforme item anterior
+
+*Importante*
+O processo "Atualizar Status NF-e" tem como finalidade sincronizar e atualizar os dados de documentos já emitidos externamente. Como sua execução altera o status da nota para "Emitida", não deve ser permitido seu uso em notas que ainda se encontram na situação "À Emitir", evitando inconsistências no fluxo operacional da emissão fiscal.
+
+h3. RN90 - Tratamento dos equipamentos Objeto de locação
+
+(#204562)
+
+Somente serão permitidos de 0 a 1000 equipamentos incluídos como objetos de locação para cada nota fiscal, conforme definido na NT009 versão 1.0.
+
+h3. RN91 - Disparo da busca automática de Benefício Fiscal
+
+(#211985)
+Somente para nota fiscal avulsa, o sistema dispara a busca automática do Benefício Fiscal para o item da Nota Fiscal sempre que o usuário inserir ou alterar um dos seguintes campos: Produto, CFOP, CST ou NCM. A busca é executada de forma independente para cada item da nota.
+
+h3. RN92 - Prioridade de busca do Benefício Fiscal
+
+(#211985)
+Somente para nota fiscal avulsa, o sistema verifica, em primeiro lugar, se existe Benefício Fiscal cadastrado diretamente vinculado ao Produto informado no item. Caso exista, o sistema preenche automaticamente o campo Benefício Fiscal com o valor identificado, e não realiza a consulta ao cadastro de Estado.
+
+Caso não exista Benefício Fiscal vinculado diretamente ao Produto, o sistema consultar o cadastro de Estado, filtrando pela combinação de CFOP e CST informados no item. Caso seja localizado um único registro correspondente, o sistema preenche automaticamente o campo Benefício Fiscal com o valor identificado.
+
+Caso a consulta retorne mais de um registro para a mesma combinação de CFOP + CST, o sistema utiliza o NCM informado no item da Nota Fiscal como critério de desempate, preenchendo automaticamente o Benefício Fiscal correspondente ao NCM localizado.
+
+Caso o item da Nota Fiscal não possua NCM preenchido, ou caso os registros retornados também estejam empatados quanto ao NCM, o sistema não deverá aplicar nenhum Benefício Fiscal automaticamente, mantendo o campo vazio.
+
+h3. RN93 - Reepreenchimento do Benefício Fiscal em caso da alteração dos campos Produto, CFOP, CST ou NCM
+
+(#211985)
+Somente para nota fiscal avulsa, sempre que o Produto, o CFOP, o CST ou o NCM do item forem alterados após um preenchimento anterior do campo Benefício Fiscal independentemente de esse preenchimento ter sido automático ou manual o sistema reexecutar a busca automática e substituir o valor atual do campo Benefício Fiscal pelo novo valor identificado.
+
+h3. RN94 - Preenchimento dos campos Finalidade, Forma de contato e Frete
+
+(#171042)
+Buscar as informações de Finalidade, Forma de contato e Frete, para os campos Finalidade (Aba Dados), Forma de contato (Aba Dados) e Frete (Aba Complemento) da Nota fiscal, quando concluído o processo Gerar NF das seguintes origens:
+
+* Remessa de equipamentos
+* Devolução de locação
+* Ordem de manutenção
+* Venda indenização de locado
+* Venda balcão
+
+h3. RN95 - NFCom - Base de cálculo do IBS e CBS
+
+(#188640)
+A base de cálculo para IBS e para CBS é única, calculada conforme fórmula:
+( + ) vProd
+( + ) vServ
+( + ) vFrete
+( + ) vSeg
+( + ) vOutro
+( + ) vII
+( - ) vDesc
+( - ) vPIS
+( - ) vCOFINS
+( - ) vICMS
+( - ) vICMSUFDest
+( - ) vFCP
+( - ) vFCPUFDest
+( - ) vICMSMono
+( - ) vISSQN
+( + ) vIS
+
+h3. RN96 - Abas FUST e FUNTTEL
+
+(#212039)
+As abas FUST e FUNTTEL devem ser exibidas se a série da NF for NFCom.
+
+  
+
+---
+
+h1. INTEGRAÇÃO SISLOC X PROTHEUS (#76260)
+
+* Somente se o módulo mdl_Integração_Protheus Habilitado  e TVariante (config) = 'TVarianteAGeradora'.
+
+* Grande parte da integração do Sisloc e Protheus é baseada nas Notas Fiscais, tanto notas de Entradas quanto notas de Saídas.
+
+> *Processo de SAÍDAS*:
+
+>> +Locações (Serviços de Locações, Serviços extras , Remessas )+ ou +Serviços extras ou Manutenções+
+
+>>> Todo o processo de locação ocorre diretamente no Sisloc. Consultará o seu estoque físico e lógico para controlar as aprovações de remessa e expedições.
+
+>>> A emissão das notas fiscais é que dispara a integração com o Protheus através do processo de notas fiscais de Entrada e Saída. Isso é necessário para que a escrituração fiscal ocorra do lado Protheus. 
+
+>>> Ao ocorrer o faturamento da locação, o Sisloc chamará a integração e enviará a nota de fatura ao Protheus através do fluxo de nota fiscal de saída, tanto para escrituração quanto para o financeiro. 
+
+>>>> * Condições
+
+>>>>> Existirá um novo parâmetro no sistema para a integração do serviço de locação. Este parâmetro guardará um ID que representará o Serviço de Locação correspondente no Protheus. Isso é necessário, pois na fatura da locação o item de serviço pode ser definido de forma dinâmica, ou seja, para o Sisloc não é um registro normalizado, é apenas um texto montado. 
+
+>>>>> O Sisloc enviará além dos dados da nota de Fatura, os valores segregados (rateio das Naturezas, Centro de custos e Empresas).
+
+>>>>> Os serviços extras faturados separadamente da locação serão enviados naturalmente, porém seguindo a condição geral de representa-los como um produto. A entidade de serviços do Sisloc conhecerá o ID de produto que o representa no Protheus. (Produto e serviço no Protheus é uma coisa só). 
+
+>> +Devolução de Compra+ (Feito pelo Protheus)
+
+>> +Vendas (Estoque e Imobilizados)+
+
+>>> O pedido de venda é gerado, os produtos são relacionados e ao final uma Pré-Nota é gerada.
+
+>>> A emissão desta Pré-Nota acionará a integração conforme fluxo de nota fiscal de saída. Aguardará a confirmação do processamento pelo Protheus para a atualização do ID Protheus da Nota Fiscal (A nota do Sisloc, como demais entidades integradas, receberá a chave cruzada para relacionar os registros).
+
+>>>> * Condições
+
+>>>>> Os cálculos das Notas e Impostos serão realizados pelo Sisloc e repassados ao Protheus junto com os demais dados.
+
+>> +Manutenções+
+
+>>> As manutenções ocorrem no Sisloc e todos o processo terão sua integração baseada nos fluxos de Requisiões de Material e emissão das Notas Fiscais de saída.             
+
+> *Processos de ENTRADAS:*
+
+>> +Compras (Transferências apenas)+ 
+
+>>> Ao realizar o processo de entrada da nota fiscal o Sisloc acionará a integração e passará os dados da Nota e Produtos transferidos.
+
+>>> O Protheus receberá esta informação e efetuará a inclusão da Nota e irá gerar as informações fiscais, contábil, estoque e patrimônio (ativo fixo) de acordo com regras especificadas no Tipo de Entrada e Saída (TES).
+
+>>> A movimentação de estoque neste contexto ocorre de forma nativa. O Sisloc movimentará na entrada da nota e o Protheus realizará a movimentação de estoque de acordo com a TES.
+
+>>>> * Condições:
+
+>>>> Todo o CFOP relacionado a Nota deve possuir um TES. Esta validação garante apenas a existência do código TES, não garante a validação desse código.
+
+>> +Devoluções de Venda+
+
+>>> O Sisloc através do processo de devolução de venda gerará uma nota de entrada que ao ser emitida, comunicará através de integração com o Protheus. Esta integração segue o fluxo de Nota de Entrada.
+
+>>> O Protheus irá receber a Nota de entrada com seu respectivo ID da nota de referência e efetuará o registro no sistema.
+
+>>>> * Condições:
+
+>>>>> Conforme previsto no fluxo de nota de entrada utilizada na devolução de venda o Sisloc deve identificar o Tipo de Entrada e Saída (TES).
+
+>> +Ordem de Produção+ (Feito no Protheus)
+ 
+> *Processo de Transferência:*
+
+>> +Transferência+
+
+>>> Todas as transferências previstas de imobilizados ou estoques serão realizadas pelo Sisloc. Necessário porque toda as movimentações que geram Notas Fiscais serão de responsabilidade do Sisloc.
+
+>>> A integração será baseada em Notas de Saída (origem) e Notas de Entradas (destino). Estas operações são representadas pelos processos de vendas/compras. 
+  
+>>>> * Condições:
+
+>>>>> O Processo no Sisloc será natural. As validações existentes neste ponto estão relacionadas ao processo. 
+>>>>> Deve existir o acesso de ao menos um usuário para conclusão da entrada da Nota Fiscal (pedido de compra), mesmo em uma unidade implantada.
+
+> *Processo de Comodato:*
+
+>> +Comodato+   
+
+>>> O Processo de comodato será iniciado pelo Sisloc através de um processo nativo. A integração está baseada na movimentação de Notas Fiscais.
+
+>>> Remessa (Envio)
+>>> Para o envio do equipamento a Nota Fiscal de Remessa (Envio) dispara a integração pelo fluxo de Nota Fiscal de Saída. O Protheus irá registrar a Nota Fiscal de Saída na Unidade de Origem, em seguida será efetuado de forma manual o registro da Nota Fiscal de Entrada na Unidade de Destino (no Protheus). 
+>>> Ao concluir a entrada da nota de destino o usuário deve executar a rotina “aprovar a movimentação de estoque” da remessa no Sisloc.
+
+>>> Devolução (Retorno)
+>>> A devolução é registrada no Sisloc e o processo de recepção é iniciado (aguarda a conclusão da movimentação de estoque). 
+>>> O usuário deve gerar uma Nota Fiscal Avulsa de Saída no Sisloc dentro da unidade de Destino. Esta ação dispara a integração através do Fluxo de Nota Fiscal de Saída (na unidade de destino). Em seguida será efetuado de forma manual o registro da Nota Fiscal de Entrada na Unidade de Origem (no Protheus). 
+>>> Ao concluir a entrada o usuário deverá executar a rotina “aprovar a movimentação de estoque” de recepção no Comodato (no Sisloc).
+
+>>>> * Condições:
+
+>>>>>  Com a integração ativa a emissão da Nota Fiscal de Remessa (envio) nas fichas de comodato deve ser obrigatória. Na devolução a geração da nota de devolução (retorno) deve ser bloqueada.
+
+
+* Adaptações necessárias para atender a integração com  de Movimentação de Estoque 
+
+> Para as notas fiscais de saída de produtos o Sisloc considerará o almoxarifado da movimentação de estoque relacionado a origem da nota.
+> Para a junção de notas de saída o almoxarifado será considerado conforme a origem da primeira nota fiscal participante da junção. É a movimentação desta primeira nota que definirá o almoxarifado. (Segundo A Geradora o almoxarifado é sempre o mesmo no caso de junção).
+> A integração de Nota Fiscal não será disparada caso a movimentação de estoque da origem não tenha a definição do almoxarifado, ou seja, caso a movimentação de estoque não tenha sido autorizada.
+> Quando a integração da nota fiscal não necessitar movimentar estoque o Sisloc enviará como almoxarifado um texto fixo de 'default'. Neste caso o Protheus considerará o almoxarifado padrão do seu produto/serviço. Isso é necessário, pois existem compras que não movimentam estoque. Outro exemplo são as notas de locação. 
+
+
+* Adaptações necessárias para atender a integração dos dados Contábeis.
+
+> Para as movimentações de Notas Fiscais de saída, a contabilização será realizada através da Classificação Financeira, Naturezas Financeiras, Centro de Resultado e Valor. Trata-se da classificação financeira relacionada a Nota Fiscal ou aos títulos criados pela nota. 
+> Para o Protheus teremos que enviar uma Natureza Master (centralizadora) relacionada a Nota Fiscal, uma centralizadora. Para isso criamos um novo campo de Natureza Financeira na nota fiscal, recuperada no modelo de Nota Fiscal, que também recebeu esse novo campo.                                                                                                          
+> As Naturezas Financeiras e Centros de Resultados desta estrutura representaram a contabilização no Protheus pois através das entidades relacionadas o Protheus dispara sua contabilização.
+
+---
+
+h1. CHANGELOG
+
+Demanda: #212039
+RT0 - Criar campos de FUST e FUNTTEL na NFCom (OUT / 2026)
+
+
+Demanda: #188640
+RT0.02 - Implementar os campos CBS e IBS, na NFcom
+
+
+Demanda: #211985
+Preenchimento Autômatico do Beneficio Fiscal em Notas Fiscais
+
+
+Demanda: #204562
+Adequação da NFS-e de fatura de locação - Preparação das informações na Geração da Nota NT009
+
+Demanda: #208027
+Implementar Alterar NF Industrialização Retorno
+
+
+Demanda: #213838
+Habilitação do processo de sincronização de Notas *"Atualizar Status NF-e"*, para notas não eletrônicas.
+
+Demanda: #209330
+Inclusão do Grupo de Informações sobre o Tipo de Benefício Municipal - NFS-e Nacional
+
+Demanda: #196410
+Implementar no cadastro de Pessoa (relacionamento cliente), um campo que o usuário possa configurar a suspensão do IPI, surtindo efeitos e tratamentos fiscais no faturamento da nota
+
+
+Demanda: #190033
+Incluir tags para informações sobre Origem da nota fiscal, Vendedor responsável e Detalhamento do frete na nota fiscal de Remessa e Devolução.
+
+Demanda: #171042
+Criar campo 'Forma de contato' na Venda Loc para geração da NF com o CFOP correto
+
+
+Demanda: #188634
+Implementado adequação nas notas fiscais para IBS/CBS em atendimento a Reforma Tributária
+
+
+Demanda: #200699
+- Implementado geração da NFS-e pela TecnoSpeed.
+
+Demandas: #189747
+Adaptação ao novo CNPJ Alfanumérico - Nota Técnica 2025.001
+
+Demanda: #206575
+Automatização do responsável pela retenção do ISS
+
+Demanda: #190357
+Validações da geração da NFCom
+
+Demanda: #205418
+Bloqueio do cancelamento para notas fiscais com status "Emitida contingência EPEC"
+
+Demanda:#200609
+Incluído campo de informação do CIB (RTC)
+
+Demanda: #195147
+Implementar tratamento Outras Retenções NFS-e de Cuiabá
+
+Demanda: #178440
+Melhorar o processo de emissão de NF-e em contingência.
+
+Demanda: #188505
+Inclusão da coluna "Inscrição Estadual" na tela de emissão de NF para geração de relatórios
+
+Demanda: #153290
+Implementado na contabilização de nota fiscal produto, variáveis para devolução de compras.
+
+Manutenção: #165366
+Configuração de NF para deduzir os impostos das peças - Mehta
+
+Demanda: #157440
+Exibir campos customizados nas listagens
+
+Demanda: #166368
+Implementado data e hora na listagem das notas fiscais,independente da origem.
+
+Demanda: #172558
+Incluir as retenções no valor de faturamento da Nota Fiscal e Relatórios de faturamento.
+
+Demanda: #164832
+Implementado NFS-e modelo nacional.
+
+Demanda: #157433
+Exibir motivo de cancelamento em notas fiscais canceladas e coluna 'Tipo de cancelamento' no GRID
+
+Demanda: #104251
+Padronização do campo do logradouro, número e complemento.
+
+Demanda: #136760
+NF de importação - considerar PIS, COFINS, AFRMM no total da NFe
+
+Demanda: #132609
+Validação do campo Solicitação de Compra de terceiro.
+
+Demanda: #110199
+Tratamento para as operações de Junção de NFe
+
+Demanda: #117864
+Melhoria para adicionar CPF/CNPJ para emissão de *SAT CF-e* e o cliente é do tipo *Consumidor Final*.
+
+Demanda: #116751 
+Melhoria no envio de NFC-e em contingência
+
+Demanda: #117316
+Ocultar o processo "Estornar Emissão" quando a nota estiver no status Emitida (Anulada)
+
+Demanda: #108339
+Nota Técnica 2020.006 (NFe) - Intermediador da Operação e Marketplace
+
+Demanda: #100678
+Criação do campo "Pedido/Origem" na aba "2 Mercadorias". Este campo exibirá a origem das peças (Nº Proposta da OM) na geração do faturamento da Ordem de Manutenção.
+
+Demanda: #105436
+Validação para exibição do processo "Alterar Categoria" pelo campo "Categoria".
+
+Demanda: #103975
+Inclusão das informações "Nome da Obra" e "Endereço da obra" na grid de pesquisa da NF e nas opções por pesquisa na grid.
+
+Demanda: #103997
+Criação do atalho [Ctrl + I] para inserção de mercadorias e [Ctrl + J] para inserção de serviços na nota.
+
+Demanda: #103598
+Alteração da exibição do processo "Estornar Aprov. do BM" para que seja exibido nas NFs que utilizaram o controle de BM
+
+Demanda: #95631
+Alterar tela "Nota Fiscal (Emissão)" para que sejam visualizadas notas de todas as empresas
+
+Demanda: #93633
+Criação de processo para "anular" uma NF emitida e já contabilizada
+
+Demanda: #100039
+Impedir emissão de NF com valor total diferente do valor de origem
+
+Demanda: #97859
+Exibição de uma nova descrição para o termo comodato exibido no campo "Origem" caso seja passado no parâmetro geral definido.
+
+Demanda: #98613
+Mudança do tamanho atual do campo "nfmerc.codigo" de tamanho 20 para 60. Esse campo se encontra na aba "Mercadorias" da tela "Nota Fiscal (Emissão)".
+
+Demanda:#95715
+Criação do processo "Visualizar" na listagem de nota fiscal.
+
+Demanda: #94929
+Criação do campo "Retenção de PIS/COFINS/CSLL somente sobre mão-de-obra".
+
+Demanda: #94092
+Será obrigatório informar o número de autorização do cartão de crédito e/ou débito.
+Os títulos serão gerados liquidadosl.
+
+Demanda #91255
+Separar o campo 'Logradouro' da tela da nota fiscal em logradouro, número e complemento
+
+Demanda #89037
+Elaborar o EFD Reinf
+
+Demanda #86551
+Inserido a totalização da coluna VALOR na tela de listagem.
+
+Demanda #86377
+Padronização do comportamento dos lembretes no Sisloc
+
+Demanda: #85736
+Melhoria na emissão de Nota fiscal eletrônica - Operação de exportação
+
+Demanda: #80922
+Não será permitido excluir parcelas de uma nota fiscal de devolução.
+Ver RN37 e RN38
+
+Demanda #81619
+Configuração de Casas Decimais por Modelo de NF
+
+Demanda #80636
+Melhoria na Nota Fiscal eletrônica - acrescentando os campos que o Sisloc não possui.
+
+Demanda 80166: A comissão de captador (da ficha de locação) será preenchida de acordo com o grupo de comissão informado no cadastro do mesmo.
+
+Demanda: #79237
+Quantidade de casas decimais do campo % Mão-de-Obra
+
+Demanda: #78694
+a)Adequação da devolução de venda de imobilizado.
+b)Aba parcelas quando nota de devolução permitir abrir o CAP com dois cliques.
+
+Demanda #74378
+Emissão de MDFe
+
+Demanda: #77278
+Criar processo Enviar E-mail
+
+Demanda: #76976
+Na aba cobrança, da nota fiscal, existe o campo E-mails de cobrança. Se for nota de saída então este campo deverá estar desbloqueado, independente do status.
+
+Demanda: #76879
+Mensagem de exclusão quando possuir anotação associada.
+
+Demanda: #53271
+Integração Sisloc x Protheus
+
+Demanda #74957
+Alteração de mensagem 
+Ver RN31
+
+Demanda: #75893
+Criar o campo ‘Vencimento Contra Apresentação’.
+
+Demanda #75383: 
+Adicionada opção de pesquisar registros pelo código do cliente.
+
+Demanda #75402: 
+Ajuste no campo Projeto para não exibir projetos marcados como inativos.
+
+project:melhorias_1215 / Demanda: #70294
+Se BM originada em junção, o campo origem virá com a descrição JUNÇÃO.
+Alterar a mensagem de exclusão para "Nota Fiscal" não pode ser excluído.
+Estorne a junção do BM.'
+
+project:customizacoes_tecnobre / Demanda: #68631
+Implementar as regras de validação para consumidor final na emissão da NFC-e. 
+
+project:resfiscal / Demanda: #55802
+1. Alterar em Nota Fiscal > aba 9-Notas referenciadas, o campo "Emissão" para o formato dd/mm/yyyy;
+
+2. Criar nova aba "Exportação", em Iniciar > Nota Fiscal > 2-Mercadorias > Dados NF-e, após aba "Declaração de importação". 
+Nesta nova aba, adicionar os campos, que armazenam os dados de Exportação: "UF de embarque","Local de embarque" e "Local de despacho".
+Exemplo abaixo com sugestão de leiaute:
+
+!exportacao.png!
+
+O campo "UF de embarque" deve conter todos as 27 unidades da federação. 
+Não tem default em nenhum dos 3 campos.
+Campos não obrigatórios.
+Estes campos deverão ser informados no XML da NF-e quando um destes três estiverem preenchidos (exemplo do xml em anexo, no nó "<exporta>").
+
+Demanda: #128544
+Implementação da Nota Técnica 2021.004
+Inclusão do campo Tipo do ato concessório no processo referenciado.
+E inclusão do grupo Grupo Obs. de uso livre Contribuinte, com os campos Identificação do campo e Conteúdo do campo, no processo Abrir Dados NFe.
+
+h3. Conversor
+
+Para o campo "Emissão" da Nota Fiscal > aba 9-Notas referenciadas, deve-se realizar a conversão dos registros existentes com dados nesta aba, para que receba o primeiro dia do mês em que foi gerado. Exemplo:
+Estava lançado como "04/2014", deverá ficar "01/04/2014"; lançado "02/2013" deverá ficar "01/02/2013".
+
+project:resfiscal / Demanda: #55808
+Criar o campo que relacione as notas de remessa ou devolução e sua contrária quando emissao de COMODATO, para propiciar o estorno ou cancelamento da nota origem, apagando automaticamente a nota par.
+
+project:resfincont / Demanda: #54833
+Adaptação do processo. 
+Passa a tratar as condições para gerar a contabilização.
+
+project:bma2015 / Demanda: #59762
+Adicionar o campo “NBS” em iniciar > nota fiscal > emissão > aba 3-Serviço após o campo “Cód.Serviço NFS-e”.
+Hint “Nomenclatura Brasileira de Serviço”.
+Campo não obrigatório.
+
+Adicionar o campo "Lei da transparência", flag sim/não, somente leitura, posicionado aba 1-Dados abaixo do campo "Data entrada / saída". 
+Default: Não
+Hint: "Sim quando a nota foi impressa utilizando corretamente as alíquotas e prazo de vigência.
+Não quando impresso faltando: alíquota correta ou prazo de vigência vencido."
+
+Ajustar os nomes descritivos dos campos (labels) em Nota Fiscal > aba 3-Serviços:
+|Campos antigo|Campos novos nomes|
+|Cód. serviço NF-e SP|Código do serviço NF-e SP|
+|Cód. serviço NFS-e|Código do serviço NFS-e|
+|Item lista serviço NFS-e|Item lista de serviço NFS-e|
+
+
+project:resfiscal / Demanda: #55804
+
+a) 
+Adicionar o campo “Emitido” que pode ter somente as duas informações abaixo:
+> Próprio  = emitido pela empresa;
+> Terceiro = emitido por terceiro;
+Posição: entre os campos “Entrada/Saída” e “Categoria” da seção "Nota Fiscal".
+Hint: "Próprio quando emitido pela empresa e Terceiro quando emitido por fornecedores, clientes, etc."
+Default: "Próprio"
+Na conversão deve ser default “Próprio” para todas NF existentes.
+Não permite alterações.
+
+b) 
+Alterar a exibição do campo calculado “NF-e”, da aba 1-Dados ficando da seguinte forma: 
+> “Chave da NF-e” ou “Nro. Protocolo” dependendo se serviço ou mercadoria (campo calculado nf.vnfe);
+> Lote.
+Exemplo: Chave NF-e:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|Lote:xxxx
+
+c) 
+Adicionar um novo STATUS que é o "Impressa por terceiro".
+Posição: No viewframe abaixo de "Impressa".
+Permitir filtrar no viewframe por “Impressa por terceiro” com a mesma equivalência da “Impressa”. Este novo status tem a equivalência de uma nota emitida (status = 100) mas não aparecerá nos relatórios existentes. Desta forma, tem que ter uma nova numeração no NFIntf.
+Ao executar um duplo clique em uma nota "Impressa por terceiro" abre o registro com status = "Emitida por terceiro".
+
+project:bma2015 / Demanda: #57253
+Criar os campos opcionais ‘Descrição Item Serviço’ e ‘Descrição CNAE’ para o tipo de nota eletrônica 'Integração NFSe'. Essas informações serão impressas somente se estiverem preenchidas no primeiro Item de Serviço informado na nota.
+
+project:resfiscal / Demanda: #55799
+Adicionado RN22 e adicionado o campo "% Comissão"
+
+
+project:bfev2015 / Demanda: #57445
+Criar na aba 'Impostos e valores' campo "Tipo Dedução", "Operação" e opções no campo "Natureza da Operação NFSe" para o tipo de nota eletrônica 'Integração NFSe', modelo 'DSF'. Validar RN21, RN23 e RN24.
+
+project:bout2014 / Demanda: #53886
+
+Criar um campo, não visível ao usuário, para receber as informações da origem conforme o parâmetro geral "Máscara para geração das Informações da origem no CAR"
+
+As notas provenientes de junção, não terão informações neste novo campo.
+
+project:b1411 / Demanda: #50601
+Inserir mensagem de alerta para Anotações e Anexos. Validar RN14.
+
+project:b1411 / Demanda: #47581
+Implementar a consulta pelo código EAN na inclusão de mercadorias.
+
+project:B1408 / Problema: #49045
+Habilitar Cód.serviço NFS-e independente do módulo de NFS-e.
+
+project:B1408 / Demanda: #48004
+Gravar valores de impostos calculados pela lei de transparência.
+
+project:b1310i1000 / Demanda: #48101
+Regras de status da Nota fiscal.
+
+project:b1310i1000 / Demanda: #48094
+Criar o campo "Data Envio BM". Validar RN10.
+
+project:b1310i1000 / Demanda: #48088
+Criar o campo "Empresa Gestora". Validar RN9.
+
+project:b1310i1000 / Demanda: #47939
+Na tela de nota fiscal listar somente os modelos de NF que o usuário tem vinculado.
+
+project:b1407 /Demanda: #47629
+Criar regra para campos natureza de operação na NFS-e de Santa Cruz do Sul. Validar RN8.
+
+project:b1411  / Demanda: #43439
+-Retirar o campo "Chave NF-e referenciada" da aba 'Complemento' e alterar o campo "Finalidade" da aba 'Complemento' para a aba 'Notas Referenciadas'.
+-Criar opção de 'Devolução/Retorno' no campo "Finalidade" da aba Notas Referenciadas. Validar RN15.
+-Criar campo "Finalidade/Forma de contato" na aba dados. Validar RN16.
+-Criar identificação do documento referenciado. Validar RN7.
+-Criar regra para data da prestação do serviço. Validar RN19.
+
+project:b1402 / Demanda: #41316
+
+Alterar o processo origem para que ao ser clicado e for uma nota de locação de caçamba, será aberto o list da tela do comercial (módulo caçamba).
+
+project:b1401 / Demanda: #38949
+
+Tratar o campo situação tributária da nota fiscal.
+
+project:b1312 / Demanda: #38693
+
+Acrescentar a opção E-mail/Impressão no campo  “Enviar nota de débito por”
+
+project:b1312 / Demanda: #38785
+
+Habilitar o processo de anotações na tela de nota fiscal (Emissão).
+
+project:b1310 / Demanda: #34245
+
+Validação do calculo do campo 'Base de Calculo'.
+Alterou o hit do campo 'Base de Calculo'.
+
+project:b1308 / Demanda: #35020
+
+Criar os campos E-mails de cobrança e Enviar ND por.
+Criar a marca d'água para nota Cancelada.
+Ver regras de negócio 1 e 3.
+
+project:b1308 / Demanda: #35254
+
+Ao cancelar ou estornar uma Nota fiscal, não deverá ser removido o registro correspondente gerado na tabela “Faturacar”. Remover apenas o vínculo entre as tabelas CAR e Faturacar.
+
+*Projeto acobertado pelo ticket 28504*
+
+1. Considerar os campos situação tributária PIS [CLASSFISCAL.COD_CST_PIS] e situação tributária COFINS[CLASSFISCAL.COD_CST_COFINS] ao incluir uma mercadoria na nota.
+Será aplicado apenas ao CNPJ da Scarpant: 05.893.704/0001-54
+
+Ver regra de negócio 5.
+
+project:b1302 / project:b1303i1 / Demanda: #32311
+
+1. Criar o campo fl_cfps.
+Este campo ficará na aba Impostos e valores abaixo do campo "Natureza da operação NFS-e" [NF.CD_NATOPER_NFSE].
+Ver regra de negócio 4.
+
+2. O módulo de Envio de RPS do Sisloc deverá contemplar o modelo/serie de NFS-e para a prefeitura de Serra-ES.
+Conforme a regra de banco, já existente, de número 3 será salvo o xml de envio. Para o caso da NFS-e de Serra, é o XML de Solicitação de Emissão de Nota Eletrônica.
+
+project:versao1210 / project:b1203p1210i6 / Demanda: #31076
+
+a) Permitir entrada manual de BC ICMS e BC IPI.
+b) Calcular impostos dos itens
+c) Acrescentar Obs. na aba ICMS.
+
+project:versao1210
+
+Adicionar campo nf_eletronica.xml_canc conforme dicionário de dados project:versao1209-cce
+Adicionar campos na tabela cartacorrecao: nro_envios_cce, xml_envio e xml_cce; regra de negócio 1 a 3; ajuste de tela; adequação do botão EXCLUIR.
+
+
+project:b1203p1210i6
+
+a) A versão corrente do SISLOC traz como base de calculo de ICMS e IPI o valor total do item. Caso essa seja modificada dentro do Detalhes do item(Processo existente na emissão de NF), o sistema busca o valor da nota fiscal(aba Mercadorias) e substitui o valor editado, voltando ao que era anteriormente.   
+ Para esse projeto, será alterado alguns pontos dessa rotina. São elas:
+ 
+# Ao abrir a tela através do processo "Dados NFe", o sistema trará os valores como é na versão atual porém, o sistema deverá permitir a edição da base de calculo(ICMS/IPI) e esses novos valores deverão vigorar como nova base de calculo, realizando assim o novo cálculo do valor de ICMS e/ou IPI. Havendo alteração na base de cálculo ou alíquota do ICMS, IPI, PIS e COFINS o valor dos mesmos deverão ser recalculados.
+ Para o cálculo do valor de ICMS, considerar, também, o Perc. de redução da base de cálculo de ICMS ou seja, no ato do cálculo, se existir percentual de redução, a BC deverá ser reduzida (Nova BC = NFE_VBCICMS - (NFE_VBCICMS * NFE_PREDBC)).
+   Obs.: O percentual de redução incide na base apenas durante o cálculo do valor do ICMS. 
+# Havendo alterações nos valores dos campos Tot. Frete(nfe_vfrete), Tot. Seguro(nfe_vseg), Desconto(nfe_vdesc) ou Outras desp. acessórias (nfe_voutro), a base de cálculo do ICMS, PIS, COFINS e IPI deverão ser cálculadas através da fórmula: ((Qt_nfmerc * Vl_uni_nfmerc) + nfe_vfrete + nfe_vseg + nfe_voutro - nfe_vdesc). Alterando a base o valor do ICMS, PIS, COFINS e IPI também deverão ser recalculados sobre a nova base encontrada.
+
+
+b) Conforme relação abaixo, alguns CST's de ICMS,IPI,PIS e COFINS terão seus valores calculados automaticamente.
+
+|\2=.+*ICMS*+|
+|~.Cod. Sit. Tributária|=.Ação|
+|=~.00|/6=.Seguir o mesmo cálculo do CST 00 que ocorre no sistema. 
+Permitir Alterar a base de cálculo e recalcular o valor do ICMS com a nova base|
+|=~.10|
+|=~.20|
+|=~.51|
+|=~.70|
+|=~.90|
+
+|\2=.+*IPI*+|
+|~.Cod. Sit. Tributária|=.Ação|
+|=~.00|/4=.Permitir alteração na base de calculo. Remover rotina que corrige a BC quando é alterada.
+ Calcular o novo Vl. IPI quando base de cálculo alterada.|
+|=~.49|
+|=~.50|
+|=~.99|
+
+|\2=.+*PIS/COFINS*+|
+|~.Cod. Sit. Tributária|=~.Ação|
+|~.01|~.Está correto no sistema|
+|~.02|~.Realizar o cálculo semelhante ao CST 01|
+|~.03|~.Realizar o cálculo Alíquota (em reais) * Quantidade Vendida|
+|~.04/06/07/08/09|~.Não fazer cálculo automático|
+|/2<.49 à 60|/2<.Se  (Tipo de cálculo = Percentual) então
+   Cálculo igual ao CST 01
+senão Cálculo igual ao CST 03|
+|
+
+c) Ao entrar no processo Dados NFe, aba ICMS, o sistema deverá verificar o regime da empresa ativa. Sendo este igual a "Regime Normal" (EMPRESA.FL_OPTSIMPLES = 3) apresentar na tela a seguinte observação: 
+
+Atenção: O valor da Base de Cálculo de ICMS do produto deve ser informada contemplando todos os valores previstos na legislação pertinente, ainda que algumas de suas parcelas tenha sido informadas em campos específicos (frete, seguro, desconto, IPI, Outras despesas acessórias, etc).    
+
+* project:versao1209-cce 
+
+* Diminuir o tamanho da grid, de forma que caiba mais dois campos abaixo do campo "Cidade". Com o espaço liberado no rodapé, deverá constar os campos:
+Núm. envios <99>              
+Status: <xxxxxx>
+Para "Núm. envios" deverá ser o campo nf.cartacorrecao.nro_envios_cce; e para "Status" a extração do item do XML recebido da SEFAZ e armazenado no campo "nf.cartacorrecao.xml_cce". Deverá ser extraído do xml_cce os campos: cStat e xMotivo, independente se for XML de erro ou não.
+* somente poderá excluir a carta de correção se:
+> * não for eletrônica (nf.nfserie.fl_nfe <> 40);
+> * se CC-e (nf.nfserie.fl_nfe = 40) e cartacorrecao.nro_envios_cce = 0
+* Colocar o seguinte texto à direita de EMPRESA:
+"A Carta de Correcao e disciplinada pelo paragrafo 1o-A do art. 7o do Convenio S/N, de 15 de dezembro de 1970 e pode ser utilizada para regularizacao de erro ocorrido na emissao de documento fiscal, desde que o erro nao esteja relacionado com: I - as variaveis que determinam o valor do imposto tais como: base de calculo, aliquota, diferenca de preco, quantidade, valor da operacao ou da prestacao; II - a correcao de dados cadastrais que implique mudanca do remetente ou do destinatario; III - a data de emissao ou de saida."
+
+h3. Pesquisa
+
+Exibição <Campos que aparecerão na grid de pesquisa>
+
+Filtros <Filtros que estarão disponíveis para pesquisa>
+
+h3. Regra de Negócio do Banco de dados
+
+1. Número incremental iniciando em 1 após o envio da CC-e; sequencial até o número máximo 20. 
+2. Armazenará o XML tanto de mensagem de erro/inválido, como também a mensagem de evento aceito.
+3. Armazenar o XML de envio.
+4. Caso seja uma nota fiscal eletrônica de serviço (NFS-e) e pertencente à prefeitura de Serra-ES, então o campo estará habilitado e com o default igual ao valor 511 senão, será desabilitado e o default passará a ser vazio.
+5. Seguir a regra de negócio 1 do RF #32827.

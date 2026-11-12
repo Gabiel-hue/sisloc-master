@@ -1,0 +1,378 @@
+h1. DOCUMENTAÇÃO
+
+{{toc}}
+
+*Atenção:*
+Este requisito foi migrado para o ReqSearch e pode estar desatualizado. Confira a versão oficial clicando no campo 'ReqSearch'.
+
+{{collapse(Última versão Redmine)
+
+
+h1. REGRA DE NEGÓCIO
+
+h3. RN1
+
+Texto da regra RN1.
+
+h3. RN2 
+
+Texto da regra RN2.
+
+h3. RN3
+
+Texto da regra RN3.
+
+h3. RN4
+
+Texto da regra RN4.
+
+h3. RN5
+
+Texto da regra RN5.
+
+h3. RN6
+
+Texto da regra RN6.
+
+h3. RN7
+
+Texto da regra RN7.
+
+h3. RN8
+
+Texto da regra RN8.
+
+h3. RN9 
+
+Texto da regra RN9.
+
+h3. RN10
+
+Texto da regra RN10.
+
+h3. RN16 
+
+Texto da regra RN16.
+
+h3. RN17 
+
+Texto da regra RN17.
+
+h3. RN18
+
+Texto da regra RN18.
+
+h3. RN19
+
+Texto da regra RN19.
+
+h3. RN20
+
+Texto da regra RN20.
+
+h3. RN21
+
+Texto da regra RN21.
+
+h3. RN22
+
+Texto da regra RN22.
+
+h3. RN23
+
+Texto da regra RN23.
+
+h3. RN24
+
+Texto da regra RN24.
+
+h3. RN25
+
+Texto da regra RN25.
+
+h3. RN26 - *Descontinuada*
+
+Texto da regra RN26.
+
+h3. RN27
+
+Texto da regra RN27.
+
+h3. RN28
+
+Texto da regra RN28.
+
+h3. RN29
+
+Texto da regra RN29.
+
+h3. RN30
+
+Texto da regra RN30.
+
+h3. RN32
+
+Texto da regra RN32.
+
+h3. RN35
+
+Texto da regra RN35.
+
+h3. RN36
+
+Texto da regra RN36.
+
+h3. RN37
+
+Texto da regra RN37.
+
+h3. RN38
+
+Texto da regra RN38.
+
+h3. RN39
+
+Texto da regra RN39.
+
+h3. RN40 - Tabela de preço padrão (venda)
+
+Texto da regra RN40.
+
+h3. RN41
+
+Texto da regra RN41.
+
+h3. RN42 - Status da empresa (ativa/inativa)
+
+Texto da regra RN42.
+
+h3. RN43
+
+Texto da regra RN43.
+
+h3. RN44
+
+Texto da regra RN44.
+
+h3. RN45
+
+Texto da regra RN45.
+
+h3. RN46
+
+Texto da regra RN46.
+
+h3. RN47
+
+Texto da regra RN47.
+
+h3. RN48
+
+Texto da regra RN48.
+
+h3. RN49
+
+Texto da regra RN49.
+
+h3. RN50
+
+Texto da regra RN50.
+
+h3. RN51 - Processo 'Alterar CNPJ'":http://net1/redmine/issues/32745#RN51
+
+Texto da regra RN51.
+
+h3. RN52
+
+Texto da regra RN52.
+
+h3. RN53 - Condição de pagamento locação
+
+Texto da regra RN53.
+
+h3. RN54 - Integração Boa Vista
+
+Texto da regra RN54.
+
+h3. RN55
+
+Texto da regra RN55.
+
+h3. RN56
+
+Texto da regra RN56.
+
+h3. RN58
+
+Texto da regra RN58.
+
+h1. Web/Mobile
+
+h3. RN57 - Obrigatoriedade de assinaturas digitais
+
+(#100000)
+Texto da regra RN57.
+
+h3. RN59 - Integração de Empresa entre Web e Desktop
+
+(#100000)
+Texto da regra RN59.
+
+h3. RN60 - Landing Page
+
+(#100000)
+Texto da regra RN60.
+
+h3. RN61
+
+(#100000)
+Texto da regra RN61.
+
+h3. RN62 - Campo *Horário padrão da empresa.
+
+(#100000)
+Texto da regra RN62.
+
+h3. RN63 - Campo *Horário SLA corrido*
+
+(#100000)
+Texto da regra RN63.
+
+h3. RN64 - Campo *Horário SLA útil*
+
+(#100000)
+Texto da regra RN64.
+
+h3. RN65 - Campo de assunto e serviço.
+
+(#100000)
+Texto da regra RN65.
+
+h3. RN66 - Seção Checklist Operacional
+
+(#100000)
+Texto da regra RN66.
+
+h3. RN67 - Dispensar obrigatoriedade
+
+(#100000)
+Texto da regra RN67.
+
+h3. RN68 - Contabilização Apontamento de Horas:
+
+(#100000)
+Texto da regra RN68.
+
+h3. RN69  – Parâmetro “CR fatura de locação”
+
+(#100000)
+Texto da regra RN69.
+
+h3. RN70 – Campo Centro de resultado
+
+(#100000)
+Texto da regra RN70.
+
+h3. RN71 – Validação CR empresa
+
+(#100000)
+Texto da regra RN71.
+
+h3. RN72 - Endereço da Entrega:
+
+(#100000)
+Texto da regra RN72.
+
+h3. RN73 - Controle RFID:
+
+(#100000)
+Texto da regra RN73.
+
+h3. RN74 - Leitura RFID
+
+(#100000)
+Texto da regra RN74.
+
+h3. RN75 - Exibição do campo Gerar registro 1601 no cadastro da empresa.
+
+(#100000)
+Texto da regra RN75.
+
+h3. RN76 - Comportamento das opções do campo Gerar registro 1601.
+
+(#100000)
+Texto da regra RN76.
+
+h3. RN77 - Centro de resultado não configurado para módulo Classificação Financeira desabilitado
+
+(#100000)
+Texto da regra RN77.
+
+h3. RN78 - Imprimir local de incidência na NFS-e
+
+(#100000)
+Texto da regra RN78.
+
+h3. RN79 - Campo Romaneio de Devolução
+
+(#100000)
+Texto da regra RN79.
+
+h3. RN80 - Parâmetro ‘Sobrepor Informações’
+
+(#100000)
+Texto da regra RN80.
+
+h3. RN81 – Id. integração NFSe
+
+(#100000)
+Texto da regra RN81.
+
+h3. RN81 - Campo Natureza de Tributação NFS-e
+
+(#100000)
+Texto da regra RN81.
+
+h3. RN82 - Campo 'Exige Contrato Assinado'
+
+(#100000)
+Texto da regra RN82.
+
+h3. RN83 - Data base reajuste de Ficha
+
+(#100000)
+Texto da regra RN83.
+
+h3. RN84 - Exibição dos campos FUST e FUNTELL
+
+(#212039)
+A exibição dos campos FUST e FUNTELL estão condicionados ao módulo NFCom ( Nota Fiscal de Comunicação Eletrônica) estar habilitado. O cálculo destes impostos dependem de alíquota definida pelo usuário.
+
+---
+
+h1. INTEGRAÇÃO SISLOC X PROTHEUS (#76260)
+
+* Somente se o módulo mdl_Integração_Protheus Habilitado.
+
+h1. REFACTORING PENDENTES
+
+
+h1. CHANGELOG
+
+Demanda: #212039
+RT0 - Criar campos de FUST e FUNTTEL na NFCom (OUT / 2026)
+
+
+Demanda: #178319
+Gerar expedição da Remessa somente após o contrato assinado
+
+Demanda: #188637
+- Implementado CST e CClassTrib IBS/CBS.
+
+##141451
+Validar se o módulo "Classificação Financeira" está desabilitado.
+
+Demanda: #137134
+Implementado configuração de Centro de Resultado por empresa na contabilizção do faturamento de locação.
+
+}}

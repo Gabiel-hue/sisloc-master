@@ -1,0 +1,1293 @@
+h1. DOCUMENTAÇÃO
+
+Através deste processo, é gerado o faturamento, o demonstrativo e a NF referente à ficha de locação.
+
+{{toc}}
+
+h1. Nome do Processo
+
+Gera fatura
+
+h1. Hint
+
+Gera fatura de Locação
+
+h1. REGRA DE NEGÓCIO
+
+h3. RN1 
+
+Geral
+
+1.1. Ao gerar uma fatura e o campo "Apresentar mão-de-obra"(FICH_LOC.FL_MAODEOBRA) estiver indicando que o "valor da mão-de-obra será gerada de forma separada do valor de locação", ao invés de gerar uma NF, deverá gerar duas, sendo a primeira com os valores de locação e a segunda com os valores de mão-de-obra (conforme campo fich_loc.pr_mo).
+e gravará os códigos das NFs geradadas nos respectivos campos na tabela fl_fatura:
+
+* FL_FATURA.CD_NF: Receberá o código da NF da locação
+* FL_FATURA.CD_NF_MO: Receberá o código da NF da mão-de-obra
+
+h3. RN2
+
+Gerar fatura da remessa
+
+h3. RN2.1
+
+Se o parâmetro  'Demonstrativo de faturamento: imprimir nota de devolução' estiver marcado, então deverá ser impresso no demonstrativo de faturamento o número da nota fiscal de devolução do equipamento que está sendo faturado.
+
+h3. RN3
+
+Gerar fatura do serviço extra
+
+3.1. Ao gerar uma fatura para um serviço extra, o mesmo deverá ser relacionado com a tabela fl_fatura.
+
+h3. RN4 
+
+Gerar fatura da OM
+
+4.1. ...
+
+h3. RN5 
+
+Gerar fatura do apontamento 
+
+A fatura de apontamento, possui parametrização para indicar como a mesma deve ser discriminada na nota fiscal, conforme parâmetros:
+* A = "CONFIG.[ACESSO] LOCACAO TIPO APONTAMENTO" 
+* B = "Modelo para fatura de apontamento"(Geral > Ficha Locação > Fatura Locação).
+
+|REGRA|PARAMETRO A|PARAMETRO B||
+|5.1|1|parâmetro - Modelo 1|Gera um serviço na NF para cada patrimônio|
+|5.2|1|parâmetro - Modelo 2|Gera um serviço na NF para cada tipo de apontamento de cada patrimônio|
+|5.3|2|fixo - Modelo 3|...|
+|5.4|3||Gera um serviço na NF para cada patrimônio |
+
+
+5.1. Tipo 1 / Modelo 1
+
+...
+
+5.2. Tipo 1 / Modelo 2  
+
+5.2.1. Para cada patrimônio deverá ser totalizado cada tipo de cobrança (horas, mobilização, desmobilização e km).
+5.2.1.2. Para cada tipo de cobrança de cada patrimônio deve ser adicionado um serviço na fatura com os respectivos valores. 
+5.2.1.2. O texto do primeiro tipo de cobrança do patrimônio deverá ter no inicio o texto conforme os parâmetros #31156 ("Fatura de Apontamento: texto 1ª linha - locação" e "Fatura de Apontamento: texto 1ª linha - locação").
+5.2.2. REMOVIDO: Após adicionar todos os patrimônio, adicionar um serviço com o Local da obra e número das OS.
+
+5.3
+
+...
+
+5.4
+5.4.1. Para cada patrimônio deverá ser totalizado cada tipo de cobrança (horas, mobilização, desmobilização e km).
+
+h3. RN6
+
+Se Faturar período Integral igual a Sim então o processo de faturamento considerar o valor integração.
+Ex.: Tipo de locação: 3 dias (Dia 4 à dia 6)
+Valor = R$100,00
+Faturamento realizado no dia 5. Valor cobrado R$100,00.
+
+h3. RN7
+
+Se contrato possuir valor de projeto então considerar:
+
+* O valor total das faturas, incluindo o valor que esta sendo faturado no momento, não pode ser maior que o valor definido para o projeto. Caso seja verdade irá emitir uma mensagem ao usuário alertando sobre o valor excedente ao contrato e, caso o parâmetro "Permitir realizar faturar com valor maior que o valor residual" esteja marcado, irá emitir o aviso porém irá liberar o faturamento (Tratar mensagem conforme parâmetro).
+Atualizar o valor do saldo deixando negativo.
+Mensagem: 
+"[Fatura não pode ser emitida].
+Valor da fatura maior que o valor residual.
+Valor Projeto:[Valor] - Valor Residual: [Valor] - Valor da Fatura: [Valor]"
+
+* O valor total das faturas, incluindo o valor que esta sendo faturado no momento, é igual ao valor definido para o projeto. Caso seja verdade irá executar o faturamento atual e emitir uma mensagem ao usuário alertando sobre o uso total da verba firmada em contrato. Também irá atualizar o valor do campo ‘Valor Saldo’, que neste caso ficará zerado.
+Mensagem: 
+"Atenção!
+Valor total firmado em contrato foi alcançado. 
+Valor Projeto:[Valor] - Valor Residual: [Valor] - Valor da Fatura: [Valor]"
+
+* O valor total das faturas, incluído o valor que esta sendo faturado no momento, é menor ao valor definido para o projeto. Caso seja verdade irá executar o faturamento atual e atualizar o valor do campo ‘Valor Saldo’ do contrato. 
+
+h3. RN8
+
+Para o apontamento tipo 3
+
+1- Quando o equipamento possuir o mínimo de horas dia (tela de preço de apontamento) informado, se houver horas improdutivas essas deverão ser abatidas.
+Exemplo: Operador trabalhou 6 horas e o mínimo é 9 horas à 68,00. Na coluna Total, da seção horas trabalhadas, irá apresentar 6 horas e o valo R$ 408,00.
+
+2- Quanto o equipamento possuir o mínimo de horas dia (tela de preço de apontamento) informado e o total de apontamento do dia for menor que este mínimo então, o mínimo será cobrado.
+Exemplo: Operador trabalhou 6 horas e o mínimo é 9 horas à 68,00. Na coluna Total, da seção horas trabalhadas, irá apresentar 9 horas e o valo R$ 612,00.
+
+3- O mínimo de horas trabalhadas é da máquina e não do operador ou seja, se dois operadores diferentes operaram na mesma máquina então será cobrado o mínimo considerando a máquina e não os operadores.
+Exemplo: Considerando que o mínimo de horas dia contratado é 9 horas e, o operador “A” trabalhou de 07:00 às 12:00 e o operador “B” trabalhou das 13:00 às 15:00 então deverá ser faturado 9 horas pois, os dois juntos operaram por 7 horas.
+O mesmo ocorre se houver substituição de patrimônio. Deverá ser considerado o tempo de trabalho dos patrimônios no mesmo dia.
+
+4 - As horas adicionais trabalhadas, não são contempladas dentro da franquia ou seja, se a máquina possui a franquia de 200 horas/mês e o operador trabalhou 180 horas normais e 20 horas adicionais, será cobrado o mínimo de 200 horas mais, as 20 horas adicionais à parte assim, na totalização irá ser faturado 220 horas.
+
+5 - No apontamento da central locações, será gerado um demonstrativo para cada equipamento porém, será gerado um único faturamento. 
+
+6 - Quando o apontamento for referente à sábado, domingo e feriado, não serão considerados as horas normais apenas as adicionais e as impróprias e, o valor mínimo de horas/dia informado na tabela de apontamento, também, deverá ser respeitado.
+Exemplo: Operador trabalhou 6 horas adicionais no sábado e o mínimo informado no campo “Mínimo hora dia” é 9 então, deverá ser cobrado as nova horas adicionais
+
+7 - Quando for uma apontamento considerando mínimo hora mês, o sistema irá considerará o campo “Tipo faturamento”, criado no cabeçalho do apontamento. 
+No momento da geração da fatura, se o tipo de faturamento for igual a “Mínimo de horas” então a rotina irá considerar o mínimo informado na tabela de preço de apontamento senão se, o tipo de faturamento for igual a “Pró-rata” então o período a ser fatura irá considerar a fórmula ((Mínimo de horas da tabela de apontamento) / 30 x nº de dias faturados considerando o período de faturamento da ficha) senão se, o tipo de faturamento for igual a Apenas horas apontadas então o período a ser faturado irá considerar apenas as horas apontadas.
+
+Exemplo para tipo de faturamento Pró-rata: Contrato aberto no dia 20/01 sendo este mensal e com mínimo hora mês igual a 200. O faturamento deverá ocorrer no dia 20/02 porém, se houver o faturamento no dia 25/01, será calculado sobre 33 horas: ((200 hrs / 30 duas) x 5) = 33.
+
+*Atenção: O campo número Dias, na tela de locação por período, é quem define se é uma locação diária, mensal quinzenal sendo assim, o campo tipo de locação só é considerado caso este campo esteja igual a 0, 15 ou 30.*
+
+h3. RN9
+
+Para apontamento tipo 3
+
+1- Deverá ser gerado um demonstrativo por equipamento
+Exemplo: O contrato possui o patrimônio A (Com apontamentos também de acessórios), Patrimônio B e o Patrimônio
+C.
+Neste exemplo será impresso um demonstrativo A com os respectivos apontamentos e os apontamentos dos
+acessórios lançados juntos. Será impresso um demonstrativo B e um demonstrativo C.
+Observação: Apenas o demonstrativo será gerado separado, o faturamento ocorrerá conforme é hoje ou seja um
+único faturamento considerando todos os equipamentos. Caso o usuário não queira que um determinado
+apontamento seja faturado, basta ir na tela de apontamento e mudar a flag faturar para “N” do período desejado.
+
+2- Como no demonstrativo pode haver apontamento de equipamento e acessório, o demonstrativo irá ordenar os
+apontamentos por data e operador.
+
+3- Quanto o equipamento possuir o mínimo de horas dia (tela de preço de apontamento) informado, se houver horas
+improdutivas essas deverão ser abatidas.
+Exemplo: Operador trabalhou 6 horas e o mínimo é 9 horas à 68,00. Na coluna Total, da seção horas trabalhadas, irá
+apresentar 6 horas e o valo R$ 408,00.
+
+4- Quanto o equipamento possuir o mínimo de horas dia (tela de preço de apontamento) informado e o total de
+apontamento do dia for menor que este mínimo então, o mínimo será cobrado.
+Exemplo: Operador trabalhou 6 horas e o mínimo é 9 horas à 68,00. Na coluna Total, da seção horas trabalhadas, irá
+apresentar 9 horas e o valo R$ 612,00.
+
+5- O mínimo de horas trabalhadas é da máquina e não do operador ou seja, se dois operadores diferentes operaram na
+mesma máquina então será cobrado o mínimo considerando a máquina e não os operadores.
+Exemplo: Considerando que o mínimo de horas dia contratado é 9 horas e, o operador “A” trabalhou de 07:00 às 12:00
+e o operador “B” trabalhou das 13:00 às 15:00 então deverá ser faturado 9 horas pois, os dois juntos operaram por 7 horas.
+O mesmo ocorre se houver substituição de patrimônio. Deverá ser considerado o tempo de trabalho dos patrimônios
+no mesmo dia.
+
+6- Quando o apontamento for mensal, as horas adicionais trabalhadas, não são contempladas dentro da franquia ou seja, se a máquina possui a franquia de 200 horas/mês e o operador trabalhou 180 horas normais e 20 horas adicionais, será cobrado o mínimo de 200 horas mais, as 20 horas adicionais à parte assim, na totalização irá ser faturado 220 horas.
+
+7- A coluna “Total dia” é o resultado da soma do total das horas normais mais, o total das horas adicionais menos as horas
+improdutivas.
+
+8- Na seção total de apontamentos, o campo “Total Medição”, é a soma do total de horas da coluna “Total Dia” e o
+campo valor é a soma dos valores da coluna “Total Dia”
+
+h3. RN10
+
+Caso o módulo de Portal de Relacionamentos Web 'mdl_Portal_Relacionamentos' esteja habilitado o processo de gerar fatura irá gravar o demonstrativo de faturamento em formato .PDF. 
+
+Ao visualizar o demostrativo de faturamento, logo ao sair da tela, o usuário terá a opção de gerar a NF. Caso faça a opção pelo 'Sim' o sistema também irá gravar o demonstrativo de faturamento. 
+
+A condição é necessário para que o arquivo possa ser exposto na ferramenta de Portal de Relacionamentos. 
+
+O .PDF só será gerada para faturas de locação. Faturas extras, serviços do tipo A ou G não serão gerados.  
+
+h3. RN11
+
+Caso o campo cobrar a partir de (Tela Remessa) for menor que a Data inicial(Período de Locação) e, tenha sido realizado a expedição então deverá ser habilitado a opção "Faturar apenas remessa complementar"
+
+h3. RN12
+
+Caso o Serviço extra possua a Data base menor que a Data inicial(Período de locação) e o valor de venda unitário maior que zero então deverá ser habilitado a opção "Faturar apenas remessa complementar". 
+
+h3. RN13
+
+Para apontamento tipo 3
+
+1- Quando o apontamento for quinzenal, as horas adicionais trabalhadas, não são contempladas dentro da franquia ou seja, se a máquina possui a franquia de 200 horas/15 dias e o operador trabalhou 180 horas normais e 20 horas adicionais, será cobrado o mínimo de 200 horas mais, as 20 horas adicionais à parte assim, na totalização irá ser faturado 220 horas.
+
+2- As horas improdutivas devem ser abatidas da franquia ou seja, se for estipulado um mínimo de 200 horas/15 dias e o operador trabalhar 180 horas normais e 10 improdutivas, deverá ser cobra 200 menos 10 horas então, será cobrado 190 horas.
+
+3- Quando for uma apontamento considerando mínimo hora quinzenal, o sistema habilitará o campo “Tipo faturamento”. (Esta regra também é aplicada no tipo de locação mensal a diferença, é o cálculo feito para a opção "Pró-rata")
+
+No momento da geração da fatura, se o tipo de faturamento for:
+
+* Se igual a “Mínimo de horas” então a rotina irá considerar o mínimo informado na tabela de preço de apontamento 
+
+* Se igual a “Pró-rata” então o período a ser faturado irá considerar a fórmula ((Mínimo de horas da tabela de apontamento) / 15 x nº de dias faturados considerando o período de faturamento informado na ficha) 
+
+* Se igual a “Apenas horas apontadas” então o período a ser faturado irá considerar apenas as horas apontadas.
+Exemplo para tipo de faturamento Pró-rata: Contrato aberto no dia 01/01 sendo este com mínimo hora quinzenal igual a 200. O faturamento deverá ocorrer no dia 15/01 porém, se houver o faturamento no dia 10/01, será calculado sobre 133 horas: ((200 hrs / 15 dias) x 10) = 133
+
+*Atenção: O campo número Dias, na tela de locação por período, é quem define se é uma locação diária, mensal quinzenal sendo assim, o campo tipo de locação só é considerado caso este campo esteja igual a 0, 15 ou 30.*
+
+h3. RN14
+
+(#48086) Ao faturar a ficha de locação se o parâmetro "Aplicar valor serviço extra tipo C apenas para patrimônio expedido" estiver marcado, sistema não deve ratear o valor do desconto/acréscimo entre os itens da locação quando o tipo for "C", o sistema deve dar o desconto/acréscimo apenas naquele patrimônio em questão.
+
+No demostrativo de faturamento onde é impresso os dados referentes ao serviços extras quando for um serviço tipo "C" de desconto/acréscimo e estiver com patrimônio informado, o sistema deve concatenar a descrição do serviço e número do patrimônio a descrição do mesmo.
+
+
+h3. RN15
+
+Ao gerar fatura para uma locação que possua OM cadastrada com campo “Geração da fatura” igual a “Destacar serviços da OM na fatura da locação”, as peças gastas na OM serão adicionadas na NF com natureza de operação referente ao tipo de operação cadastrado no parâmetro “OM materiais”. Caso o parâmetro não esteja configurado irá gerar mensagem de alerta pedindo para o usuário configurar o parâmetro. 
+
+h3. RN16
+
+(#48093) Ao gerar o faturamento do contrato de locação se o contrato estiver com a opção “Enviar boletim de medição” selecionada, a nota fiscal gerada deve ficar com status “A Enviar BM”. Se o contrato NÃO necessitar de aprovação de BM, a nota fiscal deve ficar com status “A imprimir”.
+
+h3. RN17
+
+(#48098) Quando a opção “Enviar boletim de medição” na ficha de locação estiver selecionada, o titulo do demonstrativo de faturamento deve ser “Boletim de Medição”.
+
+h3. RN18
+
+(#48104) Ao faturar a ficha de locação não mostrar a tela de nota fiscal, deve mostrar a tela de controle de boletim de medição.
+
+h3. RN19
+
+(#55568)
+1 - Ao gerar a fatura de locação, o sistema deve inserir na nota fiscal, em tabela auxiliar, a prévia da classificação financeira conforme Contas Contábeis configuradas nos parâmetros gerais e no Grupo de produto. 
+2 - O demonstrativo de faturamento deve ratear os produtos que façam parte de um grupo marcado para não exibir no demonstrativo de faturamento. Este rateio dos produtos deve quebrar entre os agrupamentos de ambientes. Os produtos que estão marcados para não exibir no demonstrativo de faturamento e que não façam parte de um ambiente, deve ter seu valor rateado entre todos os demais itens.
+
+-<CL>(#48126)*Alterada em 13/01/2014*
+1 - Ao gerar a fatura de locação, o sistema deve inserir na nota fiscal as respectivas naturezas financeiras conforme os itens da remessa. 
+2 - O demonstrativo de faturamento deve ratear os produtos que façam parte de um grupo marcado para não exibir no demonstrativo de faturamento. Este rateio dos produtos deve quebrar entre os agrupamentos de ambientes. Os produtos que estão marcados para não exibir no demonstrativo de faturamento e que não façam parte de um ambiente, deve ter seu valor rateado entre todos os demais itens.<CL>-
+
+h3. RN20
+
+(#55568) Se um equipamento +não+ possuir uma Conta Contábil relacionado ao Tipo de contrato no cadastro do grupo, o sistema deve dar um alerta informando que aquele equipamento daquele grupo não está configurado e não deve gerar a fatura. Isso se o parâmetro 'Preço de Locação composto' estiver marcado.
+
+-<CL>*Alterado em 13/01/2014* (#48201) Se um equipamento não estiver com a natureza financeira informada no cadastro do grupo do mesmo, o sistema deve dar um alerta informando que aquele equipamento daquele grupo não está configurado e não deve gerar a fatura.<CL>-
+
+h3. RN21
+
+(#47612) Ao gerar o faturamento da ficha de locação, caso exista remessa aprovada e não expedida deve exibir a mensagem de alerta "Ficha de Locação possui remessa aprovada e não expedida".
+
+
+h3. RN22
+
+(#100096)
+Ao faturar a ficha de locação para um Serviço Extra do tipo 'A' e 'G', o Sisloc observará se o parâmetro 'Preço de Locação composto' esta marcado. Caso verdade o processo irá validar/buscar as seguintes informações:
+* O Tipo de Contrato informado na ficha de locação;
+* O Grupo em que o serviço esta vinculado;
+* As Contas Contábeis relacionadas ao Grupo e ao Tipo de Contrato (no cadastro do Grupo);
+* O Centro de Resultado informado no tipo de contrato;
+
+Assim com essas informações/referências gravará as Contas Contábeis e o centro de resultado (que fica no cadastro da empresa) para classificar automaticamente ao emitir a nota fiscal.
+
+(#55568)
+-Ao faturar a ficha de locação para um Serviço Extra do tipo 'A' e 'G', o Sisloc observará se o parâmetro 'Preço de Locação composto' esta marcado. Caso verdade o processo irá validar/buscar as seguintes informações:-
+-O Tipo de Contrato informado na ficha de locação.-
+-O Grupo em que o serviço esta vinculado.-
+-As Contas Contábeis relacionadas ao Grupo e ao Tipo de Contrato (no cadastro do Grupo)-
+-Assim com essas informações/referências gravará as Contas Contábeis e o centro de resultado (que fica no cadastro da empresa) para classificar automaticamente ao emitir a nota fiscal.
+
+-<CL>*Alteração em 13/01/2014* (#51403) Ao faturar a ficha de locação para um Serviço Extra do tipo 'A' e 'G', o Sisloc observará se o parâmetro 'Preço de Locação composto' esta marcado. Caso verdade o processo irá validar/buscar as seguintes informações:* O Tipo de Contrato informado na ficha de locação.* O Grupo em que o serviço esta vinculado.* As Naturezas Financeiras relacionadas ao Grupo e ao Tipo de Contrato (no cadastro do Grupo).Assim com essas informações/referências gravará as naturezas financeiras e o centro de resultado (que fica no cadastro da empresa) para que possa classificar automaticamente ao emitir a nota fiscal.<CL>-
+
+h3. RN23
+
+Caso o campo 'Faturar Comodato' estiver com o valor 'SIM', ao acionar o processo "Gera Fatura" o sistema deve permitir gerar a fatura. Caso contrário, o sistema não deve permitir gerar a fatura.
+
+Caso tiver fatura gerada, não deve ser possível alterar o campo 'Faturar Comodato'.
+
+h3. RN25
+
+(#57845) (#79922) 
+
+Para imprimir o demonstrativo de faturamento modelo 2 deverá configurar:
+* Apontamento 3 ou Apontamento Padrão Sisloc (tipo 0)
+* Sintético 
+
+O demonstrativo será impresso sempre com 31 dias, caso haja mais do que esse período a ser faturado, o restante será quebrado em outra página (Cada página possuirá espaço para 31 dias).
+Obs.:
+
+1) Havendo mais de uma página, para o apontamento do equipamento em questão, os totalizadores (HRN, HRE, HRM, etc.) serão apresentados apenas na última página.
+
+2) O início da representação de data será a mesma data do campo data inicial da ficha de locação pois, é esta que determina o início do faturamento.
+
+Para os dias sem apontamento, os campos serão impressos vazios
+
+h3. RN26
+
+(#57253) As informações somente serão impressas caso existir valor nos campos "Descrição Item Serviço" e "Descrição CNAE" do primeiro Item de Serviço informado na nota.
+
+h3. RN27 - Apontamento Parte Diária
+
+(#55226) (#84916)
+
+Quando o tipo de apontamento habilitado for o padrão (Apontamento configurável) calculo do faturamento considerará as seguintes parametrizações/condições
+
+> Configurações do tipo de apontamento (Configurações de apontamento ou ficha)/ Tipo de Horário - Se for um horário por intervalo, que possua inícios e fins definidos, o processo se baseará nestes intervalos para apurar as horas excedentes, além de considerar o mínimo de horas, caso exista. Isso é possível neste tipo de horário. Já para o horário por quantidade de horas o sistema considerara as horas excedentes através da comparação da quantidade de horas padrão e executadas, neste caso o mínimo de horas sempre prevalecerá sobre as horas excedentes. 
+
+> Configurações do tipo de apontamento (Configurações de apontamento ou ficha)/Mob.Desmob. -  Se cobrará a Mobilização ou Desmobilização e como fara a cobrança. O valor pode ser cobrado por lançamento independentemente da quantidade de horas ou multiplicado pela quantidade de horas apontadas. Definição conforme tela de Configuração do Apontamento.
+
+> Configurações do tipo de apontamento (empresa ou ficha)/Acres.Desconto – Se for definido como ‘Sim’ avaliará os lançamentos realizados para compor o faturamento. Neste caso é um valor monetário lançado diretamente no apontamento. 
+
+> Configurações do tipo de apontamento (Configurações de apontamento ou ficha)/ Controle KM – Se definido como ‘Sim’ o sistema comparará o total de quilômetros informados no período com a Franquia e aplicará os valores conforme parâmetros. O total de quilômetros é a soma das diferenças do KM inicial e KM final dentro do período para um equipamento. Se ultrapassar a franquia o faturamento pode aplicar a quantidade extra no valor por km excedido e também aplicar a multa estipulada no valor ao exceder. 
+
+> Configurações do tipo de apontamento (Configurações de apontamento ou ficha)/ Vl. hora composto - Marcado - O Parâmetro de apontamento receberá dois valores que compõem o valor final da hora a ser faturada no apontamento. Ao gerar a fatura de locação, baseado no apontamento que possua o "Vl. hora composto", o sistema deverá considerar como valor de hora, a soma dos valores informados nos dois campos. Exemplo: Vl. hora apontamento = 170,00 + Vl. hora operação = 30,00, então o valor da hora considera o total de 200,00. 
+
+> Configurações do tipo de apontamento (Configurações de apontamento ou ficha)/ Fatura sem Apontamento – Se marcado como ‘Não’ o sistema só calculará a fatura se em todos os dias do período previsto de todos os equipamentos possuir um apontamento com início,fim,OS e Operador ou um Evento, um Acréscimo/Desconto, uma Mobilização/Desmobilização. Se marcado como ‘Sim’ o sistema aplicará a mesma validação, a diferença é que somente avisará ao usuário, mas dará a oportunidade de continuar com o faturamento. 
+
+> Configurações do tipo de apontamento (Configurações de apontamento ou ficha)/ Faturar – Este define se os valores serão apurados com base em todas as horas, somente horas normais ou somente horas excedentes. 
+>>	Todas as horas – Fatura as horas normais e os excedentes. Neste caso tem as validações de horas excedentes e também do mínimo de horas.
+>>	Somente horas normais – Fatura apenas as horas normais. Aplica a validação do mínimo de horas. 
+>>	Somente horas excedentes – Fatura apenas as horas identificadas como excedentes. Aplica a validação de mínimo de horas dia, caso não haja horário de contrato e o mínimo tenha sido informado. 
+
+> Configurações do tipo de apontamento (Configurações de apontamento ou ficha)/ Horas excedentes – Validará o tipo de cobrança para horas excedentes. Pode cobra-las no mesmo valor da hora normal, em um valor diferenciado para todas as horas excedentes por tipo do dia, ou por faixas com valores separados. No caso de faixas, após apurar as horas excedentes de cada dia, as classificará conforme as faixas e aplicará sobre o valor da hora normal o percentual.  
+
+> Configurações do tipo de apontamento (empresa ou ficha)/ Mínimo de Horas – Deverá apurar quais os limites e períodos configurados e aplicar a validação da cobrança do mínimo de horas. Este parâmetro tem uma hierarquia que é: 
+>>	Por Mês
+>>>	Por Quinzena
+>>>>	Por Semana
+>>>>>	Por Dia 
+>> Caso mais de uma opção esteja definida para este parâmetro o sistema seguira a hierarquia. Primeiro avaliará se necessita aplicar o mínimo com maior peso, caso não se aplique, validará a necessidade de aplicar o com menor peso na sequência.
+>> Horas extras influenciam normalmente na contagem do mínimo de horas. 
+>> Eventos lançados também tem sua influência na apuração de mínimo de horas. 
+>> O mínimo de horas para feriado sobrepõe os demais tipos, caso ocorram no mesmo dia. 
+>>> Isso se aplica mesmo para os feriados parciais. 
+
+> Deverá observar a existência dos eventos lançados no apontamento, que influenciam na apuração das horas, normais ou excedentes. Um evento pode incrementar horas ou decrementa-las. 
+>> Eventos inseridos como não cobrar que estejam dentro do horário serão abatidos das quantidades de horas e consequentemente da apuração do mínimo de horas.O mesmo se aplica para o evento que estão configurados para cobrar as horas. Incrementa as horas, caso não tenha interseção com horas apontadas, e também contam para apuração do mínimo de horas.
+
+> Observar a existência do lançamento dos valores de acréscimo e desconto no apontamento, que vão influenciar o total a ser faturado. 
+
+> O faturamento da ficha de locação com este tipo de apontamento gerará a Nota Fiscal com uma linha de serviço para cada produto/patrimônio. Se no modelo de Nota Fiscal existir uma definição de Máscara para descrição do serviço ( http://net1/redmine/issues/31980#RN4 ), essa será utilizada. Mas, se estiver vazio o sistema utilizará o padrão: 
+
+>> Produto XPTO
+>> Horas serviço: 17:35 - 1.758,33
+>> Acréscimos: 55,00
+>> Descontos: 25,00
+>> Horas excedentes: 05:02 - 564,00
+>> Horas mobilização: 00:35 - 116,67
+>> Horas desmobilização: 00:35 - 58,33
+>> Km rodados: 57 - 2.350,00
+>> Multa franquia Km excedida: 40,00
+> A representação do patrimônio também ficará registrado no campo específico de 'Patrimônio'.
+
+> Se o valor da hora de apontamento for composto (Campo 'Vl.hora composto' marcado). Todos os valores baseados em mão de obra na nota fiscal do faturamento de locação serão considerados como a soma dos valores definidos no campo 'Vl.hora operação' (deixará de considerar o percentual de mão de obra geral da ficha de locação)
+>> Valor da mão de obra da mascara na descrição do equipamento
+>> Valor base de INSS 
+>> Valor base de IRRF
+
+h3. RN28
+
+(#54833)
+Se o módulo de contabilização estiver habilitado (mdl_MContábil) e o parâmetro ‘Data para ativação da Movimentação Contábil’ possuir uma data igual ou menor que a data do contexto, o sistema deverá executar os seguintes passos ao executar este processo:
+> Aplicar a(s) regra(s) de contabilização;
+> Gerar o pré-lançamento ao gerar a pré-nota;
+> Registrar a pré-nota como origem do lançamento.
+
+h3. RN29
+
+(#59948) Se o novo parâmetro "Bloquear faturamento de cliente com cadastro bloqueado" estiver marcado e o cliente estiver com status ‘Bloqueado’, o sistema deve apresentar uma mensagem de alerta e não deve permitir gerar a fatura. Caso novo parâmetro esteja desmarcado, o sistema deve permitir gerar a fatura independente do status do cliente.
+
+h3. RN30
+
+(#63024) Ao informar o medidor final durante o faturamento, o sistema armazena o campo vl_medidor_ate. Este mesmo valor deverá ser armazenado no campo vl_medidor_ate_ori.
+
+h3. RN31
+
+Ao mandar faturar o serviço é aberto uma tela para que seja selecionado quais serviços extras (tipo A e G) serão faturados. 
+
+* Se o parâmetro  "Listar serviços pendentes" estiver marcado, os serviços sem data de conclusão serão listados em vermelho para que possam ficar em destaque
+* Estes serviços sem data de conclusão *não* poderão ser faturados sendo assim, levantar exceção ao clicar em OK
+Mensagem: “Não é permitido faturar serviços extra sem data de conclusão. Se necessário entre no cadastro do serviço extra e informe, aba complemento, o campo Data Conclusão.
+Serviços: [Nº dos serviços separados por vírgula]”
+
+h3. RN32
+
+Ao faturar uma ficha de locação que possua um serviço extra, diferente de A ou G ou seja, que são faturados junto com o valor de locação e cujo a data base esteja dentro do período a ser faturado, a rotina deverá validar se este serviço extra possui data de conclusão. Caso não exista esta data preenchida, será levantado uma exceção.
+Mensagem: “Serviço extra [nº] pendente sendo faturado. 
+Para que este contrato possa ser faturado, será necessário mudar este serviço extra para tipo A, ou colocar a data de conclusão, aba complemento, ou mudar a data base para algum período posterior. ”
+
+h3. RN33
+
+Habilitar o campo ‘Condição de Pagamento’ apenas se o tipo de serviço for A ou G. 
+
+h3. RN34
+
+O campo não será obrigatório. Caso este não venha preenchido o Sisloc gerará a nota com uma única parcela. 
+
+h3. RN35
+
+A data base para o cálculo das datas de vencimento dependerá da flag 'Data Base' do cadastro de condição de pagamento e se foi informado a condição de pagamento. 
+
+* Se informado condição de pagamento e esta possua em seu cadastro o campo data base igual a data do pedido então, considerar no cálculo de vencimento da parcela, a data de vencimento do serviço extra. Se esta data não tiver sido informada, utilizar a data de vencimento sugerida pela tela de geração da fatura.
+
+* Se não informado condição de pagamento, considerar no cálculo de vencimento da parcela, a data de vencimento do serviço extra. Se esta data não tiver sido informada, utilizar a data de vencimento sugerida pela tela de geração da fatura.
+
+* Se informado condição de pagamento e esta possua em seu cadastro o campo data base igual a data de faturamento então, considerar no cálculo de vencimento da parcela, a data de execução do faturamento.
+
+h3. RN36
+
+Ao faturar mais de um serviço extra ao mesmo tempo, o Sisloc criará as parcelas de cada um de forma separada e no momento de incluir essas na nota fiscal, aquelas que coincidirem a mesma data de vencimento, seus valores serão somados criando assim uma única parcela.
+
+h3. RN37
+
+(#74981) Quando o tipo de apontamento habilitado for o padrão (Apontamento configurável):
+
+Definido o mínimo diário, sem horário de contrato, havendo apontamento lançado no dia, as horas faltantes para completar o mínimo do dia são cobradas como "Hora excedente". Caso, haja horário de contrato, as horas faltantes são cobradas como "Hora normal".
+
+h3. RN38
+
+(#77911)
+Quando o tipo de apontamento habilitado for o padrão (Apontamento configurável): cálculo do faturamento considerará os valores referente ao parâmetro relacionado ao patrimônio.
+
+h3. RN39
+(#81619)
+
+Ao gerar a nota fiscal a partir da fatura de locação, o Sisloc buscará a parametrização de quantidade de casas decimais informada no campo Máx. casas decimais no vl. unitário do respectivo Modelo da Nota Fiscal, para assim gerar a nota com as devidas configurações de valor unitário;
+
+h3. RN40
+
+Ao gerar o demonstrativo de faturamento, caso o parâmetro 'Demonstrativo de faturamento: imprimir valor por remessa' esteja marcado, não serão impressos os itens, apenas a remessa.
+
+h3. RN41
+
+(#86435)
+Para as notas fiscais configuradas para reter IR (Modelo Nota Fiscal), o Sisloc verificará se, no mesmo mês, o valor total das notas fiscais emitidas para o cliente ultrapassa o valor mínimo da retenção de acordo com o parâmetro geral aba *Impostos* / *_Impostos retidos sobre serviços_* / _campo *Mínimo_*. Caso o valor da NF mais o valor das notas fiscais emitidas extrapole o valor mínimo da retenção, o Sisloc deverá cobrar na última NF emitida a retenção do somatório de todas as notas emitidas para aquele fornecedor no próprio mês.
+
++EXEMPLO:+ Somatório das NFs emitidas para um cliente X (no mesmo mês) aplicando a alíquota de retenção do IRRF do parâmetro geral deverá ser maior que o valor informado no campo *_mínimo_*. 
+
+|*PARÂMETRO GERAL*|
+|*ALÍQUOTA IRRF*|*VALOR MÍNIMO*|
+|1,5%|10,00|
+
+|*CLIENTE*|*NÚMERO DA NF*|*DATA EMISSÃO*|*VALOR DA NF*|*VALOR DA RETENÇÃO*|*CÁLCULO PARA RETENÇÃO*|
+|CLIENTE A1|000050|10/09|300,00|0,00|300,00 x 1,5 = 4,50 (Menor que o valor mínimo de 10,00)|
+|CLIENTE B1|000051|12/09|850,00|12,75|850,00 x 1,5 = 12,75 (Maior que o valor mínimo de 10,00)|
+|CLIENTE A1|000052|15/09|200,00|0,00|(200,00 + 300,00) x 1,5 = 7,50 (Menor que o valor mínimo de 10,00 --> 200 + 300 = Mesmas NF do mesmo cliente )|
+|CLIENTE A1|000053|18/09|500,00|15,00|(200,00 + 300,00 + 500,00) x 1,5 = 15,00 (Maior que o valor mínimo de 10,00 --> 200 + 300 + 500 = Mesmas NF do mesmo cliente)|
+
+h3. RN42
+
+Para que o Sisloc faça a retenção de ISS, deverá ser realizadas as seguintes configurações:
+* Modelo de Nota Fiscal - campo *_Retenção na fonte: ISS_*;
+* Grupo de Produto do(s) produto(s) de locação - informar o % no campo *_ISS Locação_*;
+* No cadastro de pessoa (mais precisamente do *_Cliente_*) deverá ser configurado no campo *_Retenção de ISS_* como *SIM* para que sistema calcule a retenção de ISS no momento do faturamento da ficha de locação.
+
+h3. RN43
+
+A impressão do demonstrativo de faturamento, levará em consideração o parâmetro 'Demonstrativo de faturamento: imprimir modelo sintético'. 
+
+h3. RN44
+
+Ao gerar a fatura, caso o uso diário da máquina seja superior ao limite de uso diário definido no cadastro de unidades (http://net1/redmine/issues/43207#RN1), abortar o processo informando o usuário quais patrimônios extrapolaram o limite.
+
+h3. RN45
+
+(#90932)
+Durante a geração de um registro da Nota Fiscal, será validado *+primeiramente+* o campo _Natureza de Operação NFSe_ parametrizado no processo *_Vincular Natureza de Operação NFSe_* do CFOP que será utilizado para gerar este registro da nota fiscal. Caso a parametrização esteja vazia, o Sisloc validará o parâmetro geral *Natureza de Operação NFS-e sem ISS* (Nota Fiscal > Parâmetro 2).
+
+h3. RN46 - Alertar sobre indenização criada na ficha
+
+(#92094)
+1) Ao gerar a fatura, se o novo parâmetro "Alertar sobre indenização criada na ficha" estiver preenchido com "Venda Loc" e existir indenização (Venda Loc) no status "Aguardando aprovação", o sistema deve apresentar uma mensagem de alerta antes da mensagem que já é exibida quando a ficha não possui contrato, por exemplo. Esta nova mensagem não será impeditiva para geração da fatura.
+
+2) Ao gerar a fatura, se o novo parâmetro "Alertar sobre indenização criada na ficha" estiver preenchido com "Venda Dev" e existir indenização criada (Venda Dev) nos status "Aberto", "Ag. estoque" ou "Entregue ag. fatur.", o sistema deve apresentar uma mensagem de alerta antes da mensagem que já é exibida quando a ficha não possui contrato, por exemplo. Esta nova mensagem não será impeditiva para geração da fatura.
+
+3) Ao gerar a fatura, se o novo parâmetro "Alertar sobre indenização criada na ficha" estiver preenchido com "Ambas" e existir indenização criada (Venda Loc ou Venda Dev), o sistema deve apresentar uma mensagem de alerta antes da mensagem que já é exibida quando a ficha não possui contrato, por exemplo. Esta nova mensagem não será impeditiva para geração da fatura.
+
+4) Caso novo parâmetro esteja preenchido com "Não alertar", o sistema não deve verificar se existe indenização criada e não faturada.
+
+h3. RN47 - Faturar serviço extra do tipo A
+
+(#93482)
+Quando for realizado o faturamento de um serviço extra do tipo "A - Fatura separadamente da locação, destacando cada serviço separadamente", será realizada validação do campo "Modelo N.F." do cadastro do serviço, conforme abaixo:
+- Locação de Equipamentos: a fatura será gerada com o modelo preenchido no campo "Modelo N.F" na seção "Fatura locação de equipamentos" na Ficha de Locação > aba Complemento.
+- Serviço: a fatura será gerada com o modelo preenchido no campo "Modelo N.F" na seção "Fatura de serviço" na Ficha de Locação > aba Complemento.
+Caso existam dois serviços extras do tipo A e cada um deles possuir um modelo de nota, serão geradas duas notas ao efetuar o faturamento.
+
+h3. RN48
+
+(#93967)
+Ao gerar fatura do período de locação (atual ou todos períodos aberto), será verificado o parâmetro "Faturar serviço extra 'A' e 'G' dentro do período":
+- Parâmetro marcado: os serviços extras do tipo "A" e "G" que tiverem a data base dentro do período de locação a ser faturado também serão faturados;
+- Parâmetro desmarcado: os serviços extras do tipo "A" e "G" que tiverem a data base dentro do período de locação a ser faturado não serão faturados.
+
+h3. RN49 - Condição de pagamento
+
+(#94162)
+Na tela de geração da fatura, caso o campo condição de pagamento estiver preenchido, o campo data de vencimento e vencimento dias não poderá ser editável.
+
+h3. RN50 - Geração de parcelas
+
+(#94162)
+Ao gerar a fatura (atual ou todos períodos aberto), será verificado o campo condição de pagamento e gerar as parcelas de acordo com a condição informada.
+
+h3. RN51 - Remessa cancelada
+
+(#94327)
+Remessas que estiverem no status "Cancelada" não serão faturadas.
+
+h3. RN52 - Retenção de PIS/COFINS/CSLL sobre a mão de obra
+
+(#94929)
+A geração da fatura validará a informação do campo "Retenção de PIS/COFINS/CSLL somente sobre mão-de-obra", presente na ficha de locação. Quando o campo estiver preenchido como "Sim", será aplicado o percentual da mão de obra nas bases de cálculo PIS, COFINS e CSLL ao gerar a fatura de locação em cada serviço.
+
+h3. RN53 - Agrupar serviços extras semelhantes
+
+(#98539)
+A geração da fatura validará o parâmetro "Agrupar serviços extras semelhantes na geração da fatura": 
+• Parâmetro habilitado: os serviços extras semelhantes serão agrupados (asAgruparSimples)
+• Parâmetro desabilitado: os serviços extras semelhantes não serão agrupados (asNaoAgrupar).
+
+Campos que são comparados:
+
+|Descrição do serviço|Item lista de serviço NFS-e|
+|NBS|Retenção de PIS|
+|Patrimônio|Retenção de COFINS|
+|Unidade|Retenção de CSLL|
+|Período (data inicial e data final)|Retenção de I.R.|
+|Quantidade dias|Retenção de INSS|
+|CNAE|I.S.S. sobre locação|
+|Código do serviço NF-e SP|Alíquota I.S.S. (%)|
+|Código do serviço NFS-e|% Mão de obra|
+
+h3. RN54
+
+(#99604)
+Quando o parâmetro "Gerar fatura sem validar emissão das NF's anteriores" (Iniciar > Opções > Parâmetros > Geral > aba Ficha Locação > sub aba Fatura Locação) estiver preenchido com a opção "Não gerar" será validada a autorização concedida através do processo "Autorizar geração de Fatura/BM". Se o processo tiver sido executado, o parâmetro não será validado e poderá ser gerada fatura de locação/boletim de medição mesmo se a ficha de locação possui nota não emitida.
+
+h3. RN55
+
+(#99361)
+Ao gerar a fatura de locação, o valor referente as naturezas financeiras de preço composto que estiverem como “Result. Patrimônio” igual a “sim”, deverão ser discriminadas na fatura de locação com o respectivo texto passado no parâmetro "Destacar preço composto". 
+
+h3. RN56
+
+(#99361)
+Ao gerar o demonstrativo de faturamento, o valor gerado de faturamento referente as naturezas financeiras de preço composto que estiverem como “Result. Patrimônio” igual a “não”, deverão ser discriminadas no demonstrativo de Faturamento. 
+
+h3. RN57
+
+(#100096)
+Quando o parâmetro "Preço de locação composto" estiver habilitado será buscado/validado o centro de resultado informado na Ficha de Locação para classificação financeira automática. Se o campo na ficha estiver vazio será buscado o centro de resultado do cadastro de empresa.
+
+h3. RN58
+
+(#98626)
+Caso o serviço vinculado à nota fiscal possua retenção de IR, Sisloc deverá validar o parâmetro geral *Considerar a BC do IRRF*. 
+* Se a opção for *_Valor da Mão de Obra do Serviço_* o Sisloc deverá considerar como Base de Cálculo do IR o valor do Serviço x % Mão de Obra;
+* Se a opção for *_Valor Total do Serviço_* o Sisloc deverá considerar como Base de Cálculo do IR o valor total do Serviço;
+
+
+h3. RN59
+
+(#100387)
+Na geração de uma nota fiscal em que o Grupo que está preenchido no Serviço esteja com o campo *_Código do Município - ISS_* e também exista um registro vinculado ao município da empresa ativa, o Sisloc deverá buscar o registro associado e preencher na nota fiscal o código do município e a alíquota de ISS do município da empresa ativa. 
+
+h3. RN60
+
+(#103544)
+Quando o parâmetro "Preço de locação composto" estiver habilitado, ao gerar fatura deverá ser validado também o parâmetro "Classificar serviço extra vinculado à remessa utilizando a classificação dos itens da remessa":
+• Parâmetro desabilitado: os serviços extras vinculados à remessa serão classificados de acordo com a classificação inserida no cadastro de grupo do serviço, mantendo a regra atual do sistema.
+• Parâmetro habilitado: os serviços extras vinculados à remessa serão classificados de acordo com a classificação do grupo do produto informado nos itens da remessa, se o valor do serviço for igual ao valor total de locação dos itens da remessa.
+OBS: Este parâmetro será validado apenas quando o parâmetro "Preço de locação composto" e quando o tipo de locação for EVENTO (campo dll_calcfat = FLFixa).
+
+h3. RN61
+
+(#103598)
+Ao gerar fatura do período de locação (atual ou todos períodos aberto), será verificado o parâmetro "Utilizar controle de Boletim de Medição no faturamento de serviço extra":
+- Parâmetro marcado: os serviços extras do tipo "A" e "G" faturados utilizarão o controle de boletim de medição;
+- Parâmetro desmarcado: os serviços extras do tipo "A" e "G" faturados *NÃO* utilizarão o controle de boletim de medição.
+
+h3. RN62
+
+(#100677)
+Quando o parâmetro "Preço de locação composto" estiver habilitado a natureza financeira será buscada de acordo com a propriedade do equipamento:
+
+Equipamento "Próprio": será buscada a natureza financeira da coluna "Natureza financeira (próprio)" do cadastro de grupo;
+Equipamento com propriedade diferente de "Próprio": será validado se no cadastro de pessoa do proprietário a flag "Sublocadora":
+◦ "Sim": será buscada a natureza financeira da coluna "Natureza financeira (sublocado)";
+◦ "Não": será buscada a natureza financeira da coluna "Natureza financeira (próprio)".
+
+O faturamento de serviço extra buscará a natureza financeira da coluna "Natureza financeira (próprio)".
+
+h3. RN63
+
+(#100678)
+A geração da fatura validará o parâmetro "Buscar número da proposta na nota":
+
+• Parâmetro desabilitado: os campos serão preenchidos com o número da ficha de locação;
+• Parâmetro habilitado: os campos serão preenchidos com o número da proposta (da remessa em que o equipamento foi enviado).
+
+
+h3. RN94774-1
+
+Se "[ACESSO] LOCACAO FATURA POR AMBIENTE" = "TRUE" e se ficha possui AMBIENTE com cobrança por ambiente  (fl_ambiente.fl_cobranca = "A"), modalidade deve estar configurada conforme http://net1/redmine/issues/37263#RN94774-1. Caso não esteja exibir mensagem explicando: "Ficha de locação possui ambientes configurados para que a cobrança seja realizada utilizando valores diários baseado nos pesos dos equipamentos locados. (Exibir quais modalidades suportam faturamento por ambiente, caso não tenha nenhuma configurada, dar mensagem para contactar SUPORTE para configuração conforme RN60740-37263-1). 
+
+h3. RN94774-2
+
+Para os itens de faturamento relacionados a um ambiente com tipo de cobrança igual a “por ambiente”, deverão ser gerados os respectivos totalizadores para cada intervalo de datas (inicio/fim).  
+
+Tabela de totalizadores do ambiente (tabela fl_fatura_ambiente, relacionada a fl_fatura)
+
+* cd_flfaturaambiente (integer): pk
+* cd_flfatura (integer): fk (fl_fatura)
+* cd_flambiente (integer): fk (fl_flambiente)
+* qt_m2_ambiente (float): quantidade de metros quadrados (M)
+* vl_m2_ambiente (float): valor diário do metro quadrado (V)
+* qt_kg_ambiente (float): peso total em kg (P)
+* vl_kg_ambiente (float): preço diário por kg (calculado pelo sistema K = [M]x[V]/[P]) 
+* dt_inicio (datetime): data inicial 
+* dt_fim (datetime): data final
+* qt_kg_medicao (float): Peso total dos equipamentos (L)
+* qt_m2_medicao (float): m2 proporcional (Q = ( [L] / [P] ) x [M])
+* qt_dias_medicao (integer): quantidade de dias (D = [data final] – [data inicial] + 1)
+* vl_medicao (float): valor faturado (F = [D] x [Q] x [V])
+
+Preenchimento: 
+
+* Valores do ambiente: 
+** qt_m2_ambiente (float): quantidade de metros quadrados (M)
+** vl_m2_ambiente (float): valor do metro quadrado (V)
+** qt_kg_ambiente (float): peso total em kg (P)
+** vl_kg_ambiente (float): preço por kg (calculado pelo sistema K = [M]x[V]/[P]) 
+
+Valores da medição: 
+** dt_inicio (datetime): data inicial 
+** dt_fim (datetime): data final
+** qt_kg_medicao (float): Peso total dos equipamentos (L)
+** qt_m2_medicao (float): m2 proporcional (Q = ( [L] / [P] ) x [M])
+** qt_dias_medicao (integer): quantidade de dias (D = [data final] – [data inicial] + 1)
+** vl_medicao (float): valor faturado (F = [D] x [Q] x [V])
+
+h3. RN64
+
+(#109749)
+Se o campo tipo de locação estiver habilitado com o tipo "Fator Diário";
+No cadastro de tipo de locação o Tipo fator diário estiver habilitado;
+Se existir uma tabela cadastrada com o valores referente ao Fator diária e essa tabela estiver vinculado ao grupo do produto a rotina funcionará.
+
+h3. RN65 - Exibição do *Quadro resumo* no demonstrativo simplificado.
+
+O *Quadro resumo* aparece somente quando tem mais um equipamento com apontamento informado na ficha de locação.
+
+h3. RN66 - Exibição da linha *Total a pagar* na quadro de serviço extras.
+
+A linha *Total a pagar* aparece somente quando o *Quadro Resumo* não é exibido.
+
+h3. RN67 - Validação de faturamento quando há apontamento com a opção Menos uma hora na sexta-feira
+
+(#127720)
+O faturamento valida a opção *Menos uma hora na sexta-feira* nas seguintes opções:
+>*Não*, o sistema faz o cálculo do apontamento considerando os dias das semanas corrente, de acorde com o parâmetro do apontamento.
+>*Sim*, o sistema faz o cálculo do apontamento considerando uma hora a menos na sexta-feira, ou seja, de acorde com o parâmetro do apontamento, ele considera uma hora a menos na sexta-feira.
+
+
+h3. RN68
+
+(#105160)
+Caso o módulo de Movimentações Contábeis estiver habilitado, deverá verificar se existem lançamentos da regra de contabilização de *_Locação: Estorno de Provisão_* e no momento da geração da fatura verificar se existem lançamento de provisão não realizados para aquela fatura de locação. Se forem encontrados lançamentos não gerados, deverão ser gerados estes lançamentos pendentes.
+
+h3. RN69 - Preenchimento do Campo Projeto:
+
+(#127921)
+O campo "Projeto" na aba "Dados" deve ser preenchido automaticamente com o nome do projeto informado na ficha de locação, caso contrario não será preenchido.
+
+h3. RN70
+
+(#117272)
+Ao gerar a fatura será necessário buscar o preço de acordo com o seu complemento. 
+
+h3. RN71 – Contabilização estorno provisão de locação
+
+(#136962)
+O valor do estorno de provisão é contabilizado de acordo com a regra de contabilização com finalidade “Locação: Estorno da Provisão”. 
+Onde o Valor a contabilizar Locação: Estorno da Provisão, corresponde ao valor bruto calculado e o valor a contabilizar dos impostos, ao seu imposto correspondente:
+•	Locação: Estorno Provisão: Valor da provisão bruta calculada.
+•	PIS provisão: Valor da provisão bruta multiplicado pela alíquota informada para PIS apuração no Cadastro da Empresa.
+•	COFINS provisão: Valor da provisão bruta multiplicado pela alíquota informada para COFINS apuração no Cadastro da Empresa.
+
+h3. RN72 - Validação de O.M. aberta através da ficha de locação.
+
+(#132281)
+O faturamento da ficha de locação valida o parâmetro *Emitir alerta para o encerramento da O.M.* na aba *Ordem Manutenção* sub aba *Parâmetros 3* e posteriormente O.M. que está em aberto e emite mensagem para o usuário, sugerido o encerramento das mesmas, nas seguintes situações:
+
+>O.M. externa
+>>Autorizado o não faturamento
+>>Autorizado faturamento
+>>>Destacar serviços da O.M. na fatura de locação
+>>>Gerar serviço único da fatura de locação
+>>>Ratear O.M. entre os itens da locação
+>>>Faturar O.M. separada da locação
+>>>>NF fatura gerada
+>>Equipamento entregue
+
+h3. RN73 - Impeditivos para encerramento da O.M. de forma automática.
+
+(#132281)
+Quando há O.M. a qual precisa de intervenção no encerramento, o sistema não encerra a mesma, mas alerta o usuário qual a O.M. que não foi encerrada. Estes impeditivos podem ser emissão de NF de fatura de entrada/saída, NF de remessa/devolução de terceiros ou tipo de encerramento.
+
+h3. RN74 - Ocultar resumo no demonstrativo de faturamento para "Guindastes Centro Oeste".
+
+O sistema não emiti o resumo no demonstrativo de faturamento sintético sempre que o CNPJ for 23770944000143.
+Alteração solicitada através do zendesk 290615 e tratado através do Redmine 149249.
+Unit: uNFFaturamentoRapidoDoFormMétodo: mostraConsistencia 
+De: if (Tipo = 1) then //Sintético
+Para: if (Tipo = 1) and (TWDMMain.getInstance.DadosEmpresaAtiva.cnpj_empresa <> '23770944000143') then //Sintético Zendesk: 
+
+h3. RN75 - Faturamento de OM com a locação
+
+(#147001)
+Ao gerar fatura de locação valida-se se existe Ordem de Manutenção com o faturamento autorizado, configurada para ser faturada junto com a locação:
+* Se a _Data base faturamento OM_ for menor do que a +data inicial+ do período a faturar: exibe o valor da OM nas opções 'Fat. período atual' e 'Fat. todos períodos aberto'
+* Se a _Data base faturamento OM_ estiver dentro do período a faturar: exibe o valor da Om na opção 'Fat. período atual'
+* Se a _Data base faturamento OM_ for maior do que a +data final+ do período a faturar: não exibe o valor da OM na opção 'Fat. todos períodos aberto'
+* Se a _Data base faturamento OM_ não tiver sido preenchida a OM é faturada junto com o próximo período de locação a ser faturado.
+
+h3. RN76 - Utilização dos e-mails e whatsapps da Ficha de Locação
+
+(#199979)
+
+Os e-mails e Whatsapps para geração da NF são validados de acordo com o campo _*Utilizar e-mail ficha locação*_ da aba _Dados_ da Ficha de Locação e com o parâmetro geral _*Utilizar os e-mails/Whatsapps para envio de NF do(s)*_.
+
+|*Utilizar e-mail ficha locação*|*Informações buscadas*|
+|Não|E-mails e Whatsapps de acordo com o parâmetro _Utilizar os e-mails/whatsapps para envio de NF do(s)_|
+|Sim, apenas para emissão de nota de faturamento|E-mail da aba _Dados_ da Ficha e E-mails/Whatsapps de acordo com o parâmetro _Utilizar os e-mails/whatsapps para envio de NF do(s)_|
+|Sim, apenas para emissão de remessa/devolução|E-mail da aba _Dados_ e parâmetro _Utilizar os e-mails para envio de NF do(s)_ (para acrescentar ou não o E-mail de cobrança)|
+|Sim, apenas para remessa e faturamento |E-mail da aba _Dados_ e E-mails e Whatsapps de acordo com o parâmetro _Utilizar os e-mails/whatsapps para envio de NF do(s)_|
+
+h3. RN77 - Agrupar por remessa
+
+(#150698)
+Ao gerar a fatura de locação é validado o campo *Agrupar por remessa* da Ficha de Locação:
+
+* Sim: O demonstrativo de faturamento será agrupado por remessa;
+* Não: O demonstrativo de faturamento não será agrupado por remessa.
+
+h3. RN78 - Informações da remessa
+
+(#150698)
+Os parâmetros gerais de informações da remessa no demonstrativo de faturamento são validados na geração da fatura de locação quando o campo *Agrupar por remessa* da Ficha de Locação estiver preenchido com 'Sim'. São os parâmetros:
+
+* Demonstrativo de faturamento: exibir data "Previsão Remessa" ao invés da data de "Cobrar a partir de";
+* Demonstrativo de faturamento: ordenar por "serviço" ao invés da sequência;
+* Demonstrativo de faturamento: imprimir a observação da remessa.
+
+h3. RN79
+
+(#151855)
+A existência de checklist vinculado a Serviço Extra não concluído não impede o faturamento do serviço na Ficha de Locação.
+
+h3. RN80
+
+(#153162)
+O equipamento faturado é gravado ao faturar a ficha de locação.
+
+h3. RN81 -  Ocultar resumo no demonstrativo de faturamento
+
+(#169479)
+O resumo de faturamento sintético deve ser ocultado obedecendo o parâmetro _Ocultar "Resumo" Demonstrativo Sintético_.
+
+Opções\Parâmetros\Suporte\ +Parâmetros Internos+
+
+h3. RN82 - Data de contabilização do lançamento de estorno da provisão
+
+(#158773)
+Quando executado o processo "Gerar fatura" na Ficha de locação, se habilitado o módulo de Movimentação contábil, a data do lançamento contábil de estorno deve ser a data atual, independente se o período contábil constar como aberto, reaberto ou fechado.
+
+h3. RN83 - Comissão Serviço Extra
+
+(#153943)
+O faturamento leva em consideração a _aba Comissão_ do Serviço Extra.
+
+h3. RN84 - Comissão Serviço Extra
+
+(#153943)
+Ao gerar fatura de Serviço Extra que está configurado para pagar comissão é validado se existe registro na aba Comissão, mesmo que com percentual e valor de comissão zerado. Caso não exista é exibida mensagem de alerta ao usuário:
+
+<pre>
+O Serviço Extra [Nº SERVIÇO EXTRA] paga comissão mas não existe registro de comissão informado. 
+Deseja continuar o faturamento?
+</pre>
+
+h3. RN85 - Medidor Faturamento - DESCONTINUADA PELA DEMANDA #186915
+
+(#158537)
+-O medidor do faturamento é gravado na leitura de medidor do cadastro do patrimônio, quando não existe leitura de medidor com data posterior à data final do período que está sendo faturado.- 
+
+h3. RN86 - Medidor Faturamento - Data da medição - DESCONTINUADA PELA DEMANDA #186915
+
+(#186588)
+-A data de medição do medidor do faturamento é a data de medição informada na tela de horímetros ao gerar fatura.-
+
+(#158537)
+-A data de medição do medidor do faturamento é a data final do período que está sendo faturado.-
+
+h3. RN87 - Desconto de parada em dias
+
+(#150967)
+Para o cálculo do desconto de parada do equipamento é validado o parâmetro *Desconto de parada em dias*:
+
+* Desabilitado: o desconto será calculado na quantidade de dias em que o equipamento ficou parado;
+* Habilitado: será considerada a quantidade de dias completos (24 horas) e a quantidade de horas para os dias não completos:
+
+> VlDesconto = QtDias x VlLoc / 30 + QtHoras x (VlLoc / 30 / 24)
+> 
+> VlDesconto = Valor do desconto que será concedido
+> QtDias = quantidade de dias inteiros que o equipamento ficou parado
+> VlLoc = valor de locação do equipamento 
+> QtHoras = quantidade de horas fracionadas que o equipamento ficou parado
+
++Exemplo 1+
+
+Valor de locação mensal de um equipamento: R$ 1500,00
+Data/hora inicial da parada: 12/08/2024   14:30
+Data/hora final da parada: 13/08/2024   20:30
+Tempo total de parada: 30 horas (1 dia e 6 horas)
+O desconto aplicado será de: R$62,50
+
+<pre>
+1 x (R$1500,00 / 30) + 6 x (R$1500,00 / 30 / 24) = R$50,00 + R$12,50 = R$62,50
+</pre>
+
++Exemplo 2+
+
+Valor de locação mensal de um equipamento: R$ 1500,00
+Data/hora inicial da parada: 12/08/2024   14:30
+Data/hora final da parada: 14/08/2024   10:00
+Tempo total de parada: 43 horas e 30 minutos (1 dia, 19 horas e 30 minutos)
+
+<pre>
+1 x (R$1500,00 / 30) + 19,5 x (R$1500,00 / 30) / 24 = R$50,00 + R$40,63 = R$90,63
+</pre>
+
+h3. RN88 - Faturar OM
+
+(#182253)
+Ao gerar a fatura é validada se a OM vinculada à ficha não teve seu faturamento autorizado, se o valor de faturamento da OM estiver maior que zero e se o equipamento não estiver em perfeito estado.
+
+h3. RN89 - "Preenchimento da Comissão":https://app-dev.sisloc.com.br/USR400GRRegradeNegocioScreen_DEV/RegradeNegocioCRUD.aspx?RegradeNegocioId=2491
+
+(#158532)
+No processo de _Gerar Fatura de Locação_ , quando for de serviços, olha para a aba de _Comissão_.
+O faturamento é preenchido de acordo com o _Vendedor_ e _Comissão_ gravados na aba de _Comissão_ do *Serviço Extra* .
+
+
+Nos processos de:
+_Gerar nota de entrada de venda de equipamento locados;_
+_Gerar Nota Fiscal de Serviço;_
+_Gerar nota fiscal de mercadoria de venda / indenização de locados;_
+Ao gerar a nota fiscal na Venda Loc a aba de _Comissão_  da Nota de Entrada é preenchida de acordo com o _Vendedor_ e _Comissão_ da *Venda Loc*.
+
+h3. RN90 - Tipo Faturamento - Apontamento Modelo 0
+
+(#174691)
+Esse campo é responsável por definir como as horas apontadas pelos operadores, no apontamento modelo 0, serão faturadas.
+
+* *‘Mínimo de horas’:* levará em consideração, para o cálculo da fatura, o mínimo de horas do período, que pode ser semanal, quinzenal e mensal. 
+> Cálculo para faturamento de um equipamento em um determinado período:
+> =[Mínimo de horas configuradas para o período * (Vl.hora apontada + Vl.hora operação)] + Vl.mobilização + Vl.desmobilização + Vl.Unitário + Vl.por Km excedido + Vl.multa ao exceder Km
+
+* *‘Pró-rata’:* O Sisloc realizará a cobrança proporcional de horas apontadas em relação ao mínimo do período configurado. 
+> Cálculo para faturamento mínimo diário de um equipamento em um determinado período:
+> ={[(Mínimo de horas configuradas para o período) / (Número de dias do tipo do período do mínimo)] * (Número de dias do período faturado) * (Vl. da hora + Vl. hora da operação)} + Vl. mobilização + Vl. desmobilização + Vl.por Km excedido + Vl.multa ao exceder Km + {[(V. Unitário) / (Número de dias do período da ficha)] * (Número de dias do período faturado)}
+
+* *‘Apenas horas apontadas’:* Selecionando essa opção, o Sisloc desconsiderará as configurações de mínimo, multiplicando o valor da hora diretamente pela quantidade de horas apontadas.
+> Cálculo para faturamento de um equipamento em um determinado período:
+> =[Quantidade de horas apontadas * (Vl. da hora + Vl. hora da operação)] + Vl. mobilização + Vl. desmobilização + Vl. Unitário + Vl. por Km excedido + Vl. multa ao exceder Km
+
+
+h3. RN91 - Tipo Faturamento - Mínimo de horas
+
+(#174691)
+Caso o 'Tipo Faturamento' seja "Mínimo de horas", o Sisloc verificará se o mínimo de maior tempo, selecionado no campo 'Mínimo de horas por' das configurações de apontamento, foi atendido.
+* Caso não tenha sido atendido, será cobrado o mínimo configurado
+* Caso ultrapasse, será cobrada a pró-rata
+
+h3. RN92 - Medidor Faturamento
+
+(#186915)
+A tela de medidor dos patrimônios valida o parâmetro _Gravar o horímetro do faturamento na leitura do medidor do patrimônio_ para exibir a observação correta:
+
+* Parâmetro desabilitado: _Observação: Informação para faturamento. Os medidores não serão gravados no histórico de leitura do patrimônio._
+* Parâmetro habilitado: _Observação: informação para faturamento. Os medidores serão gravados no histórico de leitura do patrimônio._
+
+h3. RN93 - Medidor Faturamento
+
+(#186915)
+Ao gerar a fatura de locação é validado o parâmetro _Gravar o horímetro do faturamento na leitura do medidor do patrimônio_:
+
+* Desabilitado: o valor do medidor informado na geração da fatura NÃO é gravado na leitura de medidor do patrimônio;
+* Habilitado: o valor do medidor informado na geração da fatura É gravado na leitura de medidor do patrimônio. O medidor é gravado com a data de medição informada na tela de horímetros ao gerar fatura, se não existir no patrimônio medidor com data maior do que a data que está sendo informada no faturamento.
+
+h3. RN94 - Serviço padrão Locação
+
+(#201691)
+O Serviço padrão configurado no campo/parâmetro *'Serviço padrão Locação'* nas configurações de empresa, é utilizado como base para preenchimento das informações de IBS e CBS;
+>> *Configurações no Serviço:*
+>> * Situação Tributária IBS/CBS
+>> * Classificação tributária IBS/CBS
+>> *Configurações no Grupo do Serviço:*
+>> ** Código de Tributação Municipal da NFS-e
+>> ** Alíquota NFS-e por município
+
+h3. RN95 - Data base para Cálculo 'Dia fixo mês atual' e/ou 'Dia fixo mês seguinte'
+
+(#201174)
+Quando utilizada a opção de vencimento *'Dia Fixo mês atual'* ou *'Dia fixo mês seguinte'*, o Sistema considera como data base para cálculo do vencimento da fatura a informação do campo 'Data Base' (A partir do Faturamento, A partir da data inicial ou A partir da data final)
+
+h3. RN96 - Gerar Fatura - *Demonstrativo Estruturado*
+
+(#206262)
+Quando marcado o _Parâmetro Interno_ - *_Demonstrativo de Faturamento - Habilitar Demonstrativo Estruturado_*, então, ao executar o processo da Ficha de Locação *'Gerar Fatura'*, deve ser impresso o relatório do novo modelo criado: *"Demonstrativo Estruturado"*
+
+h3. RN97 - Atualização de 'Previsão de Retorno' das Remessas
+
+(#180212)
+Ao gerar a fatura de Locação, a 'Data de Previsão de Retorno' das Remessas que ainda possuem equipamentos a devolver, será atualizada com a data final do próximo período a ser faturado, ou, 'Data Final' do período atualmente sendo faturado _(dt_fim da tabela fl_fatura)_, de acordo com o parâmetro: *"Previsão de Retorno - Atualizar com:"*
+** Remessas com Previsão de Retorno não preenchida, não terão alteração na geração de fatura
+** Remessas com equipamentos totalmente devolvidos, não terão alteração na geração de fatura
+** Remessas com data de previsão de retorno maior que a data final do próximo período a faturar, não terão alteração na geração de fatura
+
+h3. RN98 - Faixas de Faturamento
+
+(#214332)
+Ao gerar uma Fatura de Locação, onde o 'Tipo de Locação', possui a 'Regra de Cálculo' = *_FlFaixaDias_*, é exibida a _Janela_ *'Faixas de Faturamento'*, para Alteração/Confirmação das Faixa de Dias utilizadas para faturamento de cada equipamento.
+
+h3. RN99 - Alteração de Faixa de Dias na Janela de 'Faixas de Faturamento'
+
+(#214332)
+Ao alterar a faixa de faturamento, na geração de fatura, o valor de locação é atualizado conforme a tabela de preço por faixa da respectiva faixa de dias do Item.
+
+h3. RN100 - Cálculo de faturamento por Faixa quando _Substituição_ de Equipamento
+
+(#214332)
+Os equipamentos que fizeram parte de Substituição de Locação, terão o cálculo feito pela faixa de dias de acordo com a contagem total de dias em que esses permaneceram locados.
+*Exemplo:*
+Equipamento *A* ficou locado por 12 dias, substituído pelo equipamento *B* , que permaneceu locado por 18 dias;
+Na fatura a contagem de dias de faturamento para os dois será 30 (12 + 18) (Total do período substituto + substituído) e será aplicada a faixa de dias correspondente ao número de dias = 30 para os dois equipamentos.
+
+h3. RN101 - Cálculo de Renovação de Locação por Faixa de Dias
+
+(#214332)
+Os equipamentos com primeira fatura gerada e que permanecem locados (renovação), terão o cálculo de número de dias para atribuição da respectiva faixa, realizado pela data inicial da remessa em que foram enviados;
+*Exemplo:*
+Equipamento *A* , enviado em *01/09* , primeira fatura gerada em *30/09* , Faturado por *30 dias* , atribuída à esse a faixa de faturamento equivalente à *30 dias* , permanecendo locado para o próximo período ( *01/10 a 30/10* ), faturado por *30 dias* , porém, atribuída à esse a faixa de faturamento equivalente à *60 dias* (Período total locado)
+
+---
+
+h1. CHANGELOG
+
+Demanda: #212039
+RT0 - Criar campos de FUST e FUNTTEL na NFCom (OUT / 2026)
+
+
+Demanda: #188640
+RT0.02 - Implementar os campos CBS e IBS, na NFcom
+
+
+Demanda: #204562
+Adequação da NFS-e de fatura de locação - Preparação das informações na Geração da Nota NT009
+
+Demanda: #212606
+Adequação da configuração do Indicador de Operação Conforme regra da RTC
+
+Demanda: #187768
+Criar módulo Provisão de Locação
+
+
+Demanda: #190033
+Incluir tags para informações sobre Origem da nota fiscal, Vendedor responsável e Detalhamento do frete na nota fiscal de Remessa e Devolução.
+
+Demanda: #190357
+Carregar para o faturamento da NFCom, as informações inseridas no serviço extra.
+
+Demanda: #201810
+Alterada para que carregue as informações referentes a tributação IBS e CBS, na geraço de NFS-e de Faturamento e Serviço Extra
+
+Demanda: #186915
+Criar parâmetro para definir se o horímetro do faturamento deve ser gravado no patrimônio
+
+Manutenção: #186588
+Gravar a data de medição inserida pelo usuário ao invés da data final do período que está sendo faturado.
+
+Demanda: #174691
+Implemento do Tipo de Apontamento no Apontamento Modelo 0: Garantia Mínima, Pró-rata e Horas apontadas
+
+Demanda: #158532
+Opção de escolher o vendedor na Venda Loc e sua comissão
+
+Manutenção: #182253
+RN88
+
+Demanda: #150967
+Desconto de horas paradas na OM
+
+Demanda: #158537
+Gravar leitura de medidor do faturamento nas leituras do patrimônio
+
+Demanda: #153943
+Devolução: cálculo de indenização por limpeza/avaria
+
+Demanda: #158773
+Data de contabilização do lançamento de estorno da provisão
+
+Demanda: #169479
+Retirar Informação do Boletim de Medição
+
+Demanda: #153162
+Considerar franquia no faturamento antecipado da locação de equipamento com horímetro
+
+Demanda: #151855
+Checklist vinculado ao Serviço Extra
+
+Demanda: #150698
+Configuração do BM agrupado por remessa ser por ficha
+
+Demanda: #145354
+Inclusão das máscaras [PERIODO_INI_FAT] e [PERIODO_FIM_FAT] na descrição dos serviços no Modelo de Nota Fiscal.
+
+Demanda: #147001
+Gerar faturamento de OM na ficha de locação para períodos diferentes
+
+Demanda: #104251
+Padronização do campo do logradouro, número e complemento.
+
+Demanda: #132281
+Validação do faturamento/não faturamento da O.M. e perguntar ao usuário se deseja encerrar a O.M..
+
+Demanda: #117272
+Alterar a Descrição do Equipamento Antes da Emissão da Proposta
+
+Demanda: #127921
+Informar contrato na compra, venda, mov estoque e financeiro
+
+Demanda: #105160
+Provisão de faturamento de locação
+
+Demanda: #127720
+Validação do parâmetro *Uma hora a menos na sexta-feira* no parâmetros de apontamento.
+
+Demanda: #114695
+Exibição do *Quadro resumo* no demonstrativo de faturamento do tipo simplificado.
+
+Demanda: #100678
+Passou a validar o parâmetro "Buscar número da proposta na nota".
+
+Demanda: #100677
+Alteração da rotina de faturamento quando o parâmetro "Preço de locação composto" estiver habilitado: verifica a propriedade do equipamento e buscar a classificação financeira de acordo com o proprietário do equipamento/acessório, conforme RN62.
+
+Demanda: #101069
+Criar máscara para imprimir o número de série do patrimônio na Fatura de Locação
+
+Demanda: #103598
+Faturamento de serviço extra como boletim de medição
+
+Demanda: #103544
+Classificar serviço extra com a classificação dos produtos quando o serviço estiver vinculado à remessa
+
+Demanda: #100387
+NFSe: Códigos, CNAE, ISS diferente por município
+
+Demanda: #98626
+Calcular retenção de IR sobre valor total do serviço
+
+Demanda: #100096
+Preço de locação composto: informar centro de resultado por ficha de locação (RN57)
+
+Demanda: #99361
+Implementação das validações referentes as regras 55 e 56.
+
+Demanda: #99604
+Permitir a inclusão e exclusão de serviços extras em períodos já faturados
+
+Demanda: #98539
+Gerar serviços extras agrupados
+
+Demanda: #94774
+Novas regras RN-94774-1 e RN-94774-2.
+
+Demanda: #94929
+Possibilitar retenção de CSLL, PIS, COFINS somente sobre mão de obra
+
+Demanda: #94327
+Criação de processo para cancelamento da remessa.
+
+Demanda: #94162
+Respeitar a condição de pagamento informado na ficha de locação para gerar o faturamento
+
+Demanda: #93967
+Ajustar faturamento para que serviço extra tipo "A" ou "G" não seja faturado junto com o período de locação
+
+Demanda: #93482
+Definir modelo de nota fiscal no cadastro de serviço
+
+Demanda: #92288
+Valor hora de apontamento composto (valor hora locação + valor hora mão de obra)
+
+Demanda: #92094
+Exibir aviso de que a ficha possui indenização criada
+
+Demanda: #91255
+Separar o campo 'Logradouro' da tela da nota fiscal em logradouro, número e complemento
+
+Demanda: #89122
+Nova regra RN44.
+
+Demanda: #87825
+Imprimir relatório sintético conforme os parâmetros 'Demonstrativo de faturamento: imprimir modelo sintético' ou o parâmetro 'Demonstrativo de faturamento: habilitar apontamento sintético'. 
+Ver RN43
+
+Demanda: #84216
+RN27 - Nova possibilidade de impressão da nota fiscal com mascara para os produtos faturados com apontamento. 
+
+Demanda: #83843
+Adaptação na geração dos itens da NF. 
+
+Demanda: #83153
+Ajuste na impressão do número da NF de devolução.
+Ver RN2.1
+
+Demanda: #82243
+Respeitar o parâmetro 'Demonstrativo de faturamento: imprimir valor por remessa' ao imprimir o demonstrativo.
+Ver RN40
+
+Demanda: #81682
+Criar demonstrativo sintético para o cliente Temec
+
+Demanda #81619
+Configuração de Casas Decimais por Modelo de NF
+
+Demanda: #81172
+Separar mensagem de substituição pendente das outras e criar uma marcação para confirmar ciência da existência das substituições pendentes.
+
+Demanda: #79922
+O Apontamento Padrão (tipo 0) passa a ser impresso também no modelo 2. 
+
+Demanda: #77911
+Tratamento faturamento para parâmetro relacionado um ou mais patrimônios.
+Ver RN38
+
+Demanda #74981
+Calculo de faturamento para apontamento padrão, valor das horas faltantes para atingir mínimo de horas.
+Ver RN37
+
+Demanda: #74648
+Calculo de faturamento para apontamento padrão, o minimo de horas será cobrado se houver apontamento no dia.
+
+Demanda: #74493
+Imprimir o número da nota de devolução no demonstrativo.
+Ver RN2.1
+
+Demanda: #72722
+Considerar campo condição de pagamento na geração da fatura para gerar as parcelas
+Ver RN33 a RN36
+
+Demanda 136962:
+Implementado cálculo da provisão de locação e contabilização com valor líquido, considerando PIS e COFINS.
+
+project:melhorias1115/ Demanda: #68701
+Considerar o novo filtro "Listar serviços pendentes".
+Ver RN31 e RN32
+
+Projeto Melhorias 09/15 / Demanda: #65494
+Assim como ocorre para os outros modelos de apontamento, o tipo 3 também permitirá faturar apenas a mobilização e desmobilização
+
+project:bma2015 / Demanda: #63024
+No momento do faturamento, o valor informado como medidor final, também será armazenado no campo vl_medidor_ate_ori.
+Ver RN30
+
+project: / Demanda: #59948
+Ao faturar uma ficha de locação considerar o novo parâmetro "Bloquear faturamento de cliente com cadastro bloqueado". Validar RN29.
+
+project:resfincont / Demanda: #54833
+Adaptação do processo. 
+Passa a tratar as condições para gerar a contabilização.
+
+project: / Demanda: 59950
+Ao gerar fatura, considerar a nova flag "Devolução Mês comercial" na tela de Faturamento de Locação por período.
+
+project: - / Demanda: #55226
+Calculo de faturamento para apontamento padrão (Apontamento Configurável). 
+
+project:bmar2015 / Demanda: #57253
+Para o tipo de nota eletrônica 'Integração NFSe', ao gerar a fatura considerar as informações dos novos campos "Descrição Item Serviço" e "Descrição CNAE" no cadastro de Grupo para que sejam impressas na Nota/RPS. Validar RN26
+
+project:bmar2015 / Demanda: #57845
+Criar o layout modelo 2.
+Ver regras 24 e 25
+
+project:pdfinanfisc / Demanda: #55568
+O processo de montar a classificação financeira automática passa a considerar as Contas Contábeis ao invés de Natureza Financeira.
+
+project:bout2014 / Demanda: #53886
+Ao gerar a pré-nota o campo informações da origem, criado na nota fiscal, deverá ser preenchido conforme o parâmetro geral criado neste projeto.
+
+project:bout2014 / Demanda: #46158
+Inserir regra para faturamento de comodato. Validar RN23.
+
+project:Versão Setembro-2014 / Demanda #51403
+Gravar as informações de natureza financeira do grupo de serviço para classificação automática. 
+
+project:b1310i1000 / Demanda: #47612
+Alterar mensagem de alerta. Validar RN21.
+
+project:b1310i1000 / Demanda: #48201
+Inserir regra ao faturar uma ficha de locação utilizando o parâmetro Geral "Preço de Locação Composto". Validar RN20.
+
+project:b1310i1000 / Demanda: #48126
+Criar um novo campo na tabela dos itens faturados para armazenar o valor que não se refere a locação de equipamentos, para ser considerado apenas o valor de locação no resultado do equipamento. Validar RN19.
+
+project:b1310i1000 / Demanda: #48104 
+Ao faturar a ficha de locação, mostrar a tela de controle de boletim de medição. Validar RN18.
+
+project:b1310i1000 / Demanda: #48098
+Regra para o titulo do demonstrativo de faturamento. Validar RN17.
+
+project:b1310i1000 / Demanda: #48093
+Regra para status da Nota fiscal ao gerar o faturamento do contrato de locação. Validar RN16.
+
+P12782-04
+Adequar a geração da NF com base em 'Gerar Nota Fiscal de Mercadoria'.
+Consistência em relação ao parâmetro "OM materiais" gerar exceção se não informado.
+Regra 15. 
+
+project:b1310i1000 / Demanda: #48086
+Incluir regra para que o  desconto saia apenas no produto que foi dado o desconto. Validar RN14.
+
+project:b1408 / Demanda: #47597
+
+Aplicar as mesmas regras de faturamento do apontamento Central Locações para a opção, faturar apenas itens devolvidos.
+
+project:b1408 / Demanda: #47566
+Ao gerar a fatura considerar o cálculo de apontamento quinzenal.
+
+project:b1408 / Demanda: #47580
+Imprimir o layout Central Locações quando selecionado a opção Sintético.
+
+project:b1405 / Demanda: #46689
+Validar o cálculo das horas improdutivas
+
+project:Portal / Demanda: #39869
+Condição para gravar o arquivo de demonstrativo em PDF quando o módulo de Portal de Relacionamentos estiver habilitado.
+
+project:b1406 / Demanda: #45159
+Respeitar o campo “Faturar para Obra” na emissão da fatura
+
+project:b1406 / Demanda: #46009
+Retirada da condição da tabela de preço de locação necessitar estar ativa para gerar fatura. 
+
+project:b1405 / Demanda: #45236
+Regras RN8 e RN9
+
+project:b1404 / Demanda: #44478
+Geração da fatura deverá seguir o modelo central locações.
+
+project:b1404 / Demanda: #35778
+Considerar campo Valor projeto e valor residual durante o faturamento assim como, o parâmetro Permitir realizar faturar com valor maior que o valor residual".
+
+project:b1312 / Demanda: #38693
+O processo de geração da fatura, ao gerar a ND, deverá considerar, também, a opção E-mail/Impressão.
+
+project:b1309 / Demanda: #36100
+Considerar a flag "Faturar período Integral" na geração da fatura
+
+project:b1309 / Demanda: #37017
+Inserir a soma dos tributos PIS, COFINS, ISS e INSS no campo Informações Adicionais do processo Dados NFe.
+Inserir a soma dos tributos incluídos no campo Informações Adicionais, no campo observações da nota fiscal.
+
+project:b1308 / Demanda: #35020
+Exportar campo "E-mails de cobrança" e flag "Enviar ND por", para a NF.
+
+project:b1302 / project:b1303i1 / Demanda: #32311
+* Nova regra geral 1.1
+* Alteração regra 3.1
+* Alteração regras existentes 5.2.1, 5.2.1.2, 5.2.1.2, 5.2.2.
+
+project:b1203p1211 / project:b1211i3 / Demada: #31299
+Migrado FW novo.
