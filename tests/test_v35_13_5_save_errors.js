@@ -111,7 +111,7 @@ async function expectThrow(promise, msgIncludes) {
       mockResponse({ ok: false, status: 500, body: '<h1>500</h1>' })
     ]);
     const e = await expectThrow(saveIssue('1', 'd', 't'), 'HTTP 500');
-    assert.ok(e.message === 'HTTP 500', 'msg deveria ser exatamente "HTTP 500", got: ' + e.message);
+    assert.ok(/^HTTP 500(<br>|$)/.test(e.message), '(v35.13.6+: botão de diagnóstico anexado) msg deveria começar com "HTTP 500", got: ' + e.message);
   });
 
   await test('B2: HTTP 422 com errorExplanation aspas duplas → formatado', async () => {
@@ -285,7 +285,7 @@ async function expectThrow(promise, msgIncludes) {
       mockResponse({ ok: true, status: 200, body: 'no form' })
     ]);
     const e = await expectThrow(saveIssue('1', 'd', 't'));
-    assert.ok(e.message === 'HTTP 422', 'genérico se não tem <li>: ' + e.message);
+    assert.ok(/^HTTP 422(<br>|$)/.test(e.message), 'genérico se não tem <li>: ' + e.message);
   });
 
   await test('F5: <li> vazio é filtrado (filter(Boolean))', async () => {
@@ -307,7 +307,7 @@ async function expectThrow(promise, msgIncludes) {
       mockResponse({ ok: false, status: 500, body: '' })
     ]);
     const e = await expectThrow(saveIssue('1', 'd', 't'));
-    assert.ok(e.message === 'HTTP 500', e.message);
+    assert.ok(/^HTTP 500(<br>|$)/.test(e.message), e.message);
   });
 
   await test('G2: response body com HTML malformado → não quebra (try/catch)', async () => {
