@@ -1,0 +1,7 @@
+{
+  "name": "sisloc-master-tests",
+  "private": true,
+  "description": "Testes offline do Sisloc Master. Rodar: cd tests && npm install && node run_all.js",
+  "scripts": { "test": "node run_all.js" },
+  "devDependencies": { "jsdom": "^26.0.0" }
+}
