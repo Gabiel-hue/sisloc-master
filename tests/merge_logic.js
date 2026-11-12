@@ -15,8 +15,13 @@ function titleSimilarity(a, b) {
 }
 
 // Corta a descrição até o CHANGELOG (não procurar RNs no histórico).
+// v35.13.7: aceita h2.–h6. CHANGELOG como fallback (h1. continua tendo prioridade).
+function findChM(s) {
+  return s.match(/h1\.\s*CHANGELOG/i) || s.match(/(?:^|\n)[ \t]*h[2-6]\.\s*CHANGELOG\b/i);
+}
+
 function cropBeforeChangelog(reqDs) {
-  const m = reqDs.match(/h1\.\s*CHANGELOG/i);
+  const m = findChM(reqDs);
   return m ? reqDs.slice(0, m.index) : reqDs;
 }
 
@@ -215,6 +220,7 @@ function insertWithSpacing(text, pos, content) {
 }
 
 module.exports = {
+  findChM,
   titleSimilarity: titleSimilarity,
   cropBeforeChangelog: cropBeforeChangelog,
   getAllRules: getAllRules,
