@@ -4,6 +4,15 @@ Suite de testes offline pra validar mudanças no bookmarklet sem precisar abrir 
 
 ## Como rodar
 
+**Tudo de uma vez (v35.13.7+):**
+
+```bash
+cd tests && npm install      # 1ª vez só — instala o jsdom (usado pelas suítes que simulam o DOM)
+node run_all.js              # roda TODAS as suítes + os 2 cenários e2e e mostra um resumo
+```
+
+**Suíte a suíte:**
+
 ```bash
 node tests/run_tests.js                     # roda fixtures + sintéticos
 node tests/run_tests.js fixtures            # só demandas reais catalogadas
@@ -27,7 +36,7 @@ Saída esperada:
 Passou: 20   Falhou: 0
 ```
 
-Pré-requisito: Node.js 16+ (testado em 22). Zero dependências externas — só stdlib.
+Pré-requisito: Node.js 16+ (testado em 22). O `run_tests.js` e as suítes de parsing usam só stdlib; as suítes que simulam o navegador (`test_v35_9`, `test_v35_13_5`, `test_v35_13_7_*`, `e2e_212039.js`) precisam do `jsdom` (`cd tests && npm install`).
 
 ## Estrutura
 
