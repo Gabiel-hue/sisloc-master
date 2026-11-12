@@ -113,8 +113,9 @@ function extractRules(sec) {
     .replace(/\u2076/g, '6').replace(/\u2077/g, '7').replace(/\u2078/g, '8')
     .replace(/\u2079/g, '9');
 
+  // v35.13.7: + alternativa invertida REGRAS/CONDIÇÕES (caso #212039 → #60592/#31468)
   // v35.11.6: \s*\/\s* em vez de \/ — tolera "CONDIÇÕES / REGRAS" (espaços ao redor da barra)
-  const rulesMatch = sec.match(/(?<=^|\n)\s*(?:\*\s*)?(?:CONDI[CÇ][OÕ]ES\s*\/\s*REGRAS|REGRAS)\s*\*?\s*:?\s*\*?\s+([\s\S]*?)(?=\n\s*\*?(?:REQUISITO|Requisito|h\d+\.\s*Requisito)|\n\s*h3\.\s*#{1,2}\s*\d+|\n\s*---|$)/i);
+  const rulesMatch = sec.match(/(?<=^|\n)\s*(?:\*\s*)?(?:CONDI[CÇ][OÕ]ES\s*\/\s*REGRAS|REGRAS\s*\/\s*CONDI[CÇ][OÕ]ES|REGRAS)\s*\*?\s*:?\s*\*?\s+([\s\S]*?)(?=\n\s*\*?(?:REQUISITO|Requisito|h\d+\.\s*Requisito)|\n\s*h3\.\s*#{1,2}\s*\d+|\n\s*---|$)/i);
   if (!rulesMatch) return [];
 
   const rules = [];
