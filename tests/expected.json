@@ -780,6 +780,39 @@
       }
     ]
   },
+  "212039": {
+    "length": 4255,
+    "requirements": [
+      {
+        "id": "32745",
+        "rules": [
+          "RN84 - Exibição dos campos FUST e FUNTELL"
+        ]
+      },
+      {
+        "id": "79",
+        "rules": [
+          "RN96 - Abas FUST e FUNTTEL"
+        ]
+      },
+      {
+        "id": "60592",
+        "rules": [
+          "RNX1 - Abas FUST e FUNTTEL"
+        ]
+      },
+      {
+        "id": "31468",
+        "rules": [
+          "RNX1 - Cálculo do FUST e FUNTTEL"
+        ]
+      },
+      {
+        "id": "31059",
+        "rules": []
+      }
+    ]
+  },
   "_meta": {
     "version_baseline": "v35.6.5",
     "gerado_em": "2026-05-29",
