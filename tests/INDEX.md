@@ -15,6 +15,18 @@ Cada arquivo `.txt` em `fixtures/` é o conteúdo bruto (textile) da descrição
 | 207979 | Pequenas Melhorias | Espaços/tabs antes do `\n` no negrito `*RNX1 Notas...*  ` | v35.5.4 |
 | 208519 | Pequenas Melhorias | Negrito de linha inteira sem hífen `*RNX1 - Filtro por "Empresa"*` | v35.5.2 |
 | 208937 | Pequenas Melhorias | Botão "Atualizar Links" com asteriscos (`*RN5 - Título*`, `*RN5* - Título`) — 4 cases | v35.6.1 |
+| 212039 | Construção | Marker invertido `*REGRAS/CONDIÇÕES*` (#60592, #31468) + snapshot dos 5 requisitos | **v35.13.7** |
+
+## fixtures_req/ — descrições de REQUISITOS (v35.13.7+)
+
+Pasta separada pra descrições de **requisitos** (não de demandas) — usadas pelos testes que simulam gravação (`test_v35_13_7_changelog_h2.js`, `test_v35_13_7_relacao_precheck.js`, `e2e_212039.js`). O `run_tests.js` não lê essa pasta. Detalhes em `fixtures_req/README.md`.
+
+| Requisito | O que testa |
+|---|---|
+| 60592 | `h2. CHANGELOG` (em vez de `h1.`) |
+| 31468 | sub-numeração `RN94774-1/-2` + changelog da demanda já registrado |
+| 31059 / 79 | `h1. CHANGELOG` com changelog da #212039 já registrado |
+| 32745 | réplica estrutural (RN1–RN84, `{{collapse}}`, CHANGELOG dentro do collapse) |
 
 ## Como adicionar uma fixture nova
 
