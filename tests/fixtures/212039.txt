@@ -1,0 +1,126 @@
+h1. Requisitos Novos
+
+NA
+
+---
+
+h1. Requisitos Impactados
+
+##32745
+Implementar na aba Tributação os campos FUST e FUNTELL
+
+##79
+Implementar na aba Impostos e Valores os campos FUST e FUNTELL
+
+##60592
+Implementar as abas FUST e FUNTELL
+
+##31468
+Calcular FUST e FUNTELL na geração da NFCom
+
+##31059
+Estruturar XML NFCom para envio a Sefaz
+
+---
+
+h1. Detalhamento de Projeto
+
+*Como* Analista de Requisitos da Squad Fiscal
+*Quero* configurar as alíquotas de FUST e FUNTTEL na empresa e que o Sisloc realize automaticamente o cálculo destes fundos nas notas fiscais de comunicação eletrônica,
+*Para* atender às exigências fiscais da NFCom e garantir a correta composição e transmissão dos valores no XML da nota fiscal.
+
+---
+
+h3. ##32745
+
+*O QUE DEVE SER FEITO:*
+1)Implementar na aba Tributação os campos e seus respectivos hint's:
+* % FUST - Preencher a alíquota FUST se na emissão da NFCom (modelo 62) estes impostos forem calculados.
+* % FUNTELL - Preencher a alíquota FUNTELL se na emissão da NFCom (modelo 62) estes impostos forem calculados.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+* Os novos campos deverão ser exibidos se o módulo NFCom estiver habilitado.
+* Por padrão os campos deverão vir vazios e opcionais para preenchimento.
+
+*CONDIÇÕES/REGRAS:*
+(Criar) "RN84 - Exibição dos campos FUST e FUNTELL":http://net1/redmine/issues/32745#RN84-Exibição-dos-campos-FUST-e-FUNTELL
+A exibição dos campos FUST e FUNTELL estão condicionados ao módulo NFCom ( Nota Fiscal de Comunicação Eletrônica) estar habilitado. O cálculo destes impostos dependem de alíquota definida pelo usuário.
+
+---
+
+h3. ##79
+
+*O QUE DEVE SER FEITO:*
+1) Implementar na aba *Impostos e Valores* os campos de Fust e FUNTTEL.
+2) Os campos serão apresentados somente se a série da nota fiscal for NFCom.
+
+*CONVERSÃO/DEFINIÇÃO DE DADOS:*
+NA
+
+*CONDIÇÕES/REGRAS:*
+"RN96 – Abas FUST e FUNTTEL":http://net1/redmine/issues/79#RN96-Abas-FUST-e-FUNTTEL
+As abas FUST e FUNTTEL devem ser exibidas se a série da NF for NFCom.
+
+---
+
+h3. ##60592
+
+*O QUE DEVE SER FEITO*
+1) Implementar as abas Fust e FUNTTEL.
+2) Para cada aba deverão ser implementados os campos Base de cálculo, alíquota e valor, os campos serão criados habilitados para alteração.
+3) As abas deverão ser exibidas somente se a série da nota for NFCom (Nota Fiscal de Comunicação Eletrônica).
+
+*CONVERSOR*
+NA
+
+*REGRAS/CONDIÇÕES*
+RNX1 – Abas FUST e FUNTTEL
+As abas FUST e FUNTTEL devem ser exibidas se a série da NF for NFCom.
+
+---
+
+h3. ##31468
+
+*O QUE DEVE SER FEITO*
+1) Implementar na geração de fatura, o cálculo do FUST e FUNTTEL
+2) A base de cálculo do FUST e FUNTTEL deverá ser:
+BC = Valor da operação – desconto incondicional – valor icms – valor pis – valor cofins
+3) Os valores do FUST e FUNTTEL serão obtidos a partir da base de cálculo x o percentual definido para estes fundos no cadastro de empresa.
+
+*CONVERSOR*
+NA
+
+*REGRAS/CONDIÇÕES*
+RNX1 – Cálculo do FUST e FUNTTEL
+Os fundos FUST e FUNTTEL serão calculados na geração da fatura, compreendendo o seguinte cálculo:
+*+Base de cálculo:+*
+BC = Valor da operação – desconto incondicional – valor icms – valor pis – valor cofins
+*+Valor FUST e FUNTTEL+*
+FUST = BC x %definido no campo FUST das Configurações da Empresa
+FUNTTEL = BC x %definido no campo FUNTTEL das Configurações da Empresa
+
+---
+
+h3. ##31059
+
+*O QUE DEVE SER FEITO*
+1) Estruturar o XML da NFCom com as devidas atribuições dos valores de FUST e FUNTTEL nos campos correspondentes.
+
+*CONVERSOR*
+NA
+
+*REGRAS/CONDIÇÕES*
+NA
+
+---
+
+*+CENÁRIOS:+*
+
+*Cenário 1 – Cálculo de FUST e FUNTTEL na geração da fatura NFCom*
+*Dado* que o módulo NFCom está habilitado, a empresa possui alíquotas de FUST e FUNTTEL configuradas e a fatura está sendo gerada para uma NFCom
+*Quando* o sistema calcular os tributos da operação
+*Então* deve calcular a base de cálculo do fundo utilizando a fórmula especificada
+*E* deve calcular o valor do FUST por meio da multiplicação da base de cálculo pela alíquota de FUST configurada na empresa
+*E* deve calcular o valor do FUNTTEL por meio da multiplicação da base de cálculo pela alíquota de FUNTTEL configurada na empresa
+*E* deve disponibilizar os valores calculados nas respectivas abas da nota fiscal
+*E* deve gerar o XML da NFCom contendo os valores de FUST e FUNTTEL nos campos correspondentes.
